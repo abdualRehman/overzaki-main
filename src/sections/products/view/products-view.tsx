@@ -26,6 +26,7 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
@@ -57,9 +58,9 @@ import Iconify from 'src/components/iconify/iconify';
 
 import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunks/category';
 
+import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 // ----------------------------------------------------------------------
 
@@ -325,23 +326,23 @@ export default function OrdersListView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenDetails((pv) => !pv);
-        setEditProductId(id);
-        if (id) {
-          dispatch(fetchOneProduct(id));
-        } else {
-          setProductData({});
-          dispatch(setProduct({}));
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenDetails((pv) => !pv);
+          setEditProductId(id);
+          if (id) {
+            dispatch(fetchOneProduct(id));
+          } else {
+            setProductData({});
+            dispatch(setProduct({}));
+          }
+        } else if (state === 'variants') {
+          variantMethods.reset();
+          setOpenVariant((pv) => !pv);
+          dispatch(fetchOneVariant(id));
+          setTempVariantId(id);
         }
-      } else if (state === 'variants') {
-        variantMethods.reset();
-        setOpenVariant((pv) => !pv);
-        dispatch(fetchOneVariant(id));
-        setTempVariantId(id);
-      }
-    };
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -720,11 +721,17 @@ export default function OrdersListView() {
                                           {product.price} KWD{' '}
                                         </Typography>
                                         &nbsp; &nbsp;
-                                        <Iconify
+                                        {/* <Iconify
                                           icon="mdi:pen-plus"
                                           onClick={toggleDrawerCommon('variants', product._id)}
                                           style={{ cursor: 'pointer' }}
-                                        />{' '}
+                                        />{' '} */}
+                                        <Link href={`/dashboard/products/${product._id}`} >
+                                          <Iconify
+                                            icon="mdi:pen-plus"
+                                            style={{ cursor: 'pointer' }}
+                                          />{' '}
+                                        </Link>
                                         &nbsp; &nbsp;
                                         <Iconify
                                           icon="carbon:delete"

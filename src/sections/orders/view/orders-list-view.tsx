@@ -23,6 +23,7 @@ import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 // _mock
 import { _orders, allOrders } from 'src/_mock';
 // utils
@@ -42,7 +43,6 @@ import OrderTableToolbar from '../orders-table-toolbar';
 import OrderTableFiltersResult from '../orders-table-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 import StepsNewOrders from '../Steps-New-Order';
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 // ----------------------------------------------------------------------
 
