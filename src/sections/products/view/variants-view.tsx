@@ -18,7 +18,7 @@ import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Switch from '@mui/material/Switch';
-import { Box, Grid, Stack, Typography, Paper, Alert, Checkbox } from '@mui/material';
+import { Box, Grid, Stack, Typography, Paper, Alert, Checkbox, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
@@ -100,29 +100,11 @@ export default function OrdersListView() {
     }, [router]);
 
 
+    const dialog = useBoolean();
+    const rowDialog = useBoolean();
 
 
 
-
-    const handleProductData = (e: any) => {
-        const { name, value } = e.target;
-        setProductData((prevData: any) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
-    const handleNestedProductData = (e: any) => {
-        const { name, value } = e.target;
-        const [parentKey, nestedKey] = name.split('.');
-
-        setProductData((prevData: any) => ({
-            ...prevData,
-            [parentKey]: {
-                ...prevData[parentKey],
-                [nestedKey]: value,
-            },
-        }));
-    };
 
     const handleAddImage = (files: any) => {
         if (files.length > 0) {
@@ -437,7 +419,8 @@ export default function OrdersListView() {
                                 component="button"
                                 variant="contained"
                                 color="primary"
-                                onClick={toggleDrawerCommon('variants')}
+                                // onClick={toggleDrawerCommon('variants')}
+                                onClick={dialog.onTrue}
                             >
                                 Add New Variant
                             </Button>
@@ -475,7 +458,7 @@ export default function OrdersListView() {
                                             </Label>
                                         }
                                     />
-                                    {categoryState.list.map((categoryObj: any) => (
+                                    {/* {categoryState.list.map((categoryObj: any) => (
                                         <Tab
                                             key={categoryObj._id}
                                             iconPosition="end"
@@ -493,7 +476,7 @@ export default function OrdersListView() {
                                                 </Label>
                                             }
                                         />
-                                    ))}
+                                    ))} */}
                                 </TabList>
                             </Box>
 
@@ -815,6 +798,325 @@ export default function OrdersListView() {
                     </Button>
                 }
             />
+
+
+
+            {/* create Variant Model */}
+            <Dialog open={dialog.value} onClose={dialog.onFalse} scroll='body' maxWidth='xl' fullWidth >
+                <DialogTitle>Add New Variant</DialogTitle>
+                <DialogContent>
+                    <FormProvider methods={variantMethods} onSubmit={onVariantSubmit}>
+                        <Divider flexItem />
+                        {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+
+                        <Grid container spacing={2}>
+                            <Grid item sm={6}>
+                                <Typography
+                                    component="p"
+                                    noWrap
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                >
+                                    Group Name (English)
+                                </Typography>
+                                <RHFTextField
+                                    fullWidth
+                                    variant="filled"
+                                    settingStateValue={handleNestedVariantData}
+                                    value={variantData?.groupName?.en || ''}
+                                    name="groupName.en"
+                                />
+                            </Grid>
+                            <Grid item sm={6}>
+                                <Typography
+                                    mt="20px"
+                                    mb="5px"
+                                    component="p"
+                                    noWrap
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                >
+                                    Group Name (Arabic)
+                                </Typography>
+
+                                <RHFTextField
+                                    fullWidth
+                                    variant="filled"
+                                    settingStateValue={handleNestedVariantData}
+                                    value={variantData?.groupName?.ar || ''}
+                                    name="groupName.ar"
+                                />
+                            </Grid>
+                            <Grid item sm={6}>
+                                <Typography
+                                    mt="20px"
+                                    mb="5px"
+                                    component="p"
+                                    noWrap
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                >
+                                    Selection Type
+                                </Typography>
+
+                                <RHFSelect
+                                    fullWidth
+                                    variant="filled"
+                                    name="selectionType"
+                                    id="demo-simple-select2"
+                                    value={variantData?.selectionType || ''}
+                                    settingStateValue={handleVariantData}
+                                >
+                                    <MenuItem value="multiple">Multiple</MenuItem>
+                                    <MenuItem value="single">Single</MenuItem>
+                                </RHFSelect>
+
+                                <Stack
+                                    mt="20px"
+                                    direction="row"
+                                    alignItems="center"
+                                    justifyContent="space-between"
+                                    sx={{
+                                        borderRadius: '16px',
+                                        padding: '7px 14px',
+                                        backgroundColor: '#F5F6F8',
+                                    }}
+                                >
+                                    <Typography
+                                        component="p"
+                                        variant="subtitle2"
+                                        sx={{ fontWeight: 900, fontSize: '.9rem' }}
+                                    >
+                                        Allow More Quantity
+                                    </Typography>
+                                    <Checkbox
+                                        size="medium"
+                                        name="allowMoreQuantity"
+                                        checked={variantData?.allowMoreQuantity || false}
+                                        onChange={handleVariantCheckBox}
+                                        inputProps={{ 'aria-label': 'secondary checkbox' }}
+                                    />
+                                </Stack>
+                            </Grid>
+                            <Grid item sm={6}>
+                                {variantData?.selectionType === 'multiple' && (
+                                    <>
+                                        <Typography
+                                            mt="20px"
+                                            mb="5px"
+                                            component="p"
+                                            noWrap
+                                            variant="subtitle2"
+                                            sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                        >
+                                            Minimum
+                                        </Typography>
+                                        <RHFTextField
+                                            fullWidth
+                                            type="number"
+                                            variant="filled"
+                                            settingStateValue={handleVariantData}
+                                            value={variantData?.minimum || ''}
+                                            name="minimum"
+                                        />
+
+                                        <Typography
+                                            mt="20px"
+                                            mb="5px"
+                                            component="p"
+                                            noWrap
+                                            variant="subtitle2"
+                                            sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                                        >
+                                            Maximum
+                                        </Typography>
+                                        <RHFTextField
+                                            type="number"
+                                            fullWidth
+                                            variant="filled"
+                                            settingStateValue={handleVariantData}
+                                            value={variantData?.maximum || ''}
+                                            name="maximum"
+                                        />
+                                    </>
+                                )}
+                            </Grid>
+                            <Grid item sm={12}>
+                                <Button
+                                    startIcon="+"
+                                    fullWidth
+                                    sx={{ borderRadius: '30px', color: '#0F1349' }}
+                                    component="button"
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={rowDialog.onTrue}
+                                >
+                                    Add Row
+                                </Button>
+                            </Grid>
+                            <Grid item sm={12}>
+                                <Paper elevation={4}>
+                                    <Grid
+                                        container
+                                        item
+                                        alignItems="center"
+                                        justifyContent="space-between"
+                                        rowGap={3}
+                                        sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
+                                    >
+                                        <Grid item xs={12} md={6}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                }}
+                                            >
+
+                                                <Iconify icon="ci:drag-vertical" />
+
+                                                <Box
+                                                    component="img"
+                                                    // src={product.images[0]}
+                                                    alt=" "
+                                                    width="60px"
+                                                    bgcolor="red"
+                                                />
+                                                <Box display="flex" gap="0px" flexDirection="column">
+                                                    <Typography
+                                                        component="p"
+                                                        noWrap
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            fontSize: '.9rem',
+                                                            fontWeight: 800,
+                                                            maxWidth: { xs: '100%', md: '188px' },
+                                                        }}
+                                                    >
+
+                                                        Product name
+                                                    </Typography>
+                                                    <Typography
+                                                        component="p"
+                                                        noWrap
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            opacity: 0.7,
+                                                            fontSize: '.9rem',
+                                                            maxWidth: { xs: '100%', md: '188px' },
+                                                        }}
+                                                    >
+                                                        Category
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid item xs={12} md={6}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                                }}
+                                            >
+                                                <Typography
+                                                    component="p"
+                                                    variant="subtitle2"
+                                                    sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                                                >
+                                                    1200 kwd
+                                                </Typography>
+                                                &nbsp; &nbsp;
+                                                <Iconify
+                                                    icon="mdi:pen-plus"
+                                                    style={{ cursor: 'pointer' }}
+                                                />{' '}
+                                                &nbsp; &nbsp;
+                                                <Iconify
+                                                    icon="carbon:delete"
+
+                                                    style={{ cursor: 'pointer' }}
+                                                />{' '}
+                                                &nbsp; &nbsp;
+                                                <Iconify
+                                                    icon="bx:edit"
+                                                    style={{ cursor: 'pointer' }}
+                                                />
+                                            </Box>
+                                        </Grid>
+                                    </Grid>
+                                </Paper>
+                            </Grid>
+
+
+                        </Grid>
+
+                    </FormProvider>
+                </DialogContent>
+
+                <DialogActions>
+                    <Button onClick={dialog.onFalse} variant="outlined" color="inherit">
+                        Cancel
+                    </Button>
+                    <Button onClick={dialog.onFalse} variant="contained">
+                        Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+
+
+
+            <Dialog open={rowDialog.value} onClose={rowDialog.onFalse} scroll='body' maxWidth='xl' fullWidth >
+                <DialogTitle>Add New Row</DialogTitle>
+                <Button
+                    startIcon="+"
+                    fullWidth
+                    sx={{ borderRadius: '30px', color: '#0F1349' }}
+                    component="button"
+                    variant="contained"
+                    color="primary"
+                    onClick={toggleDrawerCommon('variants')}
+                >
+                    Add Row
+                </Button>
+                <DialogContent>
+                    <FormProvider methods={variantMethods} onSubmit={onVariantSubmit}>
+                        <Divider flexItem />
+                        {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+                        <Box width="100%">
+                            <Typography
+                                component="p"
+                                noWrap
+                                variant="subtitle2"
+                                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                            >
+                                Group Name (English)
+                            </Typography>
+                            <RHFTextField
+                                fullWidth
+                                variant="filled"
+                                settingStateValue={handleNestedVariantData}
+                                value={variantData?.groupName?.en || ''}
+                                name="groupName.en"
+                            />
+
+
+                        </Box>
+                    </FormProvider>
+                </DialogContent>
+
+                <DialogActions>
+                    <Button onClick={rowDialog.onFalse} variant="outlined" color="inherit">
+                        Cancel
+                    </Button>
+                    <Button onClick={rowDialog.onFalse} variant="contained">
+                        Subscribe
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 }
