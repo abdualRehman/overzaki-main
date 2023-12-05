@@ -38,6 +38,7 @@ import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 // _mock
 import { _orders, allVouchers } from 'src/_mock';
 // utils
@@ -71,7 +72,6 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import VouchersToolbar from '../vouchers-toolbar';
 import VouchersFiltersResult from '../vouchers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 // .....
 // ----------------------------------------------------------------------
 const activeTab = {
@@ -421,20 +421,20 @@ export default function OrdersListView() {
 
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenCreateVoucher((pv) => !pv);
-        setEditId(id);
-        if (id) {
-          dispatch(fetchOneVoucher(id));
-        } else {
-          setVoucherData({});
-          dispatch(setVoucher({}));
-        }
-      } else if (state === 'delete') {
-        setOpenDelete((pv) => !pv);
-      } else if (state === 'details') setOpenDetails((pv) => !pv);
-    };
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenCreateVoucher((pv) => !pv);
+          setEditId(id);
+          if (id) {
+            dispatch(fetchOneVoucher(id));
+          } else {
+            setVoucherData({});
+            dispatch(setVoucher({}));
+          }
+        } else if (state === 'delete') {
+          setOpenDelete((pv) => !pv);
+        } else if (state === 'details') setOpenDetails((pv) => !pv);
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -994,7 +994,7 @@ export default function OrdersListView() {
                           fontWeight: 900,
                         }}
                         onChange={handleChangeMySubCat}
-                        // endAdornment={<div style={{ fontSize: '12px', marginRight: '20px', marginTop: '3px' }}>KWD</div>}
+                      // endAdornment={<div style={{ fontSize: '12px', marginRight: '20px', marginTop: '3px' }}>KWD</div>}
                       >
                         <MenuItem value="All Products">All Products</MenuItem>
                         <MenuItem value="Laptops">Laptops</MenuItem>
