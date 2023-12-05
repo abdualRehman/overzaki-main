@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable arrow-body-style */
 /* eslint-disable @typescript-eslint/no-shadow */
 
@@ -89,42 +90,19 @@ export default function OrdersListView() {
 
     const [errorMsg, setErrorMsg] = useState('');
 
-
-    // const pathname = usePathname()
-    // console.log("pathname", pathname);
+    // setting product id
+    const [pId, setPId] = useState<any>(null);
     const router = usePathname();
-
     useEffect(() => {
-        // const { id } = router.query
-        console.log("id", router);
+        const parts = router.split('/');
+        const newProductId: any = parts[parts.length - 1];
+        setPId(newProductId)
     }, [router]);
-
 
     const dialog = useBoolean();
     const rowDialog = useBoolean();
 
 
-
-
-    const handleAddImage = (files: any) => {
-        if (files.length > 0) {
-            setProductData((prevData: any) => ({
-                ...prevData,
-                images: prevData.images ? [...prevData.images, files[0]] : [files[0]],
-                // images: files[0]
-            }));
-        }
-    };
-    const handleRemoveImage = (index: any) => {
-        setProductData((current: any) => {
-            const { images, ...rest } = current;
-            const updatedImages = images.filter((_: any, i: any) => i !== index);
-            return {
-                ...rest,
-                images: updatedImages,
-            };
-        });
-    };
 
 
 
@@ -148,7 +126,13 @@ export default function OrdersListView() {
                 } else {
                     // If the value is an array, assume it's a file input
                     value.forEach((file: any, index: any) => {
-                        formData.append(`${key}[${index}]`, file);
+                        if (typeof value === 'object' && !Array.isArray(value) && key !== 'images') {
+                            Object.entries(value).forEach(([nestedKey, nestedValue]: any) => {
+                                formData.append(`${key}[${index}][${nestedKey}]`, nestedValue);
+                            });
+                        } else {
+                            formData.append(`${key}[${index}]`, file);
+                        }
                     });
                 }
             } else {
@@ -174,6 +158,18 @@ export default function OrdersListView() {
 
     const [openDetails, setOpenDetails] = useState(false);
     const [openVariant, setOpenVariant] = useState(false);
+
+    const toggleVariantModel = (id: any = null) => {
+        setVariantData(null);
+        variantMethods.reset();
+        setTempVariantId(id);
+        if (id) {
+            dispatch(fetchOneVariant(id));
+            dialog.onFalse();
+        } else {
+            dialog.onTrue();
+        }
+    }
 
     // common
     const toggleDrawerCommon =
@@ -331,16 +327,18 @@ export default function OrdersListView() {
     // ------------
     const createVariantFun = () => {
         if (variantData && Object.entries(variantData).length > 0) {
-            // console.log("variantData", tempVariantId);
-            dispatch(createVariant({ productId: tempVariantId, data: variantData })).then(
+
+            // const newFormData = convertStateToFormData(variantData);
+
+            dispatch(createVariant({ productId: pId, data: variantData })).then(
                 (response: any) => {
                     if (response.meta.requestStatus === 'fulfilled') {
                         variantMethods.reset();
                         setVariantData(null);
                         setEditVariantId(null);
-                        handleDrawerCloseCommon('variants');
-
-                        dispatch(fetchProductsList(error));
+                        dialog.onFalse();
+                        // handleDrawerCloseCommon('variants');
+                        // dispatch(fetchProductsList(error));
                         enqueueSnackbar('Successfully Created!', { variant: 'success' });
                     } else {
                         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -365,19 +363,136 @@ export default function OrdersListView() {
         }
     };
 
-    // const removeProductFun = () => {
-    //   if (removeData) {
-    //     dispatch(deleteProduct(removeData)).then((response: any) => {
-    //       if (response.meta.requestStatus === 'fulfilled') {
-    //         dispatch(fetchProductsList(error));
-    //         enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
-    //         confirm.onFalse();
-    //       } else {
-    //         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-    //       }
-    //     });
-    //   }
-    // }
+    const removeVariantFun = () => {
+        if (removeData) {
+            dispatch(deleteProduct(removeData)).then((response: any) => {
+                if (response.meta.requestStatus === 'fulfilled') {
+                    dispatch(fetchProductsList(error));
+                    enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
+                    confirm.onFalse();
+                } else {
+                    enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+                }
+            });
+        }
+    }
+
+
+    // ------------------------------------------------------ Rows Data ----------------------------
+
+    const [rowData, setRowData] = useState<any>(null);
+    const [editRowId, setEditRowId] = useState(null);
+
+
+    const handleNestedRowData = (e: any) => {
+        const { name, value } = e.target;
+        const [parentKey, nestedKey] = name.split('.');
+        const obj = {
+            ...rowData,
+            name: {
+                ...(rowData?.name || {}),
+                [nestedKey]: value,
+            },
+        };
+        setRowData(obj);
+    };
+    const handleRowData = (e: any) => {
+        const { name, value } = e.target;
+        setRowData((prevData: any) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+    const handleAddImage = (files: any) => {
+        if (files.length > 0) {
+            setRowData((prevData: any) => ({
+                ...prevData,
+                image: files[0],
+            }));
+        }
+    };
+    const handleRemoveImage = () => {
+        setRowData((current: any) => {
+            const { image, ...rest } = current;
+            return {
+                ...rest,
+            };
+        });
+    };
+
+
+
+    const RowSchema = Yup.object().shape({
+        name: Yup.object().shape({
+            en: Yup.string().required('English Name is required'),
+            ar: Yup.string().required('Arabic Name is required'),
+        }),
+        price: Yup.number().required('Field is required'),
+        priceAfterDiscount: Yup.number().required('Field is required'),
+        barcode: Yup.string().required('Field is required'),
+        sku: Yup.string().required('Field is required'),
+    });
+    const rowMethods = useForm({
+        resolver: yupResolver(RowSchema),
+    });
+    const onRowSubmit = rowMethods.handleSubmit(async (data) => {
+        try {
+            if (editRowId) {
+                const updatedRows = [...variantData.rows];
+                updatedRows[editRowId] = rowData;
+                setVariantData({ ...variantData, rows: updatedRows });
+            } else {
+                setVariantData({ ...variantData, rows: variantData?.rows ? [...variantData.rows, rowData] : [rowData] })
+            }
+            setRowData(null);
+            rowMethods.reset();
+            rowDialog.onFalse();
+        } catch (error) {
+            console.error(error);
+            rowMethods.reset();
+            setErrorMsg(typeof error === 'string' ? error : error.message);
+        }
+    });
+
+    const handleEditRow = (row: any, index: any) => {
+        setEditRowId(index);
+        rowMethods.reset();
+        const newData = {
+            name: {
+                en: row.name.en,
+                ar: row.name.ar,
+            },
+            price: row.price,
+            priceAfterDiscount: row?.priceAfterDiscount,
+            barcode: row?.barcode,
+            sku: row?.sku,
+            image: row?.image || null,
+        };
+        setRowData(newData);
+        Object.entries(newData).forEach(([fieldName, nestedData]: any) => {
+            if (fieldName === 'name') {
+                Object.entries(nestedData).forEach(([nestedFieldName, value]: any) => {
+                    const fullFieldName: string = `${fieldName}.${nestedFieldName}`;
+                    rowMethods.setValue(fullFieldName as 'name.en' | 'name.ar', value);
+                });
+            } else {
+                rowMethods.setValue(fieldName, nestedData);
+            }
+        });
+        rowDialog.onTrue();
+    }
+    const handleRemoveRow = (indexToRemove: any) => {
+        const updatedRows = variantData.rows.filter((_: any, index: any) => index !== indexToRemove);
+        setVariantData({ ...variantData, rows: updatedRows });
+    }
+
+
+
+
+
+
+
+    // -----------------------------------------Drag Divs----------------------------
     const listStuff = data;
     const [listItems, setListItems] = useState([]);
     useEffect(() => {
@@ -420,19 +535,13 @@ export default function OrdersListView() {
                                 variant="contained"
                                 color="primary"
                                 // onClick={toggleDrawerCommon('variants')}
-                                onClick={dialog.onTrue}
+                                onClick={() => toggleVariantModel()}
                             >
                                 Add New Variant
                             </Button>
                         </Stack>
                     </BottomActions>
                 </Grid>
-
-                {/* <Grid item xs={12}>
-                    <Box mt="20px">
-                        <ProductTableToolbar />
-                    </Box>
-                </Grid> */}
 
                 <Grid item xs={12}>
                     <Box>
@@ -451,32 +560,13 @@ export default function OrdersListView() {
                                     <Tab
                                         iconPosition="end"
                                         value="All"
-                                        label="All Products"
+                                        label="All Variants"
                                         icon={
                                             <Label variant={(value === 'All' && 'filled') || 'outlined'} color="primary">
                                                 {list.length}
                                             </Label>
                                         }
                                     />
-                                    {/* {categoryState.list.map((categoryObj: any) => (
-                                        <Tab
-                                            key={categoryObj._id}
-                                            iconPosition="end"
-                                            value={categoryObj._id}
-                                            label={categoryObj?.name?.en || ''}
-                                            icon={
-                                                <Label
-                                                    variant={(categoryObj._id === value && 'filled') || 'outlined'}
-                                                    color="primary"
-                                                >
-                                                    {
-                                                        list.filter((product: any) => product.categoryId === categoryObj._id)
-                                                            .length
-                                                    }
-                                                </Label>
-                                            }
-                                        />
-                                    ))} */}
                                 </TabList>
                             </Box>
 
@@ -576,7 +666,7 @@ export default function OrdersListView() {
                                                                                 &nbsp; &nbsp;
                                                                                 <Iconify
                                                                                     icon="mdi:pen-plus"
-                                                                                    onClick={toggleDrawerCommon('variants', product._id)}
+                                                                                    // onClick={toggleDrawerCommon('variants', product._id)}
                                                                                     style={{ cursor: 'pointer' }}
                                                                                 />{' '}
                                                                                 &nbsp; &nbsp;
@@ -591,7 +681,7 @@ export default function OrdersListView() {
                                                                                 &nbsp; &nbsp;
                                                                                 <Iconify
                                                                                     icon="bx:edit"
-                                                                                    // onClick={toggleDrawerCommon('new', product._id)}
+                                                                                    onClick={() => toggleVariantModel(product._id)}
                                                                                     style={{ cursor: 'pointer' }}
                                                                                 />
                                                                             </Box>
@@ -639,6 +729,7 @@ export default function OrdersListView() {
                     {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
                     <Box width="100%">
                         <Typography
+                            mt="20px"
                             component="p"
                             noWrap
                             variant="subtitle2"
@@ -810,8 +901,10 @@ export default function OrdersListView() {
                         {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
                         <Grid container spacing={2}>
-                            <Grid item sm={6}>
+                            <Grid item xs={12} md={6} >
                                 <Typography
+                                    mt="20px"
+                                    mb="5px"
                                     component="p"
                                     noWrap
                                     variant="subtitle2"
@@ -827,7 +920,7 @@ export default function OrdersListView() {
                                     name="groupName.en"
                                 />
                             </Grid>
-                            <Grid item sm={6}>
+                            <Grid item xs={12} md={6} >
                                 <Typography
                                     mt="20px"
                                     mb="5px"
@@ -847,7 +940,7 @@ export default function OrdersListView() {
                                     name="groupName.ar"
                                 />
                             </Grid>
-                            <Grid item sm={6}>
+                            <Grid item xs={12} md={6} >
                                 <Typography
                                     mt="20px"
                                     mb="5px"
@@ -872,14 +965,13 @@ export default function OrdersListView() {
                                 </RHFSelect>
 
                                 <Stack
-                                    mt="20px"
                                     direction="row"
                                     alignItems="center"
                                     justifyContent="space-between"
                                     sx={{
                                         borderRadius: '16px',
                                         padding: '7px 14px',
-                                        backgroundColor: '#F5F6F8',
+                                        // backgroundColor: '#F5F6F8',
                                     }}
                                 >
                                     <Typography
@@ -898,7 +990,7 @@ export default function OrdersListView() {
                                     />
                                 </Stack>
                             </Grid>
-                            <Grid item sm={6}>
+                            <Grid item xs={12} md={6} >
                                 {variantData?.selectionType === 'multiple' && (
                                     <>
                                         <Typography
@@ -941,113 +1033,124 @@ export default function OrdersListView() {
                                     </>
                                 )}
                             </Grid>
-                            <Grid item sm={12}>
+                            <Grid item xs={12}>
                                 <Button
                                     startIcon="+"
-                                    fullWidth
-                                    sx={{ borderRadius: '30px', color: '#0F1349' }}
+                                    sx={{ borderRadius: '30px', color: '#0F1349', float: 'right', px: 3 }}
                                     component="button"
                                     variant="contained"
                                     color="primary"
-                                    onClick={rowDialog.onTrue}
+                                    onClick={() => {
+                                        rowDialog.onTrue();
+                                        setRowData(null);
+                                        setEditRowId(null);
+                                    }}
                                 >
                                     Add Row
                                 </Button>
                             </Grid>
-                            <Grid item sm={12}>
-                                <Paper elevation={4}>
-                                    <Grid
-                                        container
-                                        item
-                                        alignItems="center"
-                                        justifyContent="space-between"
-                                        rowGap={3}
-                                        sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
-                                    >
-                                        <Grid item xs={12} md={6}>
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px',
-                                                }}
-                                            >
-
-                                                <Iconify icon="ci:drag-vertical" />
-
+                            <Grid item xs={12}>
+                                {variantData?.rows?.map((row: any, index: any) => (
+                                    <Paper elevation={4} key={index} sx={{ mt: 2 }} >
+                                        <Grid
+                                            container
+                                            item
+                                            alignItems="center"
+                                            justifyContent="space-between"
+                                            rowGap={3}
+                                            sx={{ px: 3, py: { xs: 3, md: 0 }, minHeight: '110px' }}
+                                        >
+                                            <Grid item xs={12} md={6}>
                                                 <Box
-                                                    component="img"
-                                                    // src={product.images[0]}
-                                                    alt=" "
-                                                    width="60px"
-                                                    bgcolor="red"
-                                                />
-                                                <Box display="flex" gap="0px" flexDirection="column">
-                                                    <Typography
-                                                        component="p"
-                                                        noWrap
-                                                        variant="subtitle2"
-                                                        sx={{
-                                                            fontSize: '.9rem',
-                                                            fontWeight: 800,
-                                                            maxWidth: { xs: '100%', md: '188px' },
-                                                        }}
-                                                    >
-
-                                                        Product name
-                                                    </Typography>
-                                                    <Typography
-                                                        component="p"
-                                                        noWrap
-                                                        variant="subtitle2"
-                                                        sx={{
-                                                            opacity: 0.7,
-                                                            fontSize: '.9rem',
-                                                            maxWidth: { xs: '100%', md: '188px' },
-                                                        }}
-                                                    >
-                                                        Category
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
-                                        </Grid>
-
-                                        <Grid item xs={12} md={6}>
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '8px',
-                                                    justifyContent: { xs: 'flex-start', md: 'flex-end' },
-                                                }}
-                                            >
-                                                <Typography
-                                                    component="p"
-                                                    variant="subtitle2"
-                                                    sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '8px',
+                                                    }}
                                                 >
-                                                    1200 kwd
-                                                </Typography>
-                                                &nbsp; &nbsp;
-                                                <Iconify
-                                                    icon="mdi:pen-plus"
-                                                    style={{ cursor: 'pointer' }}
-                                                />{' '}
-                                                &nbsp; &nbsp;
-                                                <Iconify
-                                                    icon="carbon:delete"
 
-                                                    style={{ cursor: 'pointer' }}
-                                                />{' '}
-                                                &nbsp; &nbsp;
-                                                <Iconify
-                                                    icon="bx:edit"
-                                                    style={{ cursor: 'pointer' }}
-                                                />
-                                            </Box>
+                                                    <Iconify icon="ci:drag-vertical" />
+
+                                                    {row?.image ? (
+                                                        <Box
+                                                            component="img"
+                                                            // src={row?.image}
+                                                            src={typeof row.image === 'string'
+                                                                ? row.image
+                                                                : URL.createObjectURL(row.image)}
+                                                            alt=" "
+                                                            width="60px"
+                                                        />
+                                                    ) : (
+                                                        <Box
+                                                            component="div"
+                                                        // width="60px"
+                                                        />
+                                                    )}
+                                                    <Box display="flex" gap="0px" flexDirection="column">
+                                                        <Typography
+                                                            component="p"
+                                                            noWrap
+                                                            variant="subtitle2"
+                                                            sx={{
+                                                                fontSize: '.9rem',
+                                                                fontWeight: 800,
+                                                                maxWidth: { xs: '100%', md: '188px' },
+                                                            }}
+                                                        >
+
+                                                            {row?.name?.en || row?.name}
+                                                        </Typography>
+                                                        <Typography
+                                                            component="p"
+                                                            noWrap
+                                                            variant="subtitle2"
+                                                            sx={{
+                                                                opacity: 0.7,
+                                                                fontSize: '.9rem',
+                                                                maxWidth: { xs: '100%', md: '188px' },
+                                                            }}
+                                                        >
+                                                            Price: &nbsp; <b><s>{row?.price} KWD</s> </b> &nbsp; &nbsp; {row.priceAfterDiscount} KWD
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            </Grid>
+
+                                            <Grid item xs={12} md={6}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '8px',
+                                                        justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        component="p"
+                                                        variant="subtitle2"
+                                                        sx={{ fontSize: '.8rem', fontWeight: 800 }}
+                                                    >
+                                                        {row?.barcode}
+                                                    </Typography>
+                                                    &nbsp; &nbsp;
+                                                    <Iconify
+                                                        icon="carbon:delete"
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() => handleRemoveRow(index)}
+                                                    />{' '}
+                                                    &nbsp; &nbsp;
+                                                    <Iconify
+                                                        icon="bx:edit"
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() => handleEditRow(row, index)}
+                                                    />
+                                                </Box>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </Paper>
+                                    </Paper>
+
+                                ))}
                             </Grid>
 
 
@@ -1055,66 +1158,246 @@ export default function OrdersListView() {
 
                     </FormProvider>
                 </DialogContent>
-
+                <Divider flexItem sx={{ mt: 2 }} />
                 <DialogActions>
-                    <Button onClick={dialog.onFalse} variant="outlined" color="inherit">
+                    <Button onClick={() => {
+                        setOpenVariant(false);
+                        setTempVariantId(null);
+                        dialog.onFalse();
+                    }} variant="soft" color="inherit"
+                        sx={{ borderRadius: '30px', px: 2 }}>
                         Cancel
                     </Button>
-                    <Button onClick={dialog.onFalse} variant="contained">
+
+                    <LoadingButton
+                        variant="soft"
+                        color="success"
+                        // size="large"
+                        loading={variantMethods.formState.isSubmitting}
+                        onClick={() => variantMethods.handleSubmit(onVariantSubmit as any)()}
+                        sx={{ borderRadius: '30px', px: 2 }}
+                    >
+                        {editVariantId ? 'Update' : 'Save'}
+                    </LoadingButton>
+                    {/* <Button onClick={dialog.onFalse} variant="contained">
                         Create
-                    </Button>
+                    </Button> */}
                 </DialogActions>
             </Dialog>
 
 
 
-
-            <Dialog open={rowDialog.value} onClose={rowDialog.onFalse} scroll='body' maxWidth='xl' fullWidth >
-                <DialogTitle>Add New Row</DialogTitle>
-                <Button
-                    startIcon="+"
-                    fullWidth
-                    sx={{ borderRadius: '30px', color: '#0F1349' }}
-                    component="button"
-                    variant="contained"
-                    color="primary"
-                    onClick={toggleDrawerCommon('variants')}
-                >
-                    Add Row
-                </Button>
+            {/* create Row Model */}
+            <Dialog open={rowDialog.value} onClose={rowDialog.onFalse} scroll='body' maxWidth='md' fullWidth >
+                <DialogTitle>{editRowId ? "Edit Row" : "Add New Row"}</DialogTitle>
                 <DialogContent>
-                    <FormProvider methods={variantMethods} onSubmit={onVariantSubmit}>
+                    <FormProvider methods={rowMethods} onSubmit={onRowSubmit}>
                         <Divider flexItem />
-                        {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-                        <Box width="100%">
-                            <Typography
-                                component="p"
-                                noWrap
-                                variant="subtitle2"
-                                sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                            >
-                                Group Name (English)
-                            </Typography>
-                            <RHFTextField
-                                fullWidth
-                                variant="filled"
-                                settingStateValue={handleNestedVariantData}
-                                value={variantData?.groupName?.en || ''}
-                                name="groupName.en"
-                            />
+                        <Grid container spacing={2}>
 
+                            <Grid item xs={12} sm={6} mt={2} order={{ xs: 2, sm: 1 }} >
+                                <Typography
+                                    mb={1}
+                                    component="p"
+                                    noWrap
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                >
+                                    Name (English)
+                                </Typography>
+                                <RHFTextField
+                                    fullWidth
+                                    variant="filled"
+                                    settingStateValue={handleNestedRowData}
+                                    value={rowData?.name?.en || ''}
+                                    name="name.en"
+                                />
+                                <Typography
+                                    mt={2}
+                                    mb={1}
+                                    component="p"
+                                    noWrap
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                >
+                                    Name (Arabic)
+                                </Typography>
+                                <RHFTextField
+                                    fullWidth
+                                    variant="filled"
+                                    settingStateValue={handleNestedRowData}
+                                    value={rowData?.name?.ar || ''}
+                                    name="name.ar"
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6} mt={2} order={{ xs: 1, sm: 2 }} >
+                                <Stack direction="row" spacing="10px">
+                                    {rowData?.image ? (
+                                        <Box width='100%' display='flex'>
+                                            <Box
+                                                display='flex'
+                                                m={1}
+                                                justifyContent='center'
+                                                alignItems='center'
+                                                width='160px'
+                                                height='160px'
+                                            >
+                                                <Box
+                                                    component="img"
+                                                    borderRadius='5px'
+                                                    src={
+                                                        typeof rowData.image === 'string'
+                                                            ? rowData.image
+                                                            : URL.createObjectURL(rowData.image)
+                                                    }
+                                                    alt="rowImage"
+                                                />
+                                            </Box>
+                                            <Box>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <Box
+                                                        onClick={handleRemoveImage}
+                                                        sx={{
+                                                            backgroundColor: 'rgb(134, 136, 163,.09)',
+                                                            padding: '10px 11px 7px 11px',
+                                                            borderRadius: '36px',
+                                                            cursor: 'pointer',
+                                                        }}
+                                                    >
+                                                        <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
+                                                    </Box>
+                                                </Box>
+                                                <Typography
+                                                    mt="0px"
+                                                    component="p"
+                                                    variant="subtitle2"
+                                                    sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                                                >
+                                                    Maximum size is 5mb
+                                                </Typography>
 
-                        </Box>
+                                                <Typography
+                                                    mt="0px"
+                                                    component="p"
+                                                    variant="subtitle2"
+                                                    sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                                                >
+                                                    You can use these extensions PNG or JPG
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    ) : (
+                                        <UploadBox
+                                            onDrop={handleAddImage}
+                                            maxFiles={1}
+                                            maxSize={5242880}
+                                            accept={{
+                                                'image/jpeg': [],
+                                                'image/png': [],
+                                            }}
+                                            placeholder={
+                                                <Stack spacing={0.5} alignItems="center">
+                                                    <Iconify icon="eva:cloud-upload-fill" width={40} />
+                                                    <Typography variant="body2">Upload file</Typography>
+                                                </Stack>
+                                            }
+                                            sx={{ flexGrow: 1, height: '100%', py: 2.5 }}
+                                        />
+                                    )}
+                                </Stack>
+                            </Grid>
+                            <Grid item xs={12} sm={6} pt={0} order={{ xs: 3, sm: 3 }} >
+                                <Typography
+                                    mt={2}
+                                    mb={1}
+                                    component="p"
+                                    noWrap
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                >
+                                    Price
+                                </Typography>
+                                <RHFTextField
+                                    fullWidth
+                                    variant="filled"
+                                    settingStateValue={handleRowData}
+                                    value={rowData?.price || ''}
+                                    name="price"
+                                />
+                                <Typography
+                                    mt={2}
+                                    mb={1}
+                                    component="p"
+                                    noWrap
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                >
+                                    Price After Discount
+                                </Typography>
+                                <RHFTextField
+                                    fullWidth
+                                    variant="filled"
+                                    settingStateValue={handleRowData}
+                                    value={rowData?.priceAfterDiscount || ''}
+                                    name="priceAfterDiscount"
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6} pt={0} order={{ xs: 4, sm: 4 }} >
+                                <Typography
+                                    mt={2}
+                                    mb={1}
+                                    component="p"
+                                    noWrap
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                >
+                                    Barcode
+                                </Typography>
+                                <RHFTextField
+                                    fullWidth
+                                    variant="filled"
+                                    settingStateValue={handleRowData}
+                                    value={rowData?.barcode || ''}
+                                    name="barcode"
+                                />
+                                <Typography
+                                    mt={2}
+                                    mb={1}
+                                    component="p"
+                                    noWrap
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                                >
+                                    SKU
+                                </Typography>
+                                <RHFTextField
+                                    fullWidth
+                                    variant="filled"
+                                    settingStateValue={handleRowData}
+                                    value={rowData?.sku || ''}
+                                    name="sku"
+                                />
+                            </Grid>
+                        </Grid>
                     </FormProvider>
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={rowDialog.onFalse} variant="outlined" color="inherit">
+                    <Button sx={{ borderRadius: '30px' }} onClick={rowDialog.onFalse} variant="soft" color="inherit">
                         Cancel
                     </Button>
-                    <Button onClick={rowDialog.onFalse} variant="contained">
-                        Subscribe
-                    </Button>
+                    <LoadingButton
+                        variant="soft"
+                        color="success"
+                        loading={rowMethods.formState.isSubmitting}
+                        onClick={() => rowMethods.handleSubmit(onRowSubmit as any)()}
+                        sx={{ borderRadius: '30px' }}
+                    >
+                        {editRowId ? "Update" : "Add"}
+                    </LoadingButton>
+                    {/* <Button onClick={rowDialog.onFalse} variant="contained">
+                        Add
+                    </Button> */}
                 </DialogActions>
             </Dialog>
         </Container>
