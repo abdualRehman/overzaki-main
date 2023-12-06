@@ -246,7 +246,6 @@ export default function OrdersListView() {
         FormValues.append(key, customerData[key]);
       }
     });
-    FormValues.append('deviceToken', "only for android and ios app. Edited");
     dispatch(editCustomer({ customerId: editId, data: FormValues })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         dispatch(fetchCustomersList(error));
