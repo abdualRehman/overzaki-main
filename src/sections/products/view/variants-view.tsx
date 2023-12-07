@@ -75,7 +75,6 @@ export default function OrdersListView() {
 
     const settings = useSettingsContext();
 
-    // const [value, setValue] = useState<any>('All');
     const confirm = useBoolean();
 
     const [data, setData] = useState([]);
@@ -108,47 +107,6 @@ export default function OrdersListView() {
         }
     }
 
-
-
-
-    const convertStateToFormData = (state: any) => {
-        const formData = new FormData();
-
-        formData.append('groupName[en]', state.groupName.en);
-        formData.append('groupName[ar]', state.groupName.ar);
-        formData.append('selectionType', state.selectionType);
-        formData.append('allowMoreQuantity', state.allowMoreQuantity);
-        if (state?.minimum) {
-            formData.append('minimum', state?.minimum);
-        }
-        if (state?.maximum) {
-            formData.append('maximum', state?.maximum);
-        }
-
-        formData.append('required', state.required);
-
-        if (state?.rows) {
-            state.rows.forEach((row: any, index: any) => {
-                const rowKey = `rows[${index}]`;
-                const rowData = JSON.stringify({
-                    name: { en: row.name.en, ar: row.name.ar },
-                    price: row.price,
-                    priceAfterDiscount: row.priceAfterDiscount,
-                    barcode: row.barcode,
-                    sku: row.sku,
-                });
-                formData.append(rowKey, rowData);
-            });
-        }
-        // Append images
-        if (state?.images) {
-            state.images.forEach((image: any, index: any) => {
-                formData.append(`images`, image);
-            });
-        }
-
-        return formData;
-    };
 
 
 
@@ -210,7 +168,7 @@ export default function OrdersListView() {
         variantMethods.reset();
         dialog.onTrue();
         if (editVariantObj && Object.entries(editVariantObj).length > 0) {
-
+            setEditVariantId(editVariantObj.productId);
             handleEditVariantData(editVariantObj)
         } else {
 
@@ -221,7 +179,6 @@ export default function OrdersListView() {
 
 
     const handleEditVariantData = (vobj: any) => {
-        setEditVariantId(vobj.productId);
         const newData = {
             groupName: {
                 en: vobj.groupName.en,
@@ -357,6 +314,47 @@ export default function OrdersListView() {
             });
         }
     }
+
+
+
+    const convertStateToFormData = (state: any) => {
+        const formData = new FormData();
+
+        formData.append('groupName[en]', state.groupName.en);
+        formData.append('groupName[ar]', state.groupName.ar);
+        formData.append('selectionType', state.selectionType);
+        formData.append('allowMoreQuantity', state.allowMoreQuantity);
+        if (state?.minimum) {
+            formData.append('minimum', state?.minimum);
+        }
+        if (state?.maximum) {
+            formData.append('maximum', state?.maximum);
+        }
+
+        formData.append('required', state.required);
+
+        if (state?.rows) {
+            state.rows.forEach((row: any, index: any) => {
+                const rowKey = `rows[${index}]`;
+                const rowData = JSON.stringify({
+                    name: { en: row.name.en, ar: row.name.ar },
+                    price: row.price,
+                    priceAfterDiscount: row.priceAfterDiscount,
+                    barcode: row.barcode,
+                    sku: row.sku,
+                });
+                formData.append(rowKey, rowData);
+            });
+        }
+        // Append images
+        if (state?.images) {
+            state.images.forEach((image: any, index: any) => {
+                formData.append(`images`, image);
+            });
+        }
+
+        return formData;
+    };
 
 
     // ------------------------------------------------------ Rows Data ----------------------------
@@ -679,28 +677,6 @@ export default function OrdersListView() {
                     </Box>
                 </Grid>
             </Grid>
-
-
-
-            <ConfirmDialog
-                open={confirm.value}
-                onClose={confirm.onFalse}
-                title="Delete"
-                noCancel={false}
-                content={<>Are you sure want to delete items?</>}
-                action={
-                    <Button
-                        fullWidth
-                        color="error"
-                        variant="soft"
-                        size="large"
-                        onClick={removeVariantFun}
-                        sx={{ borderRadius: '30px' }}
-                    >
-                        Delete
-                    </Button>
-                }
-            />
 
 
 
@@ -1229,6 +1205,30 @@ export default function OrdersListView() {
                     </Button> */}
                 </DialogActions>
             </Dialog>
+
+
+
+
+
+            <ConfirmDialog
+                open={confirm.value}
+                onClose={confirm.onFalse}
+                title="Delete"
+                noCancel={false}
+                content={<>Are you sure want to delete items?</>}
+                action={
+                    <Button
+                        fullWidth
+                        color="error"
+                        variant="soft"
+                        size="large"
+                        onClick={removeVariantFun}
+                        sx={{ borderRadius: '30px' }}
+                    >
+                        Delete
+                    </Button>
+                }
+            />
         </Container>
     );
 }
