@@ -256,7 +256,6 @@ export default function AccountView() {
   const onSubmit = handleSubmit((data) => {
     console.log(data);
   });
-  console.log(workingHours);
 
   return (
     <Box>
