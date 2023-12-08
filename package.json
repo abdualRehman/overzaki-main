@@ -47,6 +47,7 @@
     "autosuggest-highlight": "^3.3.4",
     "axios": "^1.4.0",
     "date-fns": "^2.30.0",
+    "dayjs": "^1.11.10",
     "encoding": "^0.1.13",
     "firebase": "^10.0.0",
     "framer-motion": "^10.12.21",
