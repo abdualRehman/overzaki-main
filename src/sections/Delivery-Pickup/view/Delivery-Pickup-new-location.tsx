@@ -49,7 +49,7 @@ import { MAPBOX_API } from 'src/config-global';
 import * as Yup from 'yup';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { RHFTextField } from 'src/components/hook-form';
-import dayjs from 'dayjs';
+
 
 const MapDraggableMarkers = dynamic(
   () => import('../../_examples/extra/map-view/draggable-markers')
@@ -253,8 +253,8 @@ export default function AccountView() {
     resolver: yupResolver(detailsSchema),
   });
   const { handleSubmit } = methods;
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
+  const onSubmit = handleSubmit((submitData: any) => {
+    console.log(submitData);
   });
 
   return (
@@ -286,18 +286,18 @@ export default function AccountView() {
                 sx={
                   activeSection === 'Location Info'
                     ? {
-                        borderRadius: '12px',
-                        color: '#0F1349',
-                        backgroundColor: '#FFFFFF',
-                        boxShadow: '0px 6px 20px #00000033',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#0F1349',
+                      backgroundColor: '#FFFFFF',
+                      boxShadow: '0px 6px 20px #00000033',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                     : {
-                        borderRadius: '12px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: 'background.neutral' },
-                      }
+                      borderRadius: '12px',
+                      color: '#8688A3',
+                      backgroundColor: 'background.neutral',
+                      '&:hover': { backgroundColor: 'background.neutral' },
+                    }
                 }
               >
                 {' '}
@@ -312,18 +312,18 @@ export default function AccountView() {
                 sx={
                   activeSection === 'Delivery Zones'
                     ? {
-                        borderRadius: '12px',
-                        color: '#0F1349',
-                        backgroundColor: '#FFFFFF',
-                        boxShadow: '0px 6px 20px #00000033',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#0F1349',
+                      backgroundColor: '#FFFFFF',
+                      boxShadow: '0px 6px 20px #00000033',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                     : {
-                        borderRadius: '12px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#8688A3',
+                      backgroundColor: 'background.neutral',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                 }
               >
                 {' '}
