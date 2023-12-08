@@ -60,6 +60,14 @@ export const deleteProduct = createAsyncThunk('products/delete', async (productI
   return response.data;
 });
 
+export const fetchAllVariant = createAsyncThunk(
+  'products/fetchAllVariant',
+  async (productId: number) => {
+    const response = await getRequest(`${endpoints.product.varient}/${productId}`, defaultConfig);
+
+    return response.data;
+  }
+);
 export const fetchOneVariant = createAsyncThunk(
   'products/fetchOneVariant',
   async (productId: number) => {
@@ -87,13 +95,38 @@ export const createVariant = createAsyncThunk(
 // editVariant;
 export const editVariant = createAsyncThunk(
   'products/editVariant',
-  async (payload: { productId: any; data: any }) => {
-    const { productId, data } = payload;
+  async (payload: { variantId: any; data: any }) => {
+    // defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+    const { variantId, data } = payload;
     const response = await putRequest(
-      `${endpoints.product.varient}/${productId}`,
+      `${endpoints.product.varient}/${variantId}`,
       data,
       defaultConfig
     );
+
+    return response.data;
+  }
+);
+export const editVariantRow = createAsyncThunk(
+  'products/editVariantRow',
+  async (payload: { rowId: any; data: any }) => {
+    defaultConfig.headers['Content-Type'] = 'multipart/form-data';
+    const { rowId, data } = payload;
+    const response = await putRequest(`${endpoints.product.rows}/${rowId}`, data, defaultConfig);
+
+    return response.data;
+  }
+);
+
+export const deleteVariant = createAsyncThunk('products/deleteVariant', async (productId: any) => {
+  const response = await deleteRequest(`${endpoints.product.varient}/${productId}`, defaultConfig);
+
+  return response.data;
+});
+export const deleteVariantRow = createAsyncThunk(
+  'products/deleteVariantRow',
+  async (rowId: any) => {
+    const response = await deleteRequest(`${endpoints.product.rows}/${rowId}`, defaultConfig);
 
     return response.data;
   }

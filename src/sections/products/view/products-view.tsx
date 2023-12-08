@@ -326,23 +326,23 @@ export default function OrdersListView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenDetails((pv) => !pv);
-        setEditProductId(id);
-        if (id) {
-          dispatch(fetchOneProduct(id));
-        } else {
-          setProductData({});
-          dispatch(setProduct({}));
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenDetails((pv) => !pv);
+          setEditProductId(id);
+          if (id) {
+            dispatch(fetchOneProduct(id));
+          } else {
+            setProductData({});
+            dispatch(setProduct({}));
+          }
+        } else if (state === 'variants') {
+          variantMethods.reset();
+          setOpenVariant((pv) => !pv);
+          dispatch(fetchOneVariant(id));
+          setTempVariantId(id);
         }
-      } else if (state === 'variants') {
-        variantMethods.reset();
-        setOpenVariant((pv) => !pv);
-        dispatch(fetchOneVariant(id));
-        setTempVariantId(id);
-      }
-    };
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -500,7 +500,7 @@ export default function OrdersListView() {
 
   const editVariantFun = () => {
     if (variantData && Object.entries(variantData).length > 0) {
-      dispatch(editVariant({ productId: tempVariantId, data: variantData })).then(
+      dispatch(editVariant({ variantId: tempVariantId, data: variantData })).then(
         (response: any) => {
           if (response.meta.requestStatus === 'fulfilled') {
             dispatch(fetchProductsList(error));
@@ -543,11 +543,11 @@ export default function OrdersListView() {
   useEffect(() => {
     const sortedList = sort
       ? [...listStuff].sort((a: any, b: any) =>
-          b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
-        )
+        b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
+      )
       : listStuff;
     setListItems(sortedList);
-  }, [sort]);
+  }, [listStuff, sort]);
   const imagesItrations = Array.from({ length: 3 }, (_, index) => index);
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>

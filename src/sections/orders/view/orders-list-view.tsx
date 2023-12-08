@@ -162,7 +162,7 @@ export default function OrdersListView() {
       if (state === 'drawer') setOpenCreateOrder(false);
       else if (state === 'analytics') setOpenAnalytics(false);
     };
-  let listStuff = data;
+  const listStuff = data;
   const [listItems, setListItems] = useState<any>([]);
   const [sort, setSort] = useState(false);
 
@@ -172,11 +172,11 @@ export default function OrdersListView() {
   useEffect(() => {
     const sortedList = sort
       ? [...listStuff].sort((a: any, b: any) =>
-          b.name.toLowerCase().localeCompare(a.name.toLowerCase())
-        )
+        b.name.toLowerCase().localeCompare(a.name.toLowerCase())
+      )
       : listStuff;
     setListItems(sortedList);
-  }, [sort]);
+  }, [listStuff, sort]);
   const handleOnDragEnd = (result: any) => {
     if (!result.destination) return;
     const items = Array.from(listItems);
