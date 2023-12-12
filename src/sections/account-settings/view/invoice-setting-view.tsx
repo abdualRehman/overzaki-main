@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 /* eslint-disable @typescript-eslint/no-shadow */
 
 'use client';
@@ -31,7 +32,7 @@ export default function InvoiceSetting() {
     dispatch(fetchInvoiceSettingsList()).then((response: any) =>
       setSettingDetails(response.payload.data)
     );
-  }, []);
+  }, [dispatch]);
 
   const settings = useSettingsContext();
 
@@ -113,7 +114,7 @@ export default function InvoiceSetting() {
             onChange={(e) =>
               setSettingDetails((prev: any) => ({
                 ...prev,
-                ['sendingToCustomer']: e.target.value === 'true' ? true : false,
+                'sendingToCustomer': e.target.value === 'true',
               }))
             }
             name="send-invoices"
@@ -125,13 +126,13 @@ export default function InvoiceSetting() {
               justifyContent="space-between"
             >
               <FormControlLabel
-                checked={settingDetails && settingDetails['sendingToCustomer']}
-                value={true}
+                checked={settingDetails && settingDetails.sendingToCustomer}
+                value
                 control={<Radio />}
                 label="Yes"
               />
               <FormControlLabel
-                checked={settingDetails && !settingDetails['sendingToCustomer']}
+                checked={settingDetails && !settingDetails.sendingToCustomer}
                 value={false}
                 control={<Radio />}
                 label="No"
@@ -259,23 +260,22 @@ const ToggleSwitch = ({
   setSettingDetails: any;
   settingDetails: any;
   checked: boolean;
-}) => {
-  return (
-    <Box>
-      <FormControlLabel
-        onChange={(e) =>
-          setSettingDetails((prev) => ({
-            ...prev,
-            [e.target?.name]: (prev[e.target?.name] = !prev[e.target?.name]),
-          }))
-        }
-        control={
-          <Switch checked={settingDetails && settingDetails[name]} name={name} color="primary" />
-        }
-        label={label}
-        name={name}
-        sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-      />
-    </Box>
-  );
-};
+}) => (
+  <Box>
+    <FormControlLabel
+      name={name}
+      onChange={(e) =>
+        setSettingDetails((prev: any) => ({
+          ...prev,
+          // [e.target?.name]: (prev[e.target?.name] = !prev[e.target?.name]),
+          [name]: (prev[name] = !prev[name]),
+        }))
+      }
+      control={
+        <Switch checked={settingDetails && settingDetails[name]} name={name} color="primary" />
+      }
+      label={label}
+      sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
+    />
+  </Box>
+);

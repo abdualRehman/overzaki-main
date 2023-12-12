@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-shadow */
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 // @mui
 import Container from '@mui/material/Container';
 import { Box, Stack, Typography, Button, Switch, TextField } from '@mui/material';
@@ -15,6 +16,9 @@ import FormControl from '@mui/material/FormControl';
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
 import Iconify from 'src/components/iconify/iconify';
+import { useDispatch } from 'react-redux';
+import { editTaxSettings, fetchTaxSettingssList } from 'src/redux/store/thunks/taxSettings';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 const countries = [
@@ -42,8 +46,59 @@ const countries = [
 ]
 
 export default function TaxSetting() {
+  const dispatch = useDispatch<any>();
+
 
   const settings = useSettingsContext();
+  const [data, setData] = useState<any>();
+
+  useEffect(() => {
+    fetchDetails();
+  }, []);
+
+  const fetchDetails = () => {
+    dispatch(fetchTaxSettingssList()).then((response: any) => {
+
+      const { merchantVat, VATIncludedShippingFees, countries } = response.payload;
+
+      const merchantV = merchantVat ? "true" : "false";
+
+      setData({
+        merchantVat: merchantV,
+        VATIncludedShippingFees: VATIncludedShippingFees ? "true" : "false",
+        countries: countries.map(({ name, percentage, active }: any) => ({ name, percentage, active }))
+      })
+    });
+  }
+
+
+  const setCountryObj = (name: any, value: any, index: any) => {
+    const countriesList = data.countries || [];
+    const updatedList = countriesList.map((country: any, ind: any) => {
+      if (ind === index) {
+        return {
+          ...country,
+          [name]: value
+        }
+      }
+      return country;
+    })
+    setData({ ...data, countries: updatedList })
+  }
+
+  const saveChanges = () => {
+    const jsonData = { ...data, merchantVat: data.merchantVat === "true", VATIncludedShippingFees: data.VATIncludedShippingFees === "true" };
+
+    dispatch(editTaxSettings(jsonData)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  }
+
+
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -58,15 +113,16 @@ export default function TaxSetting() {
         <Typography variant="body1" sx={{ fontWeight: 900 }} >
           Merchant VAT
         </Typography>
-        <FormControl fullWidth >
+        <FormControl fullWidth>
           <RadioGroup
             aria-labelledby="Merchant-label"
-            defaultValue="yes"
-            name="Merchant"
+            name="merchantVat"
+            value={data?.merchantVat || null}
+            onChange={(e) => setData({ ...data, [e.target.name]: e.target.value })}
           >
-            <Stack direction='row' sx={{ maxWidth: '250px' }} alignItems='center' justifyContent='space-between' >
-              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio />} label="No" />
+            <Stack direction='row' sx={{ maxWidth: '250px' }} alignItems='center' justifyContent='space-between'>
+              <FormControlLabel value="true" control={<Radio />} label="Yes" />
+              <FormControlLabel value="false" control={<Radio />} label="No" />
             </Stack>
           </RadioGroup>
         </FormControl>
@@ -79,12 +135,13 @@ export default function TaxSetting() {
         <FormControl fullWidth >
           <RadioGroup
             aria-labelledby="shipping-label"
-            defaultValue="no"
-            name="shipping"
+            name="VATIncludedShippingFees"
+            value={data?.VATIncludedShippingFees || null}
+            onChange={(e) => setData({ ...data, [e.target.name]: e.target.value })}
           >
             <Stack direction='row' sx={{ maxWidth: '250px' }} alignItems='center' justifyContent='space-between' >
-              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio />} label="No" />
+              <FormControlLabel value="true" control={<Radio />} label="Yes" />
+              <FormControlLabel value="false" control={<Radio />} label="No" />
             </Stack>
           </RadioGroup>
         </FormControl>
@@ -109,29 +166,33 @@ export default function TaxSetting() {
           </Box>
         </Stack>
 
-        {
-          countries.map((country, indx) => (
-            <Box mt='20px' key={indx}>
-              <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                <Stack direction='row' alignItems='center' spacing='10px'>
-                  <Box component='img' src={country.flag} />
-                  <Typography variant="button" sx={{ fontWeight: 900 }} >
-                    {country.country}
-                  </Typography>
-                </Stack>
-
-                <Stack direction='row' alignItems='center' spacing='3px'>
-                  <TextField variant='filled' size='small' disabled={!(country.checked)} defaultValue={country.value} sx={styles} />
-                  <Switch color='primary' checked={country.checked} />
-                </Stack>
+        {data && data?.countries.map((country: any, indx: any) => (
+          <Box mt='20px' key={indx}>
+            <Stack direction='row' justifyContent='space-between' alignItems='center'>
+              <Stack direction='row' alignItems='center' spacing='10px'>
+                {/* <Box component='img' src={country.flag} /> */}
+                <Typography variant="button" sx={{ fontWeight: 900 }} >
+                  {country.name}
+                </Typography>
               </Stack>
-            </Box>
-          ))
+
+              <Stack direction='row' alignItems='center' spacing='3px'>
+                <TextField variant='filled' size='small'
+                  type='number'
+                  disabled={!(country.active)}
+                  value={country.percentage} onChange={(e) => setCountryObj('percentage', e.target.value, indx)} sx={styles} />
+                <Switch color='primary' checked={!!country.active} onChange={(e, value) => setCountryObj('active', value, indx)} />
+              </Stack>
+            </Stack>
+          </Box>
+        ))
         }
 
 
         <Box sx={{ mt: '20px' }}>
-          <Button fullWidth variant='contained' color='primary' size='large'
+          <Button
+            onClick={saveChanges}
+            fullWidth variant='contained' color='primary' size='large'
             sx={{
               boxShadow: '0px 6px 20px #1BFCB633',
               borderRadius: '30px',

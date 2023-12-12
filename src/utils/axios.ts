@@ -182,8 +182,8 @@ export const endpoints = {
     search: '/taxSettings/',
   },
   notificationsSettings: {
-    list: '/taxSettings/',
-    search: '/taxSettings/',
+    list: '/notificationsSettings/',
+    search: '/notificationsSettings/',
   },
   integrations: {
     list: '/taxSettings/',
