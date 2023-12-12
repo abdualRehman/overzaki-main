@@ -10,9 +10,12 @@ import {
 } from 'src/utils/axios';
 
 export const fetchStaffManagementsList = createAsyncThunk('staffManagement/fetchList', async () => {
-  const response = await getRequest(`${endpoints.staffManagement.list}`, defaultConfig);
-
-  return response;
+  try {
+    const response = await getRequest(`${endpoints.staffManagement.list}`, defaultConfig);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 export const fetchOneStaffManagement = createAsyncThunk(
@@ -31,14 +34,13 @@ export const createStaffManagement = createAsyncThunk(
   'staffManagement/create',
   async (data: any) => {
     const response = await postRequest(endpoints.staffManagement.list, data, defaultConfig);
-
     return response.data;
   }
 );
 
 export const editStaffManagement = createAsyncThunk(
   'staffManagement/edit',
-  async (payload: { staffManagementId: number; data: any }) => {
+  async (payload: { staffManagementId: string; data: any }) => {
     const { staffManagementId, data } = payload;
     const response = await putRequest(
       `${endpoints.staffManagement.list}/${staffManagementId}`,

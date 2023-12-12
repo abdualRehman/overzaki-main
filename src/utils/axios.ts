@@ -161,12 +161,12 @@ export const endpoints = {
     search: '/taxSettings/',
   },
   invoiceSettings: {
-    list: '/taxSettings/',
-    search: '/taxSettings/',
+    list: '/invoiceSettings',
+    search: '/invoiceSettings',
   },
   staffManagement: {
-    list: '/taxSettings/',
-    search: '/taxSettings/',
+    list: '/staffManagement',
+    search: '/staffManagement',
   },
   integrationSubscription: {
     list: '/taxSettings/',

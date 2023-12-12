@@ -2,7 +2,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 // @mui
 import Container from '@mui/material/Container';
 import { Box, Stack, Typography, Button, Switch } from '@mui/material';
@@ -14,12 +14,86 @@ import FormControl from '@mui/material/FormControl';
 // components
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
+import { useDispatch } from 'react-redux';
+import {
+  editInvoiceSettings,
+  fetchInvoiceSettingsList,
+  setInvoiceSettings,
+} from 'src/redux/store/thunks/invoiceSettings';
+import { enqueueSnackbar } from 'notistack';
 
 // ----------------------------------------------------------------------
 
 export default function InvoiceSetting() {
+  const dispatch = useDispatch<any>();
+  const [settingDetails, setSettingDetails] = useState<any>();
+  useEffect(() => {
+    dispatch(fetchInvoiceSettingsList()).then((response: any) =>
+      setSettingDetails(response.payload.data)
+    );
+  }, []);
 
   const settings = useSettingsContext();
+
+  const dataToMap = [
+    {
+      label: 'QR Code',
+      name: 'QRCode',
+    },
+    {
+      label: 'SKU',
+      name: 'SKU',
+    },
+    {
+      label: 'Barcode',
+      name: 'barcode',
+    },
+    {
+      label: 'Order Status',
+      name: 'orderStatus',
+    },
+    {
+      label: 'Product Weights',
+      name: 'productWeights',
+    },
+    {
+      label: 'Discount Coupon Code',
+      name: 'discountCouponCode',
+    },
+  ];
+  const saveChanges = () => {
+    const {
+      ETA,
+      QRCode,
+      SKU,
+      barcode,
+      discountCouponCode,
+      orderStatus,
+      productWeights,
+      sendingToCustomer,
+    } = settingDetails;
+    const dataToPush = {
+      ETA,
+      QRCode,
+      SKU,
+      barcode,
+      discountCouponCode,
+      orderStatus,
+      productWeights,
+      sendingToCustomer,
+    };
+
+    dispatch(editInvoiceSettings(dataToPush)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        enqueueSnackbar('Successfully Created!', { variant: 'success' });
+        dispatch(fetchInvoiceSettingsList()).then((data: any) =>
+          setSettingDetails(data.payload.data)
+        );
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -27,20 +101,41 @@ export default function InvoiceSetting() {
         <CustomCrumbs heading="Invoice Settings" />
       </Box>
 
-      <Box mt='20px'>
-        <Typography variant="body1" sx={{ fontWeight: 900 }} >
+      <Box mt="20px">
+        <Typography variant="body1" sx={{ fontWeight: 900 }}>
           Do you want to send invoices to your customer?
         </Typography>
-        <FormControl fullWidth >
+        <FormControl fullWidth>
           {/* <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel> */}
           <RadioGroup
             aria-labelledby="send-invoices-label"
             defaultValue="send"
+            onChange={(e) =>
+              setSettingDetails((prev: any) => ({
+                ...prev,
+                ['sendingToCustomer']: e.target.value === 'true' ? true : false,
+              }))
+            }
             name="send-invoices"
           >
-            <Stack direction='row' sx={{ maxWidth: '250px' }} alignItems='center' justifyContent='space-between' >
-              <FormControlLabel value="send" control={<Radio />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio />} label="No" />
+            <Stack
+              direction="row"
+              sx={{ maxWidth: '250px' }}
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <FormControlLabel
+                checked={settingDetails && settingDetails['sendingToCustomer']}
+                value={true}
+                control={<Radio />}
+                label="Yes"
+              />
+              <FormControlLabel
+                checked={settingDetails && !settingDetails['sendingToCustomer']}
+                value={false}
+                control={<Radio />}
+                label="No"
+              />
             </Stack>
           </RadioGroup>
         </FormControl>
@@ -49,16 +144,26 @@ export default function InvoiceSetting() {
       <Divider sx={{ borderWidth: '1px', my: '30px' }} />
 
       <Box>
-        <Typography variant="body1" sx={{ fontWeight: 900 }} >
+        <Typography variant="body1" sx={{ fontWeight: 900 }}>
           Invoice Template & Order Summary
         </Typography>
-        <Typography component='p' variant="caption" color='#8688A3' >
+        <Typography component="p" variant="caption" color="#8688A3">
           Edit the invoice details and view for your customers.
         </Typography>
+        {dataToMap.map((item: any) => (
+          <ToggleSwitch
+            checked={settingDetails}
+            settingDetails={settingDetails}
+            setSettingDetails={setSettingDetails}
+            name={item.name}
+            label={item.label}
+            key={item.name}
+          />
+        ))}
 
-        <Box mt='20px'>
+        {/* <Box mt="20px">
           <FormControlLabel
-            control={<Switch color='primary' />}
+            control={<Switch color="primary" />}
             label="QR Code"
             sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
           />
@@ -66,88 +171,111 @@ export default function InvoiceSetting() {
 
         <Box>
           <FormControlLabel
-            control={<Switch color='primary' defaultChecked />}
+            control={<Switch color="primary" defaultChecked />}
             label="Barcode"
             sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
           />
         </Box>
 
-
         <Box>
           <FormControlLabel
-            control={<Switch color='primary' defaultChecked />}
+            control={<Switch color="primary" defaultChecked />}
             label="Order Status"
+            onChange={(e) => console.log(e)}
+            name="orderStatus"
             sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
           />
         </Box>
 
-
         <Box>
           <FormControlLabel
-            control={<Switch color='primary' />}
-            label="ETA"
-            sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-          />
-        </Box>
-
-
-        <Box>
-          <FormControlLabel
-            control={<Switch color='primary' defaultChecked />}
+            control={<Switch color="primary" defaultChecked />}
             label="SKU"
             sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
           />
         </Box>
 
-
         <Box>
           <FormControlLabel
-            control={<Switch color='primary' defaultChecked />}
+            control={<Switch color="primary" defaultChecked />}
             label="Product Weights"
             sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
           />
         </Box>
 
-
         <Box>
           <FormControlLabel
-            control={<Switch color='primary' defaultChecked />}
+            control={<Switch color="primary" defaultChecked />}
             label="Discount Coupon Code"
             sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
           />
         </Box>
 
-
         <Box>
           <FormControlLabel
-            control={<Switch color='primary' />}
+            control={<Switch color="primary" />}
             label="Store Address"
             sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
           />
         </Box>
 
-
         <Box>
           <FormControlLabel
-            control={<Switch color='primary' defaultChecked />}
+            control={<Switch color="primary" defaultChecked />}
             label="Payment Status in Order"
             sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
           />
-        </Box>
+        </Box> */}
 
         <Box sx={{ maxWidth: '400px', mt: '20px' }}>
-          <Button fullWidth variant='contained' color='primary' size='large'
+          <Button
+            onClick={saveChanges}
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
             sx={{
               boxShadow: '0px 6px 20px #1BFCB633',
               borderRadius: '30px',
-              color: '#0F1349'
-            }}>
+              color: '#0F1349',
+            }}
+          >
             Save
           </Button>
         </Box>
-
       </Box>
-
-    </Container >
+    </Container>
   );
 }
+const ToggleSwitch = ({
+  name,
+  label,
+  setSettingDetails,
+  settingDetails,
+  checked,
+}: {
+  name: string;
+  label: string;
+  setSettingDetails: any;
+  settingDetails: any;
+  checked: boolean;
+}) => {
+  return (
+    <Box>
+      <FormControlLabel
+        onChange={(e) =>
+          setSettingDetails((prev) => ({
+            ...prev,
+            [e.target?.name]: (prev[e.target?.name] = !prev[e.target?.name]),
+          }))
+        }
+        control={
+          <Switch checked={settingDetails && settingDetails[name]} name={name} color="primary" />
+        }
+        label={label}
+        name={name}
+        sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
+      />
+    </Box>
+  );
+};
