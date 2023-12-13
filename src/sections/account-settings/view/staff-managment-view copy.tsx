@@ -35,6 +35,7 @@ import {
 } from 'src/redux/store/thunks/staffManagement';
 import { AppDispatch } from 'src/redux/store/store';
 import { enqueueSnackbar } from 'notistack';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -58,10 +59,11 @@ export default function StaffManagment() {
         setOpenCreateStaff((pv) => !pv);
         setEditId(id);
         if (id) {
-          dispatch(fetchOneStaffManagement(id)).then((response: any) => console.log(response));
+          dispatch(fetchOneStaffManagement(id)).then((response: any) =>
+            setUserData(response.payload)
+          );
         }
       } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
-      console.log(id);
     };
 
   const handleDrawerCloseCommon =
@@ -82,8 +84,8 @@ export default function StaffManagment() {
     };
   // Yup
   const StaffAdminSchema = Yup.object().shape({
-    // firstName: Yup.string().required('First name is required'),
-    // lastName: Yup.string().required('Last name is required'),
+    engName: Yup.string().required('First name is required'),
+    arabicName: Yup.string().required('Last name is required'),
     email: Yup.string().email().required('Email is required'),
     phoneNumber: Yup.string().required(),
     password: Yup.string().required('Password is required'),
@@ -97,8 +99,6 @@ export default function StaffManagment() {
     const toPushData = {
       ...userData,
       roles: ['ACCOUNTENT_ADMIN'],
-
-      preferedLanguage: ['en'],
       country: 'SY',
       gender: 'MALE',
       location: ['banias, tartus, syria'],
@@ -110,14 +110,13 @@ export default function StaffManagment() {
     };
     delete toPushData['engName'];
     delete toPushData['arabicName'];
-    console.log(toPushData);
 
     if (toPushData) {
       dispatch(createStaffManagement(toPushData)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
           dispatch(fetchStaffManagementsList()).then((itemData: any) =>
-            setUsersData(itemData?.payload.data)
+            setNewUsersData(itemData.payload)
           );
           setUserData({});
         } else {
@@ -127,19 +126,31 @@ export default function StaffManagment() {
     }
   };
   const editAdmin = () => {
-    const { phoneNumber, email } = userData;
+    const { roles, gender, country, email, phoneNumber, preferedLanguage, location } =
+      userData.user;
+    const { adminName } = userData;
+    delete adminName['localized'];
+
     const dataToPush = {
-      phoneNumber,
+      roles,
+      gender,
+      country,
       email,
+      phoneNumber,
+      preferedLanguage,
+      location,
+      adminName,
     };
 
     dispatch(editStaffManagement({ staffManagementId: editId, data: dataToPush })).then(
       (response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           dispatch(fetchStaffManagementsList()).then((response: any) =>
-            setUsersData(response.payload.data)
+            setNewUsersData(response.payload)
           );
           enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
         }
       }
     );
@@ -159,7 +170,6 @@ export default function StaffManagment() {
     return dateObject.toLocaleDateString('en-US', opts);
   };
   const handleDelete = (idToDelete: string) => {
-    console.log(idToDelete);
     if (idToDelete) {
       dispatch(deleteStaffManagement(idToDelete)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
@@ -175,9 +185,50 @@ export default function StaffManagment() {
     }
   };
   // Handling Edit
-  const handleFormChange = (e: any) => {
+  const handleFormChange = (e: any, toChange: any) => {
     const { name, value } = e.target;
-    setUserData((prev: any) => ({ ...prev, [name]: value }));
+    if (toChange == 'ar') {
+      setUserData((prev: any) => ({
+        ...prev,
+        adminName: {
+          ...prev.adminName,
+          [toChange]: e.target.value,
+        },
+      }));
+    } else if (toChange == 'en') {
+      setUserData((prev: any) => ({
+        ...prev,
+        adminName: {
+          ...prev.adminName,
+          [toChange]: e.target.value,
+        },
+      }));
+    } else if (toChange == 'phoneNumber') {
+      setUserData((prev: any) => ({
+        ...prev,
+        user: {
+          ...prev.user,
+          [toChange]: e.target.value,
+        },
+      }));
+    } else if (toChange == 'email') {
+      setUserData((prev: any) => ({
+        ...prev,
+        user: {
+          ...prev.user,
+          [toChange]: e.target.value,
+        },
+      }));
+    }
+  };
+  const [query, setQuery] = useState('');
+  // Drag and Drop
+  const handleOnDragEnd = (result: any) => {
+    if (!result.destination) return;
+    const items = Array.from(newUsersData);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setNewUsersData(items);
   };
 
   return (
@@ -245,6 +296,7 @@ export default function StaffManagment() {
                 placeholder="Search by name or phone number..."
                 fullWidth
                 variant="filled"
+                onChange={(e) => setQuery(e.target.value)}
                 // value={filters.name}
                 // onChange={handleFilterName}
                 InputProps={{
@@ -296,56 +348,73 @@ export default function StaffManagment() {
             </Stack>
           </Stack>
         </Grid>
+        <DragDropContext onDragEnd={handleOnDragEnd}>
+          <Droppable droppableId="items">
+            {(provided) => (
+              <Grid {...provided.droppableProps} ref={provided.innerRef} item xs={12}>
+                {newUsersData &&
+                  newUsersData
+                    .filter(
+                      (item: any) =>
+                        item.adminName.en.toLocaleLowerCase().includes(query.toLocaleLowerCase()) ||
+                        item.adminName.ar.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+                    )
+                    .map((user: any, indx: number) => (
+                      <Draggable key={indx} index={indx} draggableId={indx.toString()}>
+                        {(provided) => (
+                          <Card
+                            {...provided.draggableProps}
+                            ref={provided.innerRef}
+                            key={indx}
+                            sx={{
+                              border: '2px solid transparent ',
+                              '&:hover': { borderColor: '#1BFCB6' },
+                              padding: '20px',
+                              boxShadow: '0px 4px 20px #0F134914',
+                              borderRadius: '16px',
+                              marginTop: '16px',
+                            }}
+                          >
+                            <Stack
+                              direction={{ xs: 'column', sm: 'row' }}
+                              spacing="20px"
+                              alignItems="center"
+                              justifyContent="space-between"
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div {...provided.dragHandleProps}>
+                                  <Iconify icon="ci:drag-vertical" />
+                                </div>
+                                <div>
+                                  <Typography component="p" variant="h6" sx={{ fontWeight: 900 }}>
+                                    {user.adminName.en}
+                                  </Typography>
+                                  <Typography
+                                    component="p"
+                                    variant="subtitle2"
+                                    sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                                  >
+                                    {' '}
+                                    {user.user.email}{' '}
+                                  </Typography>
+                                </div>
+                              </Box>
 
-        <Grid item xs={12}>
-          {newUsersData &&
-            newUsersData.map((user: any, indx) => (
-              <Card
-                key={indx}
-                sx={{
-                  border: '2px solid transparent ',
-                  '&:hover': { borderColor: '#1BFCB6' },
-                  padding: '20px',
-                  boxShadow: '0px 4px 20px #0F134914',
-                  borderRadius: '16px',
-                  marginTop: '16px',
-                }}
-              >
-                <Stack
-                  direction={{ xs: 'column', sm: 'row' }}
-                  spacing="20px"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Box>
-                    <Typography component="p" variant="h6" sx={{ fontWeight: 900 }}>
-                      {user.adminName.en}
-                    </Typography>
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      {' '}
-                      {user.email}{' '}
-                    </Typography>
-                  </Box>
+                              <Stack
+                                alignItems="center"
+                                direction="row"
+                                spacing={{ xs: '10px', sm: '20px' }}
+                                justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
+                              >
+                                <Typography
+                                  component="p"
+                                  variant="subtitle2"
+                                  sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                                >
+                                  Joined on {formatDate(user.createdAt)}
+                                </Typography>
 
-                  <Stack
-                    alignItems="center"
-                    direction="row"
-                    spacing={{ xs: '10px', sm: '20px' }}
-                    justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
-                  >
-                    <Typography
-                      component="p"
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                    >
-                      Joined on {formatDate(user.createdAt)}
-                    </Typography>
-
-                    {/* <Chip
+                                {/* <Chip
                     label={order.role}
                     size="small"
                     sx={{
@@ -354,31 +423,34 @@ export default function StaffManagment() {
                       borderRadius: '16px',
                     }}
                   />*/}
-                    <Iconify
-                      onClick={() => [setOpenDelStaff((prev) => !prev), setToDelId(user.user._id)]}
-                      style={{ cursor: 'pointer' }}
-                      icon="material-symbols:delete-outline"
-                      width={24}
-                    />
-                    <Box
-                      sx={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '20px',
-                        background: 'rgb(134, 136, 163,0.09)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        '&:hover': {
-                          background: 'rgb(134, 136, 163,0.2)',
-                        },
-                      }}
-                      onClick={toggleDrawerCommon('new', user._id)}
-                    >
-                      <Box component="img" src="/raw/edit-pen.svg" width="13px" />
-                    </Box>
-                    {/* {order.role !== 'Owner' && (
+                                <Iconify
+                                  onClick={() => [
+                                    setOpenDelStaff((prev) => !prev),
+                                    setToDelId(user.user._id),
+                                  ]}
+                                  style={{ cursor: 'pointer' }}
+                                  icon="material-symbols:delete-outline"
+                                  width={24}
+                                />
+                                <Box
+                                  sx={{
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '20px',
+                                    background: 'rgb(134, 136, 163,0.09)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      background: 'rgb(134, 136, 163,0.2)',
+                                    },
+                                  }}
+                                  onClick={toggleDrawerCommon('new', user.user._id)}
+                                >
+                                  <Box component="img" src="/raw/edit-pen.svg" width="13px" />
+                                </Box>
+                                {/* {order.role !== 'Owner' && (
                   <Iconify
                       style={{ cursor: 'pointer' }}
                       icon="bx:edit"
@@ -386,37 +458,44 @@ export default function StaffManagment() {
                       onClick={toggleDrawerCommon('details')}
                     />
                   )}  */}
-                  </Stack>
-                </Stack>
-                <ConfirmDialog
-                  open={openDelStaff}
-                  onClose={handleDrawerCloseCommon('delstaff')}
-                  noCancel={false}
-                  action={
-                    <Button
-                      fullWidth
-                      variant="soft"
-                      color="error"
-                      onClick={() => handleDelete(toDelId)}
-                    >
-                      Delete
-                    </Button>
-                  }
-                  content={
-                    <Grid container spacing="15px">
-                      <Grid item xs={12} md={12}>
-                        <CustomCrumbs heading="Remove Member" crums={false} />
-                      </Grid>
+                              </Stack>
+                            </Stack>
+                            <ConfirmDialog
+                              open={openDelStaff}
+                              onClose={handleDrawerCloseCommon('delstaff')}
+                              noCancel={false}
+                              action={
+                                <Button
+                                  fullWidth
+                                  variant="soft"
+                                  color="error"
+                                  onClick={() => handleDelete(toDelId)}
+                                >
+                                  Delete
+                                </Button>
+                              }
+                              content={
+                                <Grid container spacing="15px">
+                                  <Grid item xs={12} md={12}>
+                                    <CustomCrumbs heading="Remove Member" crums={false} />
+                                  </Grid>
 
-                      <Grid item xs={12}>
-                        <Typography variant="body2">Do you want to delete this Member?</Typography>
-                      </Grid>
-                    </Grid>
-                  }
-                />
-              </Card>
-            ))}
-        </Grid>
+                                  <Grid item xs={12}>
+                                    <Typography variant="body2">
+                                      Do you want to delete this Member?
+                                    </Typography>
+                                  </Grid>
+                                </Grid>
+                              }
+                            />
+                          </Card>
+                        )}
+                      </Draggable>
+                    ))}
+              </Grid>
+            )}
+          </Droppable>
+        </DragDropContext>
       </Grid>
 
       {/* New Admin */}
@@ -458,8 +537,9 @@ export default function StaffManagment() {
                 Full Name (English)
               </Typography>
               <RHFTextField
-                settingStateValue={handleFormChange}
+                settingStateValue={(e) => handleFormChange(e, 'en')}
                 fullWidth
+                value={userData ? userData.adminName?.en : ''}
                 name="engName"
                 variant="filled"
               />
@@ -474,8 +554,9 @@ export default function StaffManagment() {
                 Full Name (Arabic)
               </Typography>
               <RHFTextField
-                settingStateValue={handleFormChange}
+                settingStateValue={(e) => handleFormChange(e, 'ar')}
                 fullWidth
+                value={userData ? userData.adminName?.ar : ''}
                 name="arabicName"
                 variant="filled"
               />
@@ -502,7 +583,8 @@ export default function StaffManagment() {
                 Email Address
               </Typography>
               <RHFTextField
-                settingStateValue={handleFormChange}
+                settingStateValue={(e) => handleFormChange(e, 'email')}
+                value={userData ? userData.user?.email : ''}
                 fullWidth
                 name="email"
                 variant="filled"
@@ -519,10 +601,11 @@ export default function StaffManagment() {
                 Mobile Number
               </Typography>
               <RHFTextField
-                settingStateValue={handleFormChange}
+                settingStateValue={(e) => handleFormChange(e, 'phoneNumber')}
                 fullWidth
                 variant="filled"
                 name="phoneNumber"
+                value={userData ? userData.user?.phoneNumber : ''}
                 sx={{
                   '& .MuiInputAdornment-root': {
                     marginTop: '0px !important',

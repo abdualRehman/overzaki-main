@@ -114,7 +114,7 @@ export default function InvoiceSetting() {
             onChange={(e) =>
               setSettingDetails((prev: any) => ({
                 ...prev,
-                'sendingToCustomer': e.target.value === 'true',
+                sendingToCustomer: e.target.value === 'true',
               }))
             }
             name="send-invoices"
@@ -161,72 +161,6 @@ export default function InvoiceSetting() {
             key={item.name}
           />
         ))}
-
-        {/* <Box mt="20px">
-          <FormControlLabel
-            control={<Switch color="primary" />}
-            label="QR Code"
-            sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-          />
-        </Box>
-
-        <Box>
-          <FormControlLabel
-            control={<Switch color="primary" defaultChecked />}
-            label="Barcode"
-            sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-          />
-        </Box>
-
-        <Box>
-          <FormControlLabel
-            control={<Switch color="primary" defaultChecked />}
-            label="Order Status"
-            onChange={(e) => console.log(e)}
-            name="orderStatus"
-            sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-          />
-        </Box>
-
-        <Box>
-          <FormControlLabel
-            control={<Switch color="primary" defaultChecked />}
-            label="SKU"
-            sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-          />
-        </Box>
-
-        <Box>
-          <FormControlLabel
-            control={<Switch color="primary" defaultChecked />}
-            label="Product Weights"
-            sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-          />
-        </Box>
-
-        <Box>
-          <FormControlLabel
-            control={<Switch color="primary" defaultChecked />}
-            label="Discount Coupon Code"
-            sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-          />
-        </Box>
-
-        <Box>
-          <FormControlLabel
-            control={<Switch color="primary" />}
-            label="Store Address"
-            sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-          />
-        </Box>
-
-        <Box>
-          <FormControlLabel
-            control={<Switch color="primary" defaultChecked />}
-            label="Payment Status in Order"
-            sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
-          />
-        </Box> */}
 
         <Box sx={{ maxWidth: '400px', mt: '20px' }}>
           <Button
