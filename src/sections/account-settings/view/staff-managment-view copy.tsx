@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-shadow */
 
 'use client';
@@ -49,20 +50,20 @@ export default function StaffManagment() {
   // new order
   const [openCreateStaff, setOpenCreateStaff] = useState(false);
   const [openDelStaff, setOpenDelStaff] = useState(false);
-  const [userData, setUserData] = useState({});
+  const [userData, setUserData] = useState<any>(null);
   const [toDelId, setToDelId] = useState('');
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenCreateStaff((pv) => !pv);
-        setEditId(id);
-        if (id) {
-          dispatch(fetchOneStaffManagement(id)).then((response: any) => console.log(response));
-        }
-      } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
-      console.log(id);
-    };
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenCreateStaff((pv) => !pv);
+          setEditId(id);
+          if (id) {
+            dispatch(fetchOneStaffManagement(id)).then((response: any) => console.log(response));
+          }
+        } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
+        console.log(id);
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -94,7 +95,7 @@ export default function StaffManagment() {
   const { handleSubmit } = methods;
 
   const createAdmin = () => {
-    const toPushData = {
+    const toPushData: any = {
       ...userData,
       roles: ['ACCOUNTENT_ADMIN'],
 
@@ -102,14 +103,13 @@ export default function StaffManagment() {
       country: 'SY',
       gender: 'MALE',
       location: ['banias, tartus, syria'],
-      preferedLanguage: ['en'],
       adminName: {
-        en: userData.engName,
-        ar: userData.arabicName,
+        en: userData?.engName,
+        ar: userData?.arabicName,
       },
     };
-    delete toPushData['engName'];
-    delete toPushData['arabicName'];
+    delete toPushData.engName;
+    delete toPushData.arabicName;
     console.log(toPushData);
 
     if (toPushData) {
@@ -151,11 +151,11 @@ export default function StaffManagment() {
     dispatch(fetchStaffManagementsList()).then((response: any) =>
       setNewUsersData(response.payload.filter((item: any) => item.adminName))
     );
-  }, []);
+  }, [dispatch]);
 
   const formatDate = (createdAt: any) => {
     const dateObject = new Date(createdAt);
-    const opts = { year: 'numeric', month: 'long', day: 'numeric' };
+    const opts: any = { year: 'numeric', month: 'long', day: 'numeric' };
     return dateObject.toLocaleDateString('en-US', opts);
   };
   const handleDelete = (idToDelete: string) => {
@@ -191,13 +191,8 @@ export default function StaffManagment() {
         <Grid item xs={12} md="auto">
           <CustomCrumbs
             heading="Staff Management"
-            description={`${
-              usersData
-                ? usersData?.length == 1
-                  ? usersData?.length + ' ' + 'Staff Member'
-                  : usersData?.length + ' ' + 'Staff Members'
-                : 0 + ' ' + 'Staff Members'
-            }`}
+            description={usersData ? (usersData?.length === 1 ? `${usersData?.length} Staff Member` : `${usersData?.length} Staff Members`) : `${0} Staff Members`
+            }
           />
         </Grid>
 
@@ -299,7 +294,7 @@ export default function StaffManagment() {
 
         <Grid item xs={12}>
           {newUsersData &&
-            newUsersData.map((user: any, indx) => (
+            newUsersData.map((user: any, indx: any) => (
               <Card
                 key={indx}
                 sx={{
@@ -353,7 +348,7 @@ export default function StaffManagment() {
                       color: '#0F1349',
                       borderRadius: '16px',
                     }}
-                  />*/}
+                  /> */}
                     <Iconify
                       onClick={() => [setOpenDelStaff((prev) => !prev), setToDelId(user.user._id)]}
                       style={{ cursor: 'pointer' }}

@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 // import { IStaffMangmentRequest } from 'src/types/request/staffManagement';
 import {
@@ -54,7 +55,7 @@ export const editStaffManagement = createAsyncThunk(
 
 export const deleteStaffManagement = createAsyncThunk(
   'staffManagement/delete',
-  async (staffManagementId: number) => {
+  async (staffManagementId: any) => {
     const response = await deleteRequest(
       `${endpoints.staffManagement.list}/${staffManagementId}`,
       defaultConfig
