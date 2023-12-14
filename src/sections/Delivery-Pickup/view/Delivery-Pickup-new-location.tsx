@@ -367,7 +367,7 @@ export default function AccountView() {
     minOrder: Yup.number().required('Field is required'),
     deliveryTime: Yup.number().required('Field is required'),
     country: Yup.mixed<any>().nullable().required('Country is required'),
-
+    // deliveryTimeUnit: Yup.string().required('Required'),
   });
   const DZMethods = useForm({
     resolver: yupResolver(deliveryZoneSchema),
@@ -379,18 +379,22 @@ export default function AccountView() {
       setdeliveryZoneList((prev: any) => prev.map((itemData: any) => {
         if (itemData._id === deliveryEditId) {
           return {
-            ...submitData,
+            ...deliveryZoneData,
             _id: deliveryEditId,
-            isPublished: submitData?.isPublished || false
+            isPublished: deliveryZoneData?.isPublished || false,
+            deliveryTimeUnit: deliveryZoneData?.deliveryTimeUnit || "Minutes",
+            country: typeof deliveryZoneData?.country === 'object' ? deliveryZoneData?.country.code : deliveryZoneData?.country,
           }
         }
         return itemData;
       }));
     } else {
       const newDeliveryZone = {
-        ...submitData,
+        ...deliveryZoneData,
         _id: Math.random(),
-        isPublished: submitData?.isPublished || false
+        isPublished: deliveryZoneData?.isPublished || false,
+        deliveryTimeUnit: deliveryZoneData?.deliveryTimeUnit || "Minutes",
+        country: typeof deliveryZoneData?.country === 'object' ? deliveryZoneData?.country.code : deliveryZoneData?.country,
       }
       setdeliveryZoneList([...deliveryZoneList, newDeliveryZone]);
 
@@ -421,12 +425,12 @@ export default function AccountView() {
   };
 
   const handleEditDZ = (locationObj: any) => {
-    setDeliveryZoneData(locationObj);
+
     setOpenDetails(true);
     setDeliveryEditId(locationObj._id);
 
     console.log("locationObj", locationObj);
-
+    setDeliveryZoneData(locationObj);
     Object.entries(locationObj).forEach(([fieldName, value]: any) => {
       // if (fieldName === 'zoneName'){
       // }
@@ -1395,7 +1399,8 @@ export default function AccountView() {
                         <Select
                           variant="standard"
                           name="deliveryTimeUnit"
-                          value={deliveryZoneData?.deliveryTimeUnit || "Minutes"}
+                          // value={deliveryZoneData?.deliveryTimeUnit || "Minutes"}
+                          value={deliveryZoneData?.deliveryTimeUnit || ""}
                           onChange={(e: any) => handleDeliveryZoneData(e)}
                           sx={{
                             backgroundColor: "transparent",
@@ -1423,6 +1428,7 @@ export default function AccountView() {
                 }} />}
               label="Published"
               labelPlacement="end"
+              name='isPublished'
               sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
             />
 
