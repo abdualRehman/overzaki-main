@@ -286,11 +286,16 @@ export default function AccountView() {
     // console.log(WorkingHoursFormData);
     const DeliveryZones = deliveryZoneList.map((dzObj: any) => ({
       government: dzObj.government,
-      zoneName: dzObj.zoneName,
-      deliveryFees: dzObj.deliveryFees,
-      minOrder: dzObj.minOrder,
-      deliveryTime: dzObj.deliveryTime,
-
+      zoneName: {
+        en: dzObj.zoneName.en,
+        ar: dzObj.zoneName.ar
+      },
+      deliveryFees: Number(dzObj.deliveryFees),
+      minOrder: Number(dzObj.minOrder),
+      deliveryTime: Number(dzObj.deliveryTime),
+      isPublished: dzObj?.isPublished || false,
+      deliveryTimeUnit: dzObj?.deliveryTimeUnit,
+      country: dzObj?.country,
     }));
     // console.log(DeliveryZones);
 
@@ -382,7 +387,7 @@ export default function AccountView() {
             ...deliveryZoneData,
             _id: deliveryEditId,
             isPublished: deliveryZoneData?.isPublished || false,
-            deliveryTimeUnit: deliveryZoneData?.deliveryTimeUnit || "Minutes",
+            deliveryTimeUnit: deliveryZoneData?.deliveryTimeUnit || "Minute",
             country: typeof deliveryZoneData?.country === 'object' ? deliveryZoneData?.country.code : deliveryZoneData?.country,
           }
         }
@@ -393,7 +398,7 @@ export default function AccountView() {
         ...deliveryZoneData,
         _id: Math.random(),
         isPublished: deliveryZoneData?.isPublished || false,
-        deliveryTimeUnit: deliveryZoneData?.deliveryTimeUnit || "Minutes",
+        deliveryTimeUnit: deliveryZoneData?.deliveryTimeUnit || "Minute",
         country: typeof deliveryZoneData?.country === 'object' ? deliveryZoneData?.country.code : deliveryZoneData?.country,
       }
       setdeliveryZoneList([...deliveryZoneList, newDeliveryZone]);
@@ -429,11 +434,12 @@ export default function AccountView() {
     setOpenDetails(true);
     setDeliveryEditId(locationObj._id);
 
-    console.log("locationObj", locationObj);
     setDeliveryZoneData(locationObj);
     Object.entries(locationObj).forEach(([fieldName, value]: any) => {
-      // if (fieldName === 'zoneName'){
-      // }
+      if (fieldName === 'zoneName') {
+        DZMethods.setValue('zoneName.en', value?.en);
+        DZMethods.setValue('zoneName.ar', value?.ar);
+      }
       DZMethods.setValue(fieldName, value);
     });
   };
@@ -1394,13 +1400,11 @@ export default function AccountView() {
                     <InputAdornment position="end">
                       <Stack direction="row" alignItems="center" spacing="8px">
                         <Divider orientation="vertical" variant="middle" flexItem />
-                        {/* <Typography>Minutes</Typography> */}
-
+                        {/* <Typography>Minute</Typography> */}
                         <Select
                           variant="standard"
                           name="deliveryTimeUnit"
-                          // value={deliveryZoneData?.deliveryTimeUnit || "Minutes"}
-                          value={deliveryZoneData?.deliveryTimeUnit || ""}
+                          value={deliveryZoneData?.deliveryTimeUnit || "Minute"}
                           onChange={(e: any) => handleDeliveryZoneData(e)}
                           sx={{
                             backgroundColor: "transparent",
@@ -1410,8 +1414,8 @@ export default function AccountView() {
                             }
                           }}
                         >
-                          <MenuItem value="Minutes">Minutes</MenuItem>
-                          <MenuItem value="Hours">Hours</MenuItem>
+                          <MenuItem value="Minute">Minutes</MenuItem>
+                          <MenuItem value="Hour">Hours</MenuItem>
                         </Select>
 
                       </Stack>
