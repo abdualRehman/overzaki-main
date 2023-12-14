@@ -38,6 +38,10 @@ export default function InvoiceSetting() {
 
   const dataToMap = [
     {
+      label: 'ETA',
+      name: 'ETA',
+    },
+    {
       label: 'QR Code',
       name: 'QRCode',
     },
@@ -110,7 +114,7 @@ export default function InvoiceSetting() {
           {/* <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel> */}
           <RadioGroup
             aria-labelledby="send-invoices-label"
-            defaultValue="send"
+            // defaultValue="send"
             onChange={(e) =>
               setSettingDetails((prev: any) => ({
                 ...prev,

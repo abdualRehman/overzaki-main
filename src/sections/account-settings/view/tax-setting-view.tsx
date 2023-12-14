@@ -106,6 +106,8 @@ export default function TaxSetting() {
     setData({ ...data, countries: updatedList });
   };
 
+  console.log(typeof 12);
+  console.log(data);
   const saveChanges = () => {
     const jsonData = {
       ...data,
@@ -289,7 +291,7 @@ const CountryDialog = ({ setOpenDialog, setData }: any) => {
     setDataToPush((prev: any) => ({ ...prev, active: true }));
     setData((prev: any) => ({ ...prev, countries: [...prev.countries, dataToPush] }));
   };
-
+  console.log(dataToPush);
   return (
     <Dialog maxWidth="xs" open>
       <DialogTitle>Add Country</DialogTitle>
@@ -306,7 +308,11 @@ const CountryDialog = ({ setOpenDialog, setData }: any) => {
             </Typography>
             <RHFTextField
               onChange={(e) =>
-                setDataToPush((prev: any) => ({ ...prev, [e.target.name]: e.target.value }))
+                setDataToPush((prev: any) => ({
+                  ...prev,
+                  [e.target.name]: e.target.value,
+                  active: true,
+                }))
               }
               fullWidth
               name="name"
@@ -326,7 +332,10 @@ const CountryDialog = ({ setOpenDialog, setData }: any) => {
             </Typography>
             <RHFTextField
               onChange={(e) =>
-                setDataToPush((prev: any) => ({ ...prev, [e.target.name]: e.target.value }))
+                setDataToPush((prev: any) => ({
+                  ...prev,
+                  [e.target.name]: parseInt(e.target.value, 10),
+                }))
               }
               fullWidth
               value={(dataToPush && dataToPush.percentage) || ''}

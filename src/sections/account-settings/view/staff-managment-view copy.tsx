@@ -36,11 +36,20 @@ import {
 import { AppDispatch } from 'src/redux/store/store';
 import { enqueueSnackbar } from 'notistack';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
+import { useAuthContext } from 'src/auth/hooks';
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
 export default function StaffManagment() {
+  const { user } = useAuthContext();
+  const [authUser, setAuthUser] = useState<any>();
+  useEffect(() => {
+    if (user) {
+      setAuthUser(user);
+    }
+  }, [user]);
+
   const settings = useSettingsContext();
   const dispatch = useDispatch<any>();
   // const [data] = useState(users);
@@ -59,9 +68,21 @@ export default function StaffManagment() {
         setOpenCreateStaff((pv) => !pv);
         setEditId(id);
         if (id) {
-          dispatch(fetchOneStaffManagement(id)).then((response: any) =>
-            setUserData(response.payload)
-          );
+          dispatch(fetchOneStaffManagement(id)).then((response: any) => {
+            const { user, adminName } = response.payload;
+            const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
+            delete adminName['localized'];
+            const userObj = {
+              adminName,
+              gender,
+              email,
+              location,
+              phoneNumber,
+              preferedLanguage,
+              roles,
+            };
+            setUserData(userObj);
+          });
         }
       } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
     };
@@ -103,13 +124,7 @@ export default function StaffManagment() {
       gender: 'MALE',
       location: ['banias, tartus, syria'],
       preferedLanguage: ['en'],
-      adminName: {
-        en: userData.engName,
-        ar: userData.arabicName,
-      },
     };
-    delete toPushData['engName'];
-    delete toPushData['arabicName'];
 
     if (toPushData) {
       dispatch(createStaffManagement(toPushData)).then((response: any) => {
@@ -126,8 +141,7 @@ export default function StaffManagment() {
     }
   };
   const editAdmin = () => {
-    const { roles, gender, country, email, phoneNumber, preferedLanguage, location } =
-      userData.user;
+    const { roles, gender, country, email, phoneNumber, preferedLanguage, location } = userData;
     const { adminName } = userData;
     delete adminName['localized'];
 
@@ -174,7 +188,7 @@ export default function StaffManagment() {
       dispatch(deleteStaffManagement(idToDelete)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           dispatch(fetchStaffManagementsList()).then((response: any) =>
-            setNewUsersData(response?.payload.data)
+            setNewUsersData(response?.payload)
           );
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           setOpenDelStaff(false);
@@ -206,18 +220,17 @@ export default function StaffManagment() {
     } else if (toChange == 'phoneNumber') {
       setUserData((prev: any) => ({
         ...prev,
-        user: {
-          ...prev.user,
-          [toChange]: e.target.value,
-        },
+        [toChange]: e.target.value,
       }));
     } else if (toChange == 'email') {
       setUserData((prev: any) => ({
         ...prev,
-        user: {
-          ...prev.user,
-          [toChange]: e.target.value,
-        },
+        [toChange]: e.target.value,
+      }));
+    } else if (toChange === 'password') {
+      setUserData((prev: any) => ({
+        ...prev,
+        [toChange]: e.target.value,
       }));
     }
   };
@@ -230,6 +243,7 @@ export default function StaffManagment() {
     items.splice(result.destination.index, 0, reorderedItem);
     setNewUsersData(items);
   };
+  console.log(authUser);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -243,10 +257,10 @@ export default function StaffManagment() {
           <CustomCrumbs
             heading="Staff Management"
             description={`${
-              usersData
-                ? usersData?.length == 1
-                  ? usersData?.length + ' ' + 'Staff Member'
-                  : usersData?.length + ' ' + 'Staff Members'
+              newUsersData
+                ? newUsersData?.length == 1
+                  ? newUsersData?.length + ' ' + 'Staff Member'
+                  : newUsersData?.length + ' ' + 'Staff Members'
                 : 0 + ' ' + 'Staff Members'
             }`}
           />
@@ -348,6 +362,77 @@ export default function StaffManagment() {
             </Stack>
           </Stack>
         </Grid>
+        {/* Business Owner Card */}
+        <Card
+          sx={{
+            border: '2px solid transparent ',
+            '&:hover': { borderColor: '#1BFCB6' },
+            padding: '20px',
+            width: '100%',
+            boxShadow: '0px 4px 20px #0F134914',
+            borderRadius: '16px',
+            marginTop: '16px',
+          }}
+        >
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing="20px"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div>
+                <Typography component="p" variant="h6" sx={{ fontWeight: 900 }}>
+                  {authUser && authUser.firstName + ' ' + authUser.lastName}
+                </Typography>
+                <Typography
+                  component="p"
+                  variant="subtitle2"
+                  sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                >
+                  {' '}
+                  {authUser && authUser.email}{' '}
+                </Typography>
+              </div>
+            </Box>
+
+            <Stack
+              alignItems="center"
+              direction="row"
+              spacing={{ xs: '10px', sm: '20px' }}
+              justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
+            >
+              <Typography
+                component="p"
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.8rem' }}
+              >
+                Joined on {formatDate(authUser && authUser.createdAt)}
+              </Typography>
+
+              <Chip
+                label={authUser && authUser.roles.includes('BUSINESS_OWNER') ? 'Owner' : ''}
+                size="small"
+                sx={{
+                  backgroundColor:
+                    authUser && authUser.roles.includes('BUSINESS_OWNER') ? '#76FDD3' : '#F1D169',
+                  color: '#0F1349',
+                  borderRadius: '16px',
+                }}
+              />
+
+              {/* {order.role !== 'Owner' && (
+                  <Iconify
+                      style={{ cursor: 'pointer' }}
+                      icon="bx:edit"
+                      width={24}
+                      onClick={toggleDrawerCommon('details')}
+                    />
+                  )}  */}
+            </Stack>
+          </Stack>
+        </Card>
+        {/* Cards of acc admins */}
         <DragDropContext onDragEnd={handleOnDragEnd}>
           <Droppable droppableId="items">
             {(provided) => (
@@ -414,15 +499,19 @@ export default function StaffManagment() {
                                   Joined on {formatDate(user.createdAt)}
                                 </Typography>
 
-                                {/* <Chip
-                    label={order.role}
-                    size="small"
-                    sx={{
-                      backgroundColor: order.role === 'Owner' ? '#76FDD3' : '#F1D169',
-                      color: '#0F1349',
-                      borderRadius: '16px',
-                    }}
-                  />*/}
+                                <Chip
+                                  label={
+                                    user.user.roles.includes('ACCOUNTENT_ADMIN') ? 'Admin' : 'Owner'
+                                  }
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: user.user.roles.includes('ACCOUNTENT_ADMIN')
+                                      ? '#F1D169'
+                                      : '#76FDD3',
+                                    color: '#0F1349',
+                                    borderRadius: '16px',
+                                  }}
+                                />
                                 <Iconify
                                   onClick={() => [
                                     setOpenDelStaff((prev) => !prev),
@@ -584,7 +673,7 @@ export default function StaffManagment() {
               </Typography>
               <RHFTextField
                 settingStateValue={(e) => handleFormChange(e, 'email')}
-                value={userData ? userData.user?.email : ''}
+                value={userData ? userData?.email : ''}
                 fullWidth
                 name="email"
                 variant="filled"
@@ -605,7 +694,7 @@ export default function StaffManagment() {
                 fullWidth
                 variant="filled"
                 name="phoneNumber"
-                value={userData ? userData.user?.phoneNumber : ''}
+                value={userData ? userData.phoneNumber : ''}
                 sx={{
                   '& .MuiInputAdornment-root': {
                     marginTop: '0px !important',
@@ -639,7 +728,7 @@ export default function StaffManagment() {
                   Password
                 </Typography>
                 <RHFTextField
-                  settingStateValue={handleFormChange}
+                  settingStateValue={(e) => handleFormChange(e, 'password')}
                   fullWidth
                   value={userData.password || ''}
                   name="password"
