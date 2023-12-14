@@ -290,6 +290,7 @@ export default function AccountView() {
       deliveryFees: dzObj.deliveryFees,
       minOrder: dzObj.minOrder,
       deliveryTime: dzObj.deliveryTime,
+
     }));
     // console.log(DeliveryZones);
 
@@ -358,10 +359,15 @@ export default function AccountView() {
 
   const deliveryZoneSchema = Yup.object().shape({
     government: Yup.string().required('Field is required'),
-    zoneName: Yup.string().required('Field is required'),
+    zoneName: Yup.object().shape({
+      en: Yup.string().required('English Name is required'),
+      ar: Yup.string().required('Arabic Name is required'),
+    }),
     deliveryFees: Yup.number().required('Field is required'),
     minOrder: Yup.number().required('Field is required'),
     deliveryTime: Yup.number().required('Field is required'),
+    country: Yup.mixed<any>().nullable().required('Country is required'),
+
   });
   const DZMethods = useForm({
     resolver: yupResolver(deliveryZoneSchema),
@@ -373,8 +379,9 @@ export default function AccountView() {
       setdeliveryZoneList((prev: any) => prev.map((itemData: any) => {
         if (itemData._id === deliveryEditId) {
           return {
+            ...submitData,
             _id: deliveryEditId,
-            ...submitData
+            isPublished: submitData?.isPublished || false
           }
         }
         return itemData;
@@ -383,6 +390,7 @@ export default function AccountView() {
       const newDeliveryZone = {
         ...submitData,
         _id: Math.random(),
+        isPublished: submitData?.isPublished || false
       }
       setdeliveryZoneList([...deliveryZoneList, newDeliveryZone]);
 
@@ -399,12 +407,29 @@ export default function AccountView() {
     }));
   };
 
+  const handleNestedDeliveryZoneData = (e: any) => {
+    const { name, value } = e.target;
+    const language = name.split('.')[1];
+
+    setDeliveryZoneData((prevData: any) => ({
+      ...prevData,
+      zoneName: {
+        ...prevData?.zoneName,
+        [language]: value,
+      },
+    }));
+  };
+
   const handleEditDZ = (locationObj: any) => {
     setDeliveryZoneData(locationObj);
     setOpenDetails(true);
     setDeliveryEditId(locationObj._id);
 
+    console.log("locationObj", locationObj);
+
     Object.entries(locationObj).forEach(([fieldName, value]: any) => {
+      // if (fieldName === 'zoneName'){
+      // }
       DZMethods.setValue(fieldName, value);
     });
   };
@@ -1073,7 +1098,7 @@ export default function AccountView() {
                           sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}
                         >
                           <Iconify icon="carbon:location-filled" />
-                          <span>{locationObj.zoneName}</span>
+                          <span>{locationObj?.zoneName?.en}</span>
                         </Typography>
 
                         <Stack direction="row" alignItems="center" columnGap="15px">
@@ -1214,7 +1239,58 @@ export default function AccountView() {
               <RHFTextField fullWidth variant="filled" value={deliveryZoneData?.government || ""} settingStateValue={(e: any) => handleDeliveryZoneData(e)} name="government" />
             </FormControl>
 
+
             <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
+              Zone Name (English)
+            </Typography>
+
+            <FormControl fullWidth>
+              <RHFTextField fullWidth variant="filled" value={deliveryZoneData?.zoneName?.en || ""} settingStateValue={(e: any) => handleNestedDeliveryZoneData(e)} name="zoneName.en" />
+            </FormControl>
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
+              Zone Name (Arabic)
+            </Typography>
+
+            <FormControl fullWidth>
+              <RHFTextField fullWidth variant="filled" value={deliveryZoneData?.zoneName?.ar || ""} settingStateValue={(e: any) => handleNestedDeliveryZoneData(e)} name="zoneName.ar" />
+            </FormControl>
+
+            <Typography
+              mt="20px"
+              mb="5px"
+              component="p"
+              noWrap
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+            >
+              Country
+            </Typography>
+            <CountrySelect
+              name="country"
+              variant="filled"
+              value={deliveryZoneData?.country || ''}
+              onChange={(event: any, value: any) => {
+
+                setDeliveryZoneData({ ...deliveryZoneData, country: value.code || '' })
+
+              }
+              }
+            />
+            {/* <Typography
               mt="20px"
               mb="5px"
               component="p"
@@ -1224,10 +1300,9 @@ export default function AccountView() {
             >
               Zone Name
             </Typography>
-
             <FormControl fullWidth>
               <RHFTextField fullWidth variant="filled" value={deliveryZoneData?.zoneName || ""} settingStateValue={(e: any) => handleDeliveryZoneData(e)} name="zoneName" />
-            </FormControl>
+            </FormControl> */}
 
             <Grid container alignItems="center" justifyContent="space-between" spacing="10px">
               <Grid xs={12} sm={6}>
@@ -1315,12 +1390,42 @@ export default function AccountView() {
                     <InputAdornment position="end">
                       <Stack direction="row" alignItems="center" spacing="8px">
                         <Divider orientation="vertical" variant="middle" flexItem />
-                        <Typography>Minutes</Typography>
+                        {/* <Typography>Minutes</Typography> */}
+
+                        <Select
+                          variant="standard"
+                          name="deliveryTimeUnit"
+                          value={deliveryZoneData?.deliveryTimeUnit || "Minutes"}
+                          onChange={(e: any) => handleDeliveryZoneData(e)}
+                          sx={{
+                            backgroundColor: "transparent",
+                            boxShadow: "none",
+                            "&::before": {
+                              display: "none",
+                            }
+                          }}
+                        >
+                          <MenuItem value="Minutes">Minutes</MenuItem>
+                          <MenuItem value="Hours">Hours</MenuItem>
+                        </Select>
+
                       </Stack>
                     </InputAdornment>
                   ),
                 }} />
             </FormControl>
+
+            <FormControlLabel
+
+              control={<Switch color="primary" size="medium" name='isPublished' checked={deliveryZoneData?.isPublished || false}
+                onChange={(e: any) => {
+                  setDeliveryZoneData({ ...deliveryZoneData, isPublished: e.target.checked })
+                }} />}
+              label="Published"
+              labelPlacement="end"
+              sx={{ '& .MuiTypography-root': { fontWeight: 900 } }}
+            />
+
           </Box>
         </FormProvider>
       </DetailsNavBar>
