@@ -123,7 +123,7 @@ export default function TaxSetting() {
       }
     });
   };
-  //Country Dialog
+  // Country Dialog
   const [openDialog, setOpenDialog] = useState(false);
 
   return (
@@ -231,7 +231,7 @@ export default function TaxSetting() {
                       type="number"
                       disabled={!country.active}
                       value={country.percentage}
-                      onChange={(e) => setCountryObj('percentage', e.target.value, indx)}
+                      onChange={(e: any) => setCountryObj('percentage', e.target.value, indx)}
                       sx={styles}
                     />
                     <Switch
@@ -286,7 +286,7 @@ const CountryDialog = ({ setOpenDialog, setData }: any) => {
     console.log(data);
   });
 
-  const [dataToPush, setDataToPush] = useState();
+  const [dataToPush, setDataToPush] = useState<any>();
   const handlePush = () => {
     setDataToPush((prev: any) => ({ ...prev, active: true }));
     setData((prev: any) => ({ ...prev, countries: [...prev.countries, dataToPush] }));
@@ -317,7 +317,7 @@ const CountryDialog = ({ setOpenDialog, setData }: any) => {
               fullWidth
               name="name"
               variant="filled"
-              value={(dataToPush && dataToPush.name) || ''}
+              value={(dataToPush && dataToPush?.name) || ''}
             />
             {countryError && <Typography>{countryError}</Typography>}
           </Box>
@@ -338,7 +338,7 @@ const CountryDialog = ({ setOpenDialog, setData }: any) => {
                 }))
               }
               fullWidth
-              value={(dataToPush && dataToPush.percentage) || ''}
+              value={(dataToPush && dataToPush?.percentage) || ''}
               name="percentage"
               variant="filled"
             />

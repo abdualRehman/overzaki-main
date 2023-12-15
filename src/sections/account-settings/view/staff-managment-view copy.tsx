@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-shadow */
 
 'use client';
@@ -59,7 +60,7 @@ export default function StaffManagment() {
   // new order
   const [openCreateStaff, setOpenCreateStaff] = useState(false);
   const [openDelStaff, setOpenDelStaff] = useState(false);
-  const [userData, setUserData] = useState({});
+  const [userData, setUserData] = useState<any>({});
   const [toDelId, setToDelId] = useState('');
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
@@ -71,7 +72,7 @@ export default function StaffManagment() {
           dispatch(fetchOneStaffManagement(id)).then((response: any) => {
             const { user, adminName } = response.payload;
             const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
-            delete adminName['localized'];
+            delete adminName.localized;
             const userObj = {
               adminName,
               gender,
@@ -143,7 +144,7 @@ export default function StaffManagment() {
   const editAdmin = () => {
     const { roles, gender, country, email, phoneNumber, preferedLanguage, location } = userData;
     const { adminName } = userData;
-    delete adminName['localized'];
+    delete adminName.localized;
 
     const dataToPush = {
       roles,
@@ -176,11 +177,11 @@ export default function StaffManagment() {
     dispatch(fetchStaffManagementsList()).then((response: any) =>
       setNewUsersData(response.payload.filter((item: any) => item.adminName))
     );
-  }, []);
+  }, [dispatch]);
 
   const formatDate = (createdAt: any) => {
     const dateObject = new Date(createdAt);
-    const opts = { year: 'numeric', month: 'long', day: 'numeric' };
+    const opts: any = { year: 'numeric', month: 'long', day: 'numeric' };
     return dateObject.toLocaleDateString('en-US', opts);
   };
   const handleDelete = (idToDelete: string) => {
@@ -201,7 +202,7 @@ export default function StaffManagment() {
   // Handling Edit
   const handleFormChange = (e: any, toChange: any) => {
     const { name, value } = e.target;
-    if (toChange == 'ar') {
+    if (toChange === 'ar') {
       setUserData((prev: any) => ({
         ...prev,
         adminName: {
@@ -209,7 +210,7 @@ export default function StaffManagment() {
           [toChange]: e.target.value,
         },
       }));
-    } else if (toChange == 'en') {
+    } else if (toChange === 'en') {
       setUserData((prev: any) => ({
         ...prev,
         adminName: {
@@ -217,12 +218,12 @@ export default function StaffManagment() {
           [toChange]: e.target.value,
         },
       }));
-    } else if (toChange == 'phoneNumber') {
+    } else if (toChange === 'phoneNumber') {
       setUserData((prev: any) => ({
         ...prev,
         [toChange]: e.target.value,
       }));
-    } else if (toChange == 'email') {
+    } else if (toChange === 'email') {
       setUserData((prev: any) => ({
         ...prev,
         [toChange]: e.target.value,
@@ -258,10 +259,10 @@ export default function StaffManagment() {
             heading="Staff Management"
             description={`${
               newUsersData
-                ? newUsersData?.length == 1
-                  ? newUsersData?.length + ' ' + 'Staff Member'
-                  : newUsersData?.length + ' ' + 'Staff Members'
-                : 0 + ' ' + 'Staff Members'
+                ? newUsersData?.length === 1
+                  ? `${newUsersData?.length} Staff Member`
+                  : `${newUsersData?.length} Staff Members`
+                : `${0} Staff Members`
             }`}
           />
         </Grid>
@@ -310,7 +311,7 @@ export default function StaffManagment() {
                 placeholder="Search by name or phone number..."
                 fullWidth
                 variant="filled"
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e: any) => setQuery(e.target.value)}
                 // value={filters.name}
                 // onChange={handleFilterName}
                 InputProps={{
@@ -383,7 +384,7 @@ export default function StaffManagment() {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div>
                 <Typography component="p" variant="h6" sx={{ fontWeight: 900 }}>
-                  {authUser && authUser.firstName + ' ' + authUser.lastName + ' ( You )'}
+                  {authUser && `${authUser.firstName} ${authUser.lastName}`}
                 </Typography>
                 <Typography
                   component="p"
@@ -626,7 +627,7 @@ export default function StaffManagment() {
                 Full Name (English)
               </Typography>
               <RHFTextField
-                settingStateValue={(e) => handleFormChange(e, 'en')}
+                settingStateValue={(e: any) => handleFormChange(e, 'en')}
                 fullWidth
                 value={userData ? userData.adminName?.en : ''}
                 name="engName"
@@ -643,7 +644,7 @@ export default function StaffManagment() {
                 Full Name (Arabic)
               </Typography>
               <RHFTextField
-                settingStateValue={(e) => handleFormChange(e, 'ar')}
+                settingStateValue={(e: any) => handleFormChange(e, 'ar')}
                 fullWidth
                 value={userData ? userData.adminName?.ar : ''}
                 name="arabicName"
@@ -672,7 +673,7 @@ export default function StaffManagment() {
                 Email Address
               </Typography>
               <RHFTextField
-                settingStateValue={(e) => handleFormChange(e, 'email')}
+                settingStateValue={(e: any) => handleFormChange(e, 'email')}
                 value={userData ? userData?.email : ''}
                 fullWidth
                 name="email"
@@ -690,7 +691,7 @@ export default function StaffManagment() {
                 Mobile Number
               </Typography>
               <RHFTextField
-                settingStateValue={(e) => handleFormChange(e, 'phoneNumber')}
+                settingStateValue={(e: any) => handleFormChange(e, 'phoneNumber')}
                 fullWidth
                 variant="filled"
                 name="phoneNumber"
@@ -728,7 +729,7 @@ export default function StaffManagment() {
                   Password
                 </Typography>
                 <RHFTextField
-                  settingStateValue={(e) => handleFormChange(e, 'password')}
+                  settingStateValue={(e: any) => handleFormChange(e, 'password')}
                   fullWidth
                   value={userData.password || ''}
                   name="password"
