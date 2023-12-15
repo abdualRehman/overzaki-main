@@ -383,7 +383,7 @@ export default function StaffManagment() {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div>
                 <Typography component="p" variant="h6" sx={{ fontWeight: 900 }}>
-                  {authUser && authUser.firstName + ' ' + authUser.lastName}
+                  {authUser && authUser.firstName + ' ' + authUser.lastName + ' ( You )'}
                 </Typography>
                 <Typography
                   component="p"
