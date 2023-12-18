@@ -2456,6 +2456,13 @@
   resolved "https://registry.yarnpkg.com/@mui/core-downloads-tracker/-/core-downloads-tracker-5.15.0.tgz#6b45d5bff38f305402d24d3bf86075b56c578909"
   integrity sha512-NpGtlHwuyLfJtdrlERXb8qRqd279O0VnuGaZAor1ehdNhUJOD1bSxHDeXKZkbqNpvi50hasFj7lsbTpluworTQ==
 
+"@mui/icons-material@^5.15.0":
+  version "5.15.0"
+  resolved "https://registry.yarnpkg.com/@mui/icons-material/-/icons-material-5.15.0.tgz#fdc93611ca77ce3b79128be02fb6c1ae79b972b8"
+  integrity sha512-zHY6fOkaK7VfhWeyxO8MjO3IAjEYpYMXuqUhX7TkUZJ9+TSH/9dn4ClG4K2j6hdgBU5Yrq2Z/89Bo6BHHp7AdQ==
+  dependencies:
+    "@babel/runtime" "^7.23.5"
+
 "@mui/lab@^5.0.0-alpha.136":
   version "5.0.0-alpha.156"
   resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.156.tgz#9fee3a408ded367ab4fe84275789155b65dee7e7"
@@ -2469,7 +2476,7 @@
     clsx "^2.0.0"
     prop-types "^15.8.1"
 
-"@mui/material@^5.0.0", "@mui/material@^5.14.0":
+"@mui/material@^5.0.0", "@mui/material@^5.15.0":
   version "5.15.0"
   resolved "https://registry.yarnpkg.com/@mui/material/-/material-5.15.0.tgz#f801cf56d505cc52dca225438360ab9c62057285"
   integrity sha512-60CDI/hQNwJv9a3vEZtFG7zz0USdQhVwpBd3fZqrzhuXSdiMdYMaZcCXeX/KMuNq0ZxQEAZd74Pv+gOb408QVA==
@@ -8145,6 +8152,11 @@ svgo@^3.0.2:
     css-what "^6.1.0"
     csso "5.0.5"
     picocolors "^1.0.0"
+
+swiper@^11.0.5:
+  version "11.0.5"
+  resolved "https://registry.yarnpkg.com/swiper/-/swiper-11.0.5.tgz#6ed1ad06e6906ba42fd4b93d4988f0626a49046e"
+  integrity sha512-rhCwupqSyRnWrtNzWzemnBLMoyYuoDgGgspAm/8iBD3jCvAWycPLH4Z3TB0O5520DHLzMx94yUMH/B9Efpa48w==
 
 swr@^2.2.0:
   version "2.2.4"
