@@ -106,10 +106,10 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
               effect="coverflow"
               spaceBetween={80}
               slidesPerGroup={1}
-              loop={true}
+              loop
               dir="rtl"
-              grabCursor={true}
-              centeredSlides={true}
+              grabCursor
+              centeredSlides
               breakpoints={{
                 0: {
                   slidesPerView: 1.3,
@@ -145,7 +145,7 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
                   <SwiperSlide key={indx} className="swiper-slide">
                     <Image
                       style={{ borderRadius: '20px' }}
-                      alt={''}
+                      alt='sc'
                       className="swiper-image"
                       width={350}
                       height={550}

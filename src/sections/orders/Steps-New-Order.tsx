@@ -88,7 +88,7 @@ export default function StepsNewOrders({ closeDrawer }: any) {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
       },
-    []
+    [closeDrawer]
   );
 
   const [activeStep, setActiveStep] = useState(0);
@@ -163,7 +163,7 @@ export default function StepsNewOrders({ closeDrawer }: any) {
 
       {activeStep === 0 && (
         <Box sx={{ width: '100%', textAlign: 'left' }}>
-          <FormProvider onSubmit={handleSubmit(onSubmit)} methods={methods}>
+          <FormProvider onSubmit={handleSubmit(onSubmit as any)} methods={methods}>
             <Typography
               component="p"
               variant="subtitle2"
@@ -324,7 +324,7 @@ export default function StepsNewOrders({ closeDrawer }: any) {
 
       {activeStep === 1 && (
         <Box sx={{ width: '100%', textAlign: 'left' }}>
-          <FormProvider onSubmit={handSub(onSubmit2)} methods={methods2}>
+          <FormProvider onSubmit={handSub(onSubmit2 as any)} methods={methods2}>
             <RHFTextField
               name="search"
               placeholder="Search by order ID, phone or customer..."
