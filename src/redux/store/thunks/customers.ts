@@ -76,7 +76,7 @@ const customersSlice = createSlice({
     status: 'idle',
   },
   reducers: {
-    setCustomer: (state, action: PayloadAction<any>) => {
+    setCustomers: (state, action: PayloadAction<any>) => {
       state.customer = action.payload;
     },
   },
@@ -149,5 +149,5 @@ const customersSlice = createSlice({
       });
   },
 });
-export const { setCustomer } = customersSlice.actions;
+export const { setCustomers } = customersSlice.actions;
 export default customersSlice.reducer;
