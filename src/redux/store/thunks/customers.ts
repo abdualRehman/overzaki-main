@@ -17,17 +17,17 @@ export interface ICustomerForm extends IRequest {
 }
 export const fetchCustomersList = createAsyncThunk(
   'customers/fetchList',
-  async (params: IRequest, { rejectWithValue }) => {
+  async ({ pageNumber, pageSize }: { pageNumber: any; pageSize: any }) => {
     try {
       const response = await getRequestWithParams(
-        `${endpoints.customer.list}?pageSize=10&pageNumber=1`,
-        params,
+        `${endpoints.customer.list}?pageSize=${pageSize}&pageNumber=${pageNumber}`,
+
         defaultConfig
       );
 
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return;
     }
   }
 );

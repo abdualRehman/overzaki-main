@@ -68,6 +68,7 @@ import {
   fetchOneCustomer,
   setCustomers,
 } from '../../../redux/store/thunks/customers';
+import Navigator from '../components/Pagination';
 
 // ----------------------------------------------------------------------
 
@@ -90,10 +91,11 @@ const defaultFilters: IOrderTableFilters = {
 
 export default function OrdersListView() {
   const dispatch = useDispatch<AppDispatch>();
+  const pageSize = 10;
   const { enqueueSnackbar } = useSnackbar();
-
   const loadStatus = useSelector((state: any) => state.customers.status);
   const { list, error, customer } = useSelector((state: any) => state.customers);
+  const [pageNumber, setPageNumber] = useState(1);
 
   const [editId, setEditId] = useState(null);
   const [removeData, setRemoveData] = useState<any>(null);
@@ -114,6 +116,8 @@ export default function OrdersListView() {
   const [customerData, setCustomerData] = useState<any>(null);
 
   const [errorMsg, setErrorMsg] = useState('');
+  // Pagination
+  const [customersLength, setCustomersLength] = useState<number>();
 
   const CustomerSchema = Yup.object().shape({
     firstName: Yup.string().required('Field is required'),
@@ -154,12 +158,19 @@ export default function OrdersListView() {
 
   useEffect(() => {
     if (loadStatus === 'idle') {
-      dispatch(fetchCustomersList(error)).then((response: any) => {
-        console.log(list);
+      dispatch(fetchCustomersList({ pageNumber, pageSize })).then((response: any) => {
+        setData(response.payload.data);
+        setCustomersLength(response.payload.count);
         // setData(list)
       });
     }
-  }, [loadStatus, dispatch, error, list]);
+  }, [loadStatus, dispatch, error, list, pageNumber]);
+  useEffect(() => {
+    dispatch(fetchCustomersList({ pageNumber, pageSize })).then((response: any) => {
+      setCustomersLength(response.payload.count);
+      setData(response.payload.data);
+    });
+  }, [pageNumber]);
 
   useEffect(() => {
     setData(list || []);
@@ -244,7 +255,9 @@ export default function OrdersListView() {
 
         if (response.meta.requestStatus === 'fulfilled') {
           setCustomerData(null);
-          dispatch(fetchCustomersList(error));
+          dispatch(fetchCustomersList({ pageNumber, pageSize })).then((response: any) =>
+            setCustomersLength(response.payload.count)
+          );
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -269,7 +282,7 @@ export default function OrdersListView() {
     });
     dispatch(editCustomer({ customerId: editId, data: FormValues })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchCustomersList(error));
+        dispatch(fetchCustomersList({ pageNumber, pageSize }));
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -281,7 +294,9 @@ export default function OrdersListView() {
     if (removeData && removeData.type === 'customer') {
       dispatch(deleteCustomer(removeData.id)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchCustomersList(error));
+          dispatch(fetchCustomersList({ pageNumber, pageSize })).then((response: any) =>
+            setCustomersLength(response.payload.count)
+          );
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
@@ -340,19 +355,19 @@ export default function OrdersListView() {
 
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'createOrEdit') {
-          setOpenCreateCustomer((pv) => !pv);
-          setEditId(id);
-          if (id) {
-            dispatch(fetchOneCustomer(id));
-          } else {
-            setCustomerData({});
-            dispatch(setCustomers(null));
-          }
-        } else if (state === 'details') setOpenDetails((pv) => !pv);
-        else if (state === 'analytics') setOpenAnalytics((pv) => !pv);
-      };
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'createOrEdit') {
+        setOpenCreateCustomer((pv) => !pv);
+        setEditId(id);
+        if (id) {
+          dispatch(fetchOneCustomer(id));
+        } else {
+          setCustomerData({});
+          dispatch(setCustomers(null));
+        }
+      } else if (state === 'details') setOpenDetails((pv) => !pv);
+      else if (state === 'analytics') setOpenAnalytics((pv) => !pv);
+    };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -389,6 +404,8 @@ export default function OrdersListView() {
         query.toLocaleLowerCase()
       )
   );
+
+  // Pagination
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -462,9 +479,9 @@ export default function OrdersListView() {
           </Box>
         </Grid>
 
-        <Grid item xs={12}>
-          <Box>
-            <TabContext value={value}>
+        <Grid sx={{ width: '100%' }} item xs={12}>
+          <Box sx={{ width: '100%' }}>
+            <TabContext sx={{ width: '100%' }} value={value}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <TabList
                   onChange={handleChangeTab}
@@ -495,7 +512,7 @@ export default function OrdersListView() {
                             'default'
                           }
                         >
-                          {tab.value === 'All' && list.length}
+                          {tab.value === 'All' && customersLength}
                           {tab.value === 'New' &&
                             list.length > 0 &&
                             list.filter((item: any) => item.type === 'New').length}
@@ -515,7 +532,7 @@ export default function OrdersListView() {
                 </TabList>
               </Box>
 
-              <TabPanel value={value} sx={{ px: 0 }}>
+              <TabPanel value={value} sx={{ px: 0, minHeight: '50vh' }}>
                 <DragDropContext onDragEnd={handleOnDragEnd}>
                   <Droppable droppableId="items">
                     {(provided) => (
@@ -676,6 +693,22 @@ export default function OrdersListView() {
                   </Droppable>
                 </DragDropContext>
               </TabPanel>
+              <Box
+                sx={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {Math.ceil(customersLength / pageSize) !== 1 && (
+                  <Navigator
+                    pageSize={pageSize}
+                    setPageNumber={setPageNumber}
+                    customersLength={customersLength}
+                  />
+                )}
+              </Box>
             </TabContext>
 
             {/* customer details */}
@@ -948,8 +981,8 @@ export default function OrdersListView() {
                         ? customerData.avatar
                         : customerData?.avatar
                           ? Object.assign(customerData.avatar, {
-                            preview: URL.createObjectURL(customerData.avatar),
-                          })
+                              preview: URL.createObjectURL(customerData.avatar),
+                            })
                           : null
                     }
                     onDrop={handleDropAvatar}
@@ -1009,24 +1042,24 @@ export default function OrdersListView() {
                     settingStateValue={handleCustomerData}
                     value={customerData?.phoneNumber || ''}
                     name="phoneNumber"
-                  // sx={{
-                  //   '& .MuiInputAdornment-root': {
-                  //     marginTop: '0px !important',
-                  //     // paddingLeft: '10px'
-                  //   },
-                  //   '& input': {
-                  //     paddingLeft: '2px !important'
-                  //   }
-                  // }}
-                  // InputProps={{
-                  //   startAdornment: <InputAdornment position="start">
-                  //     <Stack direction='row' alignItems='center' spacing="8px">
-                  //       <Iconify icon="mingcute:down-fill" width={43} />
-                  //       <Box component='img' src='/raw/flagN.png' />
-                  //       <Divider orientation="vertical" variant='middle' flexItem />
-                  //     </Stack>
-                  //   </InputAdornment>,
-                  // }}
+                    // sx={{
+                    //   '& .MuiInputAdornment-root': {
+                    //     marginTop: '0px !important',
+                    //     // paddingLeft: '10px'
+                    //   },
+                    //   '& input': {
+                    //     paddingLeft: '2px !important'
+                    //   }
+                    // }}
+                    // InputProps={{
+                    //   startAdornment: <InputAdornment position="start">
+                    //     <Stack direction='row' alignItems='center' spacing="8px">
+                    //       <Iconify icon="mingcute:down-fill" width={43} />
+                    //       <Box component='img' src='/raw/flagN.png' />
+                    //       <Divider orientation="vertical" variant='middle' flexItem />
+                    //     </Stack>
+                    //   </InputAdornment>,
+                    // }}
                   />
 
                   <Typography
@@ -1135,7 +1168,7 @@ export default function OrdersListView() {
                     name="gender"
                     value={customerData?.gender || ''}
                     settingStateValue={handleCustomerData}
-                  // labelId="demo-simple-select-label"
+                    // labelId="demo-simple-select-label"
                   >
                     <MenuItem value="MALE">Male</MenuItem>
                     <MenuItem value="FEMALE">Female</MenuItem>

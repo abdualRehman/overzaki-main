@@ -79,6 +79,27 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
       num: 4,
     },
     {
+      name: 'burgerboutique',
+      image: rest1,
+      type: 'restaurant',
+      url: 'https://burgerboutique.vercel.app',
+      num: 4,
+    },
+    {
+      name: 'burgerboutique',
+      image: rest1,
+      type: 'restaurant',
+      url: 'https://burgerboutique.vercel.app',
+      num: 4,
+    },
+    {
+      name: 'fatayer',
+      image: rest2,
+      type: 'restaurant',
+      url: 'https://fatayeralaaltayer.vercel.app',
+      num: 5,
+    },
+    {
       name: 'fatayer',
       image: rest2,
       type: 'restaurant',
