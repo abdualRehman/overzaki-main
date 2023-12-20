@@ -8,7 +8,7 @@ import Button from '@mui/material/Button';
 import Stepper from '@mui/material/Stepper';
 import StepLabel from '@mui/material/StepLabel';
 import Typography from '@mui/material/Typography';
-import { Checkbox, Divider, FormControlLabel, InputAdornment, TextField } from '@mui/material';
+import { Autocomplete, Checkbox, Divider, FormControlLabel, InputAdornment, TextField } from '@mui/material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { Stack } from '@mui/system';
@@ -19,9 +19,11 @@ import { RHFTextField } from 'src/components/hook-form';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { AppDispatch } from 'src/redux/store/store';
 import * as Yup from 'yup';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchCustomersList } from 'src/redux/store/thunks/customers';
+// import { fetchCustomersList } from 'src/redux/store/thunks/customers';
+import { fetchCustomersList } from '../../redux/store/thunks/customers';
 
 // ----------------------------------------------------------------------
 interface DropDownState {
@@ -35,19 +37,27 @@ const steps = ['Select Customer', 'Select Products', 'Confirm Order'];
 
 export default function StepsNewOrders({ closeDrawer }: any) {
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+
   const customersState = useSelector((state: any) => state.customers);
+
+  const [customersList, setCustomersList] = useState<any>([]);
+  const [orderData, setOrderData] = useState<any>({});
 
 
   useEffect(() => {
     if (customersState?.status === 'idle') {
       const { error } = customersState;
-      dispatch(fetchCustomersList(error)).then((response: any) => {
-        console.log("list", customersState.list);
-        // setData(list)
-      });
+      dispatch(fetchCustomersList(error));
     }
-  }, [customersState, dispatch]);
+    // console.log(customersState?.list);
+    setCustomersList(customersState?.list || [])
+
+  }, [customersState, dispatch, setCustomersList]);
+
+
+  // useEffect(() => {
+  // }, [])
 
 
 
@@ -120,7 +130,7 @@ export default function StepsNewOrders({ closeDrawer }: any) {
 
   const handleReset = () => setActiveStep(0);
   const DetailSchema = Yup.object().shape({
-    number: Yup.number().required('Number is required'),
+    // number: Yup.number().required('Number is required'),
     // search: Yup.string().required('Search is required'),
   });
   const DetailSchema2 = Yup.object().shape({
@@ -136,15 +146,33 @@ export default function StepsNewOrders({ closeDrawer }: any) {
   const { handleSubmit } = methods;
   const { handleSubmit: handSub } = methods2;
   const onSubmit = handleSubmit(async (data) => {
-    if (data && data.number) {
-      handleNext();
-    }
+    console.log("data", data);
+
+    // if (data && data.number) {
+    handleNext();
+    // }
   });
   const onSubmit2 = handSub(async (data) => {
     if (data && data.search) {
       handleNext();
     }
   });
+
+  // -------------------------------------------------------------
+
+  const handleSearchCustomer = (e: any) => {
+    const inputV = e?.target?.value;
+    // console.log('inputV', inputV);
+    const newList = customersState.list.filter((customer: any) => {
+      const customerPhoneNumber = customer?.phoneNumber?.toString().toLowerCase();
+      const searchTerm = inputV.toLowerCase();
+      return customerPhoneNumber.includes(searchTerm);
+    });
+
+    setCustomersList(newList);
+  }
+
+
 
   return (
     <>
@@ -196,10 +224,11 @@ export default function StepsNewOrders({ closeDrawer }: any) {
             </Typography>
             <RHFTextField
               name="number"
-              placeholder="128743291"
+              placeholder="Search by Phone number"
               fullWidth
               variant="filled"
-              type="number"
+              type="text"
+              onChange={(e) => handleSearchCustomer(e)}
               sx={{
                 borderRadius: '16px',
                 '& .MuiFilledInput-root': {
@@ -220,9 +249,8 @@ export default function StepsNewOrders({ closeDrawer }: any) {
                 startAdornment: (
                   <InputAdornment position="start">
                     <Stack direction="row" alignItems="center" spacing="8px">
-                      <Iconify icon="mingcute:down-fill" width={43} />
-                      <Box component="img" src="/raw/flagN.png" />
-                      <Divider orientation="vertical" variant="middle" flexItem />
+                      <Iconify icon="ic:baseline-search" width={23} />
+                      <Divider orientation="vertical" variant="middle" sx={{ m: 0 }} flexItem />
                     </Stack>
                   </InputAdornment>
                 ),
@@ -234,82 +262,43 @@ export default function StepsNewOrders({ closeDrawer }: any) {
               sx={{ mt: '12px', opacity: 0.7, fontSize: '.8rem' }}
             >
               {' '}
-              Or Select from current customers{' '}
+              {orderData?.userId ? "1 Customer is Selected" : "Or Select from current customers"}
+              {' '}
             </Typography>
 
-            <Paper
-              sx={{
-                mt: '12px',
-                padding: '13px 20px',
-                boxShadow: '0px 4px 20px #0F134914',
-                borderRadius: '13px',
-              }}
-            >
-              <Typography
-                component="p"
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 800 }}
+            {customersList?.map((customer: any, index: any) => (
+              <Paper
+                key={index}
+                sx={{
+                  mt: '12px',
+                  padding: '13px 20px',
+                  boxShadow: '0px 4px 20px #0F134914',
+                  borderRadius: '13px',
+                  borderColor: orderData?.userId === customer?._id ? '#1BFBB6' : 'transparent'
+                }}
+                color="primary"
+                variant="outlined"
+                onClick={() => { setOrderData({ ...orderData, userId: customer?._id }) }}
               >
-                Mohamed Hassan
-              </Typography>
-              <Typography
-                component="p"
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.8rem' }}
-              >
-                +9652312127845
-              </Typography>
-            </Paper>
+                <Typography
+                  component="p"
+                  variant="subtitle2"
+                  sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 800 }}
+                >
+                  {`${customer?.firstName} ${customer?.lastName}`}
+                </Typography>
+                <Typography
+                  component="p"
+                  variant="subtitle2"
+                  sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                >
+                  {customer?.phoneNumber}
+                </Typography>
+              </Paper>
+            ))}
 
-            <Paper
-              sx={{
-                mt: '12px',
-                padding: '13px 20px',
-                boxShadow: '0px 4px 20px #0F134914',
-                borderRadius: '13px',
-              }}
-            >
-              <Typography
-                component="p"
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 800 }}
-              >
-                محمود عبدالكريم
-              </Typography>
-              <Typography
-                component="p"
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.8rem' }}
-              >
-                +9652312127845
-              </Typography>
-            </Paper>
-
-            <Paper
-              sx={{
-                mt: '12px',
-                padding: '13px 20px',
-                boxShadow: '0px 4px 20px #0F134914',
-                borderRadius: '13px',
-              }}
-            >
-              <Typography
-                component="p"
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 800 }}
-              >
-                Maher Alkahwndi
-              </Typography>
-              <Typography
-                component="p"
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.8rem' }}
-              >
-                +9652312127845
-              </Typography>
-            </Paper>
             {activeStep !== steps.length && (
-              <Box sx={{ display: 'flex', gap: '10px', width: '100%' }}>
+              <Box sx={{ display: 'flex', gap: '10px', width: '100%', mt: 3 }}>
                 {activeStep === steps.length - 1 ? (
                   <Button
                     size="large"
@@ -348,6 +337,28 @@ export default function StepsNewOrders({ closeDrawer }: any) {
       {activeStep === 1 && (
         <Box sx={{ width: '100%', textAlign: 'left' }}>
           <FormProvider onSubmit={handSub(onSubmit2 as any)} methods={methods2}>
+
+            <Autocomplete
+              fullWidth
+              freeSolo
+              disableClearable
+              options={customersList.map((option: any) => option)}
+              getOptionLabel={(option: any) => option?._id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search input"
+                  InputProps={{ ...params.InputProps, type: 'search' }}
+                />
+              )}
+              renderOption={(props: any, option: any) => (
+                <li {...props} key={option?._id}>
+                  {`${option?._id}`}
+                </li>
+              )}
+            />
+
+
             <RHFTextField
               name="search"
               placeholder="Search by order ID, phone or customer..."
