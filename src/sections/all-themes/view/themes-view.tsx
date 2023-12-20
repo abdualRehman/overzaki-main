@@ -24,6 +24,9 @@ import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/navigation';
 import { EffectCoverflow, Pagination, Navigation } from 'swiper/modules';
+import { useState } from 'react';
+import Link from 'next/link';
+import { paths } from 'src/routes/paths';
 // ----------------------------------------------------------------------
 interface PersonalProps {
   theme_type: string;
@@ -50,34 +53,43 @@ interface PersonalProps {
 // };
 
 export default function ThemesViewRoot({ theme_type }: PersonalProps) {
+  const [centredTheme, setCentredTheme] = useState(0);
+
   const data = [
-    { name: 'ecom', image: ECom, type: 'market', url: 'https://ecom-zaki.vercel.app' },
-    { name: 'ecomv2', image: ECom2, type: 'market', url: 'https://e-com-v2-bice.vercel.app' },
-    { name: 'ecomv2', image: ECom2, type: 'market', url: 'https://e-com-v2-bic2e.vercel.app' },
-    { name: 'ecomv2', image: ECom2, type: 'market', url: 'https://e-com-v2-bic2e.vercel.app' },
-    { name: 'ecomv2', image: ECom2, type: 'market', url: 'https://e-com-v2-bic1342e.vercel.app' },
-    { name: 'ecomv2', image: ECom2, type: 'market', url: 'https://e-com-v2-bic2e.vercel.app' },
-    { name: 'ecomv2', image: ECom2, type: 'market', url: 'https://e-com-v2-bi6c2e.vercel.app' },
-    { name: 'ecomv2', image: ECom2, type: 'market', url: 'https://e-com-v2-bic01w02e.vercel.app' },
-    { name: 'ecomv2', image: ECom2, type: 'market', url: 'https://e-com-v2-bico205e.vercel.app' },
-    { name: 'cafe', image: Cafe, type: 'market', url: 'https://resturant-ui-mu.vercel.app' },
-    { name: 'cafe', image: Cafe, type: 'home', url: 'https://resturant-ui-mu.vercel.app' },
+    { name: 'ecom', image: ECom, type: 'market', url: 'https://ecom-zaki.vercel.app', num: 1 },
+    {
+      name: 'ecomv2',
+      image: ECom2,
+      type: 'market',
+      url: 'https://e-com-v2-bice.vercel.app',
+      num: 2,
+    },
+    {
+      name: 'cafe',
+      image: Cafe,
+      type: 'market',
+      url: 'https://resturant-ui-mu.vercel.app',
+      num: 3,
+    },
     {
       name: 'burgerboutique',
       image: rest1,
       type: 'restaurant',
       url: 'https://burgerboutique.vercel.app',
+      num: 4,
     },
     {
       name: 'fatayer',
       image: rest2,
       type: 'restaurant',
       url: 'https://fatayeralaaltayer.vercel.app',
+      num: 5,
     },
   ];
-
+  const filteredData = data.filter((item) => item.type === theme_type);
   // const notAvaliableThemes = ((allCategories.join(' ').toLowerCase()).includes(theme_type));
   const notAvaliableThemes = data.filter((item) => item.type === theme_type).length === 0;
+  const theme = filteredData[centredTheme];
 
   return (
     <Box sx={{ height: '100%' }}>
@@ -145,7 +157,7 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
                   <SwiperSlide key={indx} className="swiper-slide">
                     <Image
                       style={{ borderRadius: '20px' }}
-                      alt='sc'
+                      alt="sc"
                       className="swiper-image"
                       width={350}
                       height={550}
@@ -156,7 +168,14 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
 
               <div style={{ backgroundColor: 'red' }} className="slider-controler">
                 <div className="slide-inside">
-                  <div className="swiper-button-prev slider-arrow">
+                  <div
+                    onClick={() =>
+                      setCentredTheme((prev) =>
+                        prev === 0 ? filteredData.length - 1 : (prev -= 1)
+                      )
+                    }
+                    className="swiper-button-prev slider-arrow"
+                  >
                     <ArrowBackOutlinedIcon
                       sx={{
                         color: '#323232',
@@ -166,7 +185,14 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
                       }}
                     />
                   </div>
-                  <div className="swiper-button-next slider-arrow">
+                  <div
+                    onClick={() =>
+                      setCentredTheme((prev) =>
+                        prev === filteredData.length - 1 ? 0 : (prev += 1)
+                      )
+                    }
+                    className="swiper-button-next slider-arrow"
+                  >
                     <ArrowForwardOutlinedIcon
                       sx={{
                         color: '#323232',
@@ -202,7 +228,8 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
                 >
                   Preview
                 </button>
-                <button
+                <Link
+                  href={paths.dashboard.design.theme(theme_type, theme.name, theme.url)}
                   type="button"
                   style={{
                     backgroundColor: '#10134a',
@@ -214,10 +241,11 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
                     paddingBottom: '10px',
                     paddingRight: '50px',
                     fontWeight: 700,
+                    textDecoration: 'none',
                   }}
                 >
-                  Apply
-                </button>
+                  Edit
+                </Link>
               </div>
             </Swiper>
           </Box>
