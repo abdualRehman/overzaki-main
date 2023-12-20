@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -20,6 +20,8 @@ import FormProvider from 'src/components/hook-form/form-provider';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchCustomersList } from 'src/redux/store/thunks/customers';
 
 // ----------------------------------------------------------------------
 interface DropDownState {
@@ -32,6 +34,27 @@ interface DropDownState {
 const steps = ['Select Customer', 'Select Products', 'Confirm Order'];
 
 export default function StepsNewOrders({ closeDrawer }: any) {
+
+  const dispatch = useDispatch();
+  const customersState = useSelector((state: any) => state.customers);
+
+
+  useEffect(() => {
+    if (customersState?.status === 'idle') {
+      const { error } = customersState;
+      dispatch(fetchCustomersList(error)).then((response: any) => {
+        console.log("list", customersState.list);
+        // setData(list)
+      });
+    }
+  }, [customersState, dispatch]);
+
+
+
+
+
+
+
   const [dropDown, setDropDown] = React.useState<DropDownState>({
     order_status: null,
     payment_method: null,
