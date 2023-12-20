@@ -164,7 +164,7 @@ export default function OrdersListView() {
   useEffect(() => {
     setData(list || []);
     dispatch(setCustomers(list || []));
-  }, [list]);
+  }, [dispatch, list]);
 
   // reseting removeData value
   useEffect(() => {
@@ -340,19 +340,19 @@ export default function OrdersListView() {
 
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'createOrEdit') {
-        setOpenCreateCustomer((pv) => !pv);
-        setEditId(id);
-        if (id) {
-          dispatch(fetchOneCustomer(id));
-        } else {
-          setCustomerData({});
-          dispatch(setCustomers(null));
-        }
-      } else if (state === 'details') setOpenDetails((pv) => !pv);
-      else if (state === 'analytics') setOpenAnalytics((pv) => !pv);
-    };
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'createOrEdit') {
+          setOpenCreateCustomer((pv) => !pv);
+          setEditId(id);
+          if (id) {
+            dispatch(fetchOneCustomer(id));
+          } else {
+            setCustomerData({});
+            dispatch(setCustomers(null));
+          }
+        } else if (state === 'details') setOpenDetails((pv) => !pv);
+        else if (state === 'analytics') setOpenAnalytics((pv) => !pv);
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -948,8 +948,8 @@ export default function OrdersListView() {
                         ? customerData.avatar
                         : customerData?.avatar
                           ? Object.assign(customerData.avatar, {
-                              preview: URL.createObjectURL(customerData.avatar),
-                            })
+                            preview: URL.createObjectURL(customerData.avatar),
+                          })
                           : null
                     }
                     onDrop={handleDropAvatar}
@@ -1009,24 +1009,24 @@ export default function OrdersListView() {
                     settingStateValue={handleCustomerData}
                     value={customerData?.phoneNumber || ''}
                     name="phoneNumber"
-                    // sx={{
-                    //   '& .MuiInputAdornment-root': {
-                    //     marginTop: '0px !important',
-                    //     // paddingLeft: '10px'
-                    //   },
-                    //   '& input': {
-                    //     paddingLeft: '2px !important'
-                    //   }
-                    // }}
-                    // InputProps={{
-                    //   startAdornment: <InputAdornment position="start">
-                    //     <Stack direction='row' alignItems='center' spacing="8px">
-                    //       <Iconify icon="mingcute:down-fill" width={43} />
-                    //       <Box component='img' src='/raw/flagN.png' />
-                    //       <Divider orientation="vertical" variant='middle' flexItem />
-                    //     </Stack>
-                    //   </InputAdornment>,
-                    // }}
+                  // sx={{
+                  //   '& .MuiInputAdornment-root': {
+                  //     marginTop: '0px !important',
+                  //     // paddingLeft: '10px'
+                  //   },
+                  //   '& input': {
+                  //     paddingLeft: '2px !important'
+                  //   }
+                  // }}
+                  // InputProps={{
+                  //   startAdornment: <InputAdornment position="start">
+                  //     <Stack direction='row' alignItems='center' spacing="8px">
+                  //       <Iconify icon="mingcute:down-fill" width={43} />
+                  //       <Box component='img' src='/raw/flagN.png' />
+                  //       <Divider orientation="vertical" variant='middle' flexItem />
+                  //     </Stack>
+                  //   </InputAdornment>,
+                  // }}
                   />
 
                   <Typography
@@ -1135,7 +1135,7 @@ export default function OrdersListView() {
                     name="gender"
                     value={customerData?.gender || ''}
                     settingStateValue={handleCustomerData}
-                    // labelId="demo-simple-select-label"
+                  // labelId="demo-simple-select-label"
                   >
                     <MenuItem value="MALE">Male</MenuItem>
                     <MenuItem value="FEMALE">Female</MenuItem>
