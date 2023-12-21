@@ -45,6 +45,7 @@ import {
   fetchOneProduct,
   fetchOneVariant,
   fetchProductsList,
+  fetchProductsWithParams,
   setProduct,
 } from 'src/redux/store/thunks/products';
 // components
@@ -61,16 +62,18 @@ import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunk
 import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
+import Navigator from 'src/components/Navigator';
 
 // ----------------------------------------------------------------------
 
 export default function OrdersListView() {
+  const pageSize = 2;
+  const [pageNumber, setPageNumber] = useState<number>(1);
   const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
   const categoryState = useSelector((state: any) => state.category);
   const loadStatus = useSelector((state: any) => state.products.status);
   const { list, error, product, variant } = useSelector((state: any) => state.products);
-
   const [productData, setProductData] = useState<any>(null);
   const [editProductId, setEditProductId] = useState<any>(null);
   const [removeData, setRemoveData] = useState<any>(null);
@@ -80,7 +83,7 @@ export default function OrdersListView() {
   const [value, setValue] = useState<any>('All');
   const confirm = useBoolean();
   const [data, setData] = useState([]);
-
+  const [productsLength, setProductsLength] = useState<number>(0);
   const [errorMsg, setErrorMsg] = useState('');
 
   const ProductSchema = Yup.object().shape({
@@ -124,16 +127,6 @@ export default function OrdersListView() {
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
   });
-
-  useEffect(() => {
-    if (loadStatus === 'idle') {
-      dispatch(fetchProductsList(error)).then((response: any) => {
-        // console.log("list", list);;
-      });
-    }
-    setValue('All');
-    setData(list || []);
-  }, [loadStatus, dispatch, error, list]);
 
   // reseting removeData value
   useEffect(() => {
@@ -242,7 +235,10 @@ export default function OrdersListView() {
     dispatch(createProduct(formData)).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         setProductData(null);
-        dispatch(fetchProductsList(error));
+        dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+          setProductsLength(response.payload.data.count);
+          setData(response.payload.data.data);
+        });
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -254,7 +250,10 @@ export default function OrdersListView() {
     dispatch(editProduct({ productId: editProductId, data: formData })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         setProductData(null);
-        dispatch(fetchProductsList(error));
+        dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+          setProductsLength(response.payload.data.count);
+          setData(response.payload.data.data);
+        });
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -266,7 +265,10 @@ export default function OrdersListView() {
     if (removeData) {
       dispatch(deleteProduct(removeData)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchProductsList(error));
+          dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+            setProductsLength(response.payload.data.count);
+            setData(response.payload.data.data);
+          });
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
@@ -326,23 +328,23 @@ export default function OrdersListView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'new') {
-          setOpenDetails((pv) => !pv);
-          setEditProductId(id);
-          if (id) {
-            dispatch(fetchOneProduct(id));
-          } else {
-            setProductData({});
-            dispatch(setProduct({}));
-          }
-        } else if (state === 'variants') {
-          variantMethods.reset();
-          setOpenVariant((pv) => !pv);
-          dispatch(fetchOneVariant(id));
-          setTempVariantId(id);
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'new') {
+        setOpenDetails((pv) => !pv);
+        setEditProductId(id);
+        if (id) {
+          dispatch(fetchOneProduct(id));
+        } else {
+          setProductData({});
+          dispatch(setProduct({}));
         }
-      };
+      } else if (state === 'variants') {
+        variantMethods.reset();
+        setOpenVariant((pv) => !pv);
+        dispatch(fetchOneVariant(id));
+        setTempVariantId(id);
+      }
+    };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -488,7 +490,10 @@ export default function OrdersListView() {
             setEditVariantId(null);
             handleDrawerCloseCommon('variants');
 
-            dispatch(fetchProductsList(error));
+            dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+              setProductsLength(response.payload.data.count);
+              setData(response.payload.data.data);
+            });
             enqueueSnackbar('Successfully Created!', { variant: 'success' });
           } else {
             enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -503,7 +508,11 @@ export default function OrdersListView() {
       dispatch(editVariant({ variantId: tempVariantId, data: variantData })).then(
         (response: any) => {
           if (response.meta.requestStatus === 'fulfilled') {
-            dispatch(fetchProductsList(error));
+            dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+              setProductsLength(response.payload.data.count);
+              setData(response.payload.data.data);
+            });
+
             enqueueSnackbar('Successfully Updated!', { variant: 'success' });
           } else {
             enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -526,6 +535,12 @@ export default function OrdersListView() {
   //     });
   //   }
   // }
+  useEffect(() => {
+    dispatch(fetchProductsWithParams({ pageNumber, pageSize })).then((response) => {
+      setProductsLength(response.payload.data.count);
+      setData(response.payload.data.data);
+    });
+  }, [pageNumber]);
   const listStuff = data;
   const [listItems, setListItems] = useState([]);
   useEffect(() => {
@@ -543,12 +558,15 @@ export default function OrdersListView() {
   useEffect(() => {
     const sortedList = sort
       ? [...listStuff].sort((a: any, b: any) =>
-        b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
-      )
+          b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
+        )
       : listStuff;
     setListItems(sortedList);
   }, [listStuff, sort]);
   const imagesItrations = Array.from({ length: 3 }, (_, index) => index);
+  // Pagination
+  // For Length
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <Grid
@@ -610,7 +628,7 @@ export default function OrdersListView() {
                     label="All Products"
                     icon={
                       <Label variant={(value === 'All' && 'filled') || 'outlined'} color="primary">
-                        {list.length}
+                        {productsLength}
                       </Label>
                     }
                   />
@@ -636,7 +654,7 @@ export default function OrdersListView() {
                 </TabList>
               </Box>
 
-              <TabPanel value={value} sx={{ px: 0 }}>
+              <TabPanel value={value} sx={{ px: 0, minHeight: '50vh' }}>
                 <DragDropContext onDragEnd={handleOnDragEnd}>
                   <Droppable droppableId="items">
                     {(provided) => (
@@ -773,6 +791,22 @@ export default function OrdersListView() {
                   </Droppable>
                 </DragDropContext>
               </TabPanel>
+              {Math.ceil(productsLength / pageSize) !== 1 && (
+                <Box
+                  sx={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Navigator
+                    pageSize={pageSize}
+                    itemsLength={productsLength}
+                    setPageNumber={setPageNumber}
+                  />
+                </Box>
+              )}
             </TabContext>
           </Box>
         </Grid>

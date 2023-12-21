@@ -68,7 +68,7 @@ import {
   fetchOneCustomer,
   setCustomers,
 } from '../../../redux/store/thunks/customers';
-import Navigator from '../components/Pagination';
+import Navigator from 'src/components/Navigator';
 
 // ----------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ const defaultFilters: IOrderTableFilters = {
 
 export default function OrdersListView() {
   const dispatch = useDispatch<AppDispatch>();
-  const pageSize = 10;
+  const pageSize = 3;
   const { enqueueSnackbar } = useSnackbar();
   const loadStatus = useSelector((state: any) => state.customers.status);
   const { list, error, customer } = useSelector((state: any) => state.customers);
@@ -705,7 +705,7 @@ export default function OrdersListView() {
                   <Navigator
                     pageSize={pageSize}
                     setPageNumber={setPageNumber}
-                    customersLength={customersLength}
+                    itemsLength={customersLength}
                   />
                 )}
               </Box>
