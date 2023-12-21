@@ -7,24 +7,24 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Button } from '@mui/material';
 
 const Navigator = ({
-  customersLength,
+  itemsLength,
   setPageNumber,
   pageSize,
 }: {
-  customersLength: any;
+  itemsLength: any;
   setPageNumber: any;
   pageSize: any;
 }) => {
   return (
     <Stack spacing={2}>
       <Pagination
-        count={Math.ceil(customersLength / pageSize)}
+        count={Math.ceil(itemsLength / pageSize)}
         renderItem={(item) => (
           <Button
             onClick={() =>
               setPageNumber(
-                item.page == Math.ceil(customersLength / pageSize) + 1
-                  ? Math.ceil(customersLength / pageSize)
+                item.page == Math.ceil(itemsLength / pageSize) + 1
+                  ? Math.ceil(itemsLength / pageSize)
                   : item.page === 0
                     ? 1
                     : item.page

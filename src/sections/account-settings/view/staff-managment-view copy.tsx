@@ -33,11 +33,13 @@ import {
   editStaffManagement,
   fetchOneStaffManagement,
   fetchStaffManagementsList,
+  fetchStaffManagementsWithParams,
 } from 'src/redux/store/thunks/staffManagement';
 import { AppDispatch } from 'src/redux/store/store';
 import { enqueueSnackbar } from 'notistack';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useAuthContext } from 'src/auth/hooks';
+import Navigator from 'src/components/Navigator';
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -45,12 +47,12 @@ import { useAuthContext } from 'src/auth/hooks';
 export default function StaffManagment() {
   const { user } = useAuthContext();
   const [authUser, setAuthUser] = useState<any>();
+  const [staffLength, setStaffLength] = useState<number>(0);
   useEffect(() => {
     if (user) {
       setAuthUser(user);
     }
   }, [user]);
-  console.log(authUser);
 
   const settings = useSettingsContext();
   const dispatch = useDispatch<any>();
@@ -63,6 +65,8 @@ export default function StaffManagment() {
   const [openDelStaff, setOpenDelStaff] = useState(false);
   const [userData, setUserData] = useState<any>({});
   const [toDelId, setToDelId] = useState('');
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const pageSize = 3;
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
     (event: React.SyntheticEvent | React.MouseEvent) => {
@@ -132,8 +136,8 @@ export default function StaffManagment() {
       dispatch(createStaffManagement(toPushData)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
-          dispatch(fetchStaffManagementsList()).then((itemData: any) =>
-            setNewUsersData(itemData.payload)
+          dispatch(fetchStaffManagementsWithParams({ pageNumber, pageSize })).then(
+            (itemData: any) => setNewUsersData(itemData.payload)
           );
           setUserData({});
         } else {
@@ -161,8 +165,8 @@ export default function StaffManagment() {
     dispatch(editStaffManagement({ staffManagementId: editId, data: dataToPush })).then(
       (response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchStaffManagementsList()).then((response: any) =>
-            setNewUsersData(response.payload)
+          dispatch(fetchStaffManagementsWithParams({ pageNumber, pageSize })).then(
+            (response: any) => setNewUsersData(response.payload)
           );
           enqueueSnackbar('Successfully Updated!', { variant: 'success' });
         } else {
@@ -174,11 +178,19 @@ export default function StaffManagment() {
   const onSubmit = handleSubmit((data: any) => {
     createAdmin();
   });
+  // For Count
   useEffect(() => {
-    dispatch(fetchStaffManagementsList()).then((response: any) =>
-      setNewUsersData(response.payload.filter((item: any) => item.adminName))
-    );
-  }, [dispatch]);
+    dispatch(fetchStaffManagementsList()).then((response: any) => {
+      setStaffLength(response.payload.length);
+    });
+  }, [dispatch, newUsersData]);
+  // For Actual Fetching
+
+  useEffect(() => {
+    dispatch(fetchStaffManagementsWithParams({ pageNumber, pageSize })).then((response: any) => {
+      setNewUsersData(response.payload);
+    });
+  }, [dispatch, pageNumber]);
 
   const formatDate = (createdAt: any) => {
     const dateObject = new Date(createdAt);
@@ -245,7 +257,6 @@ export default function StaffManagment() {
     items.splice(result.destination.index, 0, reorderedItem);
     setNewUsersData(items);
   };
-  console.log(authUser);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -259,10 +270,10 @@ export default function StaffManagment() {
           <CustomCrumbs
             heading="Staff Management"
             description={`${
-              newUsersData
-                ? newUsersData?.length === 1
-                  ? `${newUsersData?.length} Staff Member`
-                  : `${newUsersData?.length} Staff Members`
+              staffLength
+                ? staffLength === 1
+                  ? `${staffLength} Staff Member`
+                  : `${staffLength} Staff Members`
                 : `${0} Staff Members`
             }`}
           />
@@ -437,113 +448,120 @@ export default function StaffManagment() {
           </Card>
         )}
         {/* Cards of acc admins */}
-        <DragDropContext onDragEnd={handleOnDragEnd}>
-          <Droppable droppableId="items">
-            {(provided) => (
-              <Grid {...provided.droppableProps} ref={provided.innerRef} item xs={12}>
-                {newUsersData &&
-                  newUsersData
-                    .filter(
-                      (item: any) =>
-                        item.adminName.en.toLocaleLowerCase().includes(query.toLocaleLowerCase()) ||
-                        item.adminName.ar.toLocaleLowerCase().includes(query.toLocaleLowerCase())
-                    )
-                    .map((user: any, indx: number) => (
-                      <Draggable key={indx} index={indx} draggableId={indx.toString()}>
-                        {(provided) => (
-                          <Card
-                            {...provided.draggableProps}
-                            ref={provided.innerRef}
-                            key={indx}
-                            sx={{
-                              border: '2px solid transparent ',
-                              '&:hover': { borderColor: '#1BFCB6' },
-                              padding: '20px',
-                              boxShadow: '0px 4px 20px #0F134914',
-                              borderRadius: '16px',
-                              marginTop: '16px',
-                            }}
-                          >
-                            <Stack
-                              direction={{ xs: 'column', sm: 'row' }}
-                              spacing="20px"
-                              alignItems="center"
-                              justifyContent="space-between"
+        <Box sx={{ minHeight: '43vh', width: '100%' }}>
+          <DragDropContext onDragEnd={handleOnDragEnd}>
+            <Droppable droppableId="items">
+              {(provided) => (
+                <Grid {...provided.droppableProps} ref={provided.innerRef} item xs={12}>
+                  {newUsersData &&
+                    newUsersData
+                      .filter(
+                        (item: any) =>
+                          item.adminName.en
+                            .toLocaleLowerCase()
+                            .includes(query.toLocaleLowerCase()) ||
+                          item.adminName.ar.toLocaleLowerCase().includes(query.toLocaleLowerCase())
+                      )
+                      .map((user: any, indx: number) => (
+                        <Draggable key={indx} index={indx} draggableId={indx.toString()}>
+                          {(provided) => (
+                            <Card
+                              {...provided.draggableProps}
+                              ref={provided.innerRef}
+                              key={indx}
+                              sx={{
+                                border: '2px solid transparent ',
+                                '&:hover': { borderColor: '#1BFCB6' },
+                                padding: '20px',
+                                boxShadow: '0px 4px 20px #0F134914',
+                                borderRadius: '16px',
+                                marginTop: '16px',
+                              }}
                             >
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div {...provided.dragHandleProps}>
-                                  <Iconify icon="ci:drag-vertical" />
-                                </div>
-                                <div>
-                                  <Typography component="p" variant="h6" sx={{ fontWeight: 900 }}>
-                                    {user.adminName.en}
-                                  </Typography>
+                              <Stack
+                                direction={{ xs: 'column', sm: 'row' }}
+                                spacing="20px"
+                                alignItems="center"
+                                justifyContent="space-between"
+                              >
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <div {...provided.dragHandleProps}>
+                                    <Iconify icon="ci:drag-vertical" />
+                                  </div>
+                                  <div>
+                                    <Typography component="p" variant="h6" sx={{ fontWeight: 900 }}>
+                                      {user?.adminName?.en}
+                                    </Typography>
+                                    <Typography
+                                      component="p"
+                                      variant="subtitle2"
+                                      sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                                    >
+                                      {' '}
+                                      {user?.user?.email}{' '}
+                                    </Typography>
+                                  </div>
+                                </Box>
+
+                                <Stack
+                                  alignItems="center"
+                                  direction="row"
+                                  spacing={{ xs: '10px', sm: '20px' }}
+                                  justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
+                                >
                                   <Typography
                                     component="p"
                                     variant="subtitle2"
                                     sx={{ opacity: 0.7, fontSize: '.8rem' }}
                                   >
-                                    {' '}
-                                    {user.user.email}{' '}
+                                    Joined on {formatDate(user?.createdAt)}
                                   </Typography>
-                                </div>
-                              </Box>
 
-                              <Stack
-                                alignItems="center"
-                                direction="row"
-                                spacing={{ xs: '10px', sm: '20px' }}
-                                justifyContent={{ xs: 'space-between', sm: 'flex-start' }}
-                              >
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                                >
-                                  Joined on {formatDate(user.createdAt)}
-                                </Typography>
-
-                                <Chip
-                                  label={
-                                    user.user.roles.includes('ACCOUNTENT_ADMIN') ? 'Admin' : 'Owner'
-                                  }
-                                  size="small"
-                                  sx={{
-                                    backgroundColor: user.user.roles.includes('ACCOUNTENT_ADMIN')
-                                      ? '#F1D169'
-                                      : '#76FDD3',
-                                    color: '#0F1349',
-                                    borderRadius: '16px',
-                                  }}
-                                />
-                                <Iconify
-                                  onClick={() => [
-                                    setOpenDelStaff((prev) => !prev),
-                                    setToDelId(user.user._id),
-                                  ]}
-                                  style={{ cursor: 'pointer' }}
-                                  icon="material-symbols:delete-outline"
-                                  width={24}
-                                />
-                                <Box
-                                  sx={{
-                                    width: '36px',
-                                    height: '36px',
-                                    borderRadius: '20px',
-                                    background: 'rgb(134, 136, 163,0.09)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                      background: 'rgb(134, 136, 163,0.2)',
-                                    },
-                                  }}
-                                  onClick={toggleDrawerCommon('new', user.user._id)}
-                                >
-                                  <Box component="img" src="/raw/edit-pen.svg" width="13px" />
-                                </Box>
-                                {/* {order.role !== 'Owner' && (
+                                  <Chip
+                                    label={
+                                      user?.user?.roles?.includes('ACCOUNTENT_ADMIN')
+                                        ? 'Admin'
+                                        : 'Owner'
+                                    }
+                                    size="small"
+                                    sx={{
+                                      backgroundColor: user?.user?.roles.includes(
+                                        'ACCOUNTENT_ADMIN'
+                                      )
+                                        ? '#F1D169'
+                                        : '#76FDD3',
+                                      color: '#0F1349',
+                                      borderRadius: '16px',
+                                    }}
+                                  />
+                                  <Iconify
+                                    onClick={() => [
+                                      setOpenDelStaff((prev) => !prev),
+                                      setToDelId(user?.user?._id),
+                                    ]}
+                                    style={{ cursor: 'pointer' }}
+                                    icon="carbon:delete"
+                                    width={24}
+                                  />
+                                  <Box
+                                    sx={{
+                                      width: '36px',
+                                      height: '36px',
+                                      borderRadius: '20px',
+                                      background: 'rgb(134, 136, 163,0.09)',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      cursor: 'pointer',
+                                      '&:hover': {
+                                        background: 'rgb(134, 136, 163,0.2)',
+                                      },
+                                    }}
+                                    onClick={toggleDrawerCommon('new', user?.user?._id)}
+                                  >
+                                    <Box component="img" src="/raw/edit-pen.svg" width="13px" />
+                                  </Box>
+                                  {/* {order.role !== 'Owner' && (
                   <Iconify
                       style={{ cursor: 'pointer' }}
                       icon="bx:edit"
@@ -551,44 +569,56 @@ export default function StaffManagment() {
                       onClick={toggleDrawerCommon('details')}
                     />
                   )}  */}
+                                </Stack>
                               </Stack>
-                            </Stack>
-                            <ConfirmDialog
-                              open={openDelStaff}
-                              onClose={handleDrawerCloseCommon('delstaff')}
-                              noCancel={false}
-                              action={
-                                <Button
-                                  fullWidth
-                                  variant="soft"
-                                  color="error"
-                                  onClick={() => handleDelete(toDelId)}
-                                >
-                                  Delete
-                                </Button>
-                              }
-                              content={
-                                <Grid container spacing="15px">
-                                  <Grid item xs={12} md={12}>
-                                    <CustomCrumbs heading="Remove Member" crums={false} />
-                                  </Grid>
+                              <ConfirmDialog
+                                open={openDelStaff}
+                                onClose={handleDrawerCloseCommon('delstaff')}
+                                noCancel={false}
+                                action={
+                                  <Button
+                                    fullWidth
+                                    variant="soft"
+                                    color="error"
+                                    onClick={() => handleDelete(toDelId)}
+                                  >
+                                    Delete
+                                  </Button>
+                                }
+                                content={
+                                  <Grid container spacing="15px">
+                                    <Grid item xs={12} md={12}>
+                                      <CustomCrumbs heading="Remove Member" crums={false} />
+                                    </Grid>
 
-                                  <Grid item xs={12}>
-                                    <Typography variant="body2">
-                                      Do you want to delete this Member?
-                                    </Typography>
+                                    <Grid item xs={12}>
+                                      <Typography variant="body2">
+                                        Do you want to delete this Member?
+                                      </Typography>
+                                    </Grid>
                                   </Grid>
-                                </Grid>
-                              }
-                            />
-                          </Card>
-                        )}
-                      </Draggable>
-                    ))}
-              </Grid>
-            )}
-          </Droppable>
-        </DragDropContext>
+                                }
+                              />
+                            </Card>
+                          )}
+                        </Draggable>
+                      ))}
+                </Grid>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </Box>
+        <Box
+          sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          {Math.ceil(staffLength / pageSize) !== 1 && (
+            <Navigator
+              pageSize={pageSize}
+              setPageNumber={setPageNumber}
+              itemsLength={staffLength}
+            />
+          )}
+        </Box>
       </Grid>
 
       {/* New Admin */}
