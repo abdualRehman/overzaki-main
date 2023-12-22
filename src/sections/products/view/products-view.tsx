@@ -57,13 +57,12 @@ import { BottomActions } from 'src/components/bottom-actions';
 //
 import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
-
+// import Navigator from 'src/components/Navigator';
 import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunks/category';
 
 import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
-
 
 // ----------------------------------------------------------------------
 
@@ -541,7 +540,7 @@ export default function OrdersListView() {
       setProductsLength(response.payload.data.count);
       setData(response.payload.data.data);
     });
-  }, [pageNumber]);
+  }, [dispatch, pageNumber]);
   const listStuff = data;
   const [listItems, setListItems] = useState([]);
   useEffect(() => {
