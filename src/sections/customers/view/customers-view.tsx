@@ -91,7 +91,7 @@ const defaultFilters: IOrderTableFilters = {
 
 export default function OrdersListView() {
   const dispatch = useDispatch<AppDispatch>();
-  const pageSize = 3;
+  const pageSize = 5;
   const { enqueueSnackbar } = useSnackbar();
   const loadStatus = useSelector((state: any) => state.customers.status);
   const { list, error, customer } = useSelector((state: any) => state.customers);

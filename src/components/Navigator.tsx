@@ -6,7 +6,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Button } from '@mui/material';
 
-const Navigator = ({
+export default function Navigator({
   itemsLength,
   setPageNumber,
   pageSize,
@@ -14,10 +14,12 @@ const Navigator = ({
   itemsLength: any;
   setPageNumber: any;
   pageSize: any;
-}) => {
+}) {
   return (
     <Stack spacing={2}>
       <Pagination
+        variant="outlined"
+        color="primary"
         count={Math.ceil(itemsLength / pageSize)}
         renderItem={(item) => (
           <Button
@@ -31,12 +33,10 @@ const Navigator = ({
               )
             }
           >
-            <PaginationItem slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }} {...item} />
+            <PaginationItem  slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }} {...item} />
           </Button>
         )}
       />
     </Stack>
   );
-};
-
-export default Navigator;
+}

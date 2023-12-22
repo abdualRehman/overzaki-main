@@ -19,13 +19,14 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Switch from '@mui/material/Switch';
 import { Box, Grid, Stack, Typography, Paper, Alert, Checkbox } from '@mui/material';
+import Navigator from 'src/components/Navigator';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
-import TextField from '@mui/material/TextField';
+// import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
+// import FormControl from '@mui/material/FormControl';
+// import Select from '@mui/material/Select';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -62,17 +63,17 @@ import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunk
 import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
-import Navigator from 'src/components/Navigator';
+
 
 // ----------------------------------------------------------------------
 
 export default function OrdersListView() {
-  const pageSize = 2;
+  const pageSize = 5;
   const [pageNumber, setPageNumber] = useState<number>(1);
   const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
   const categoryState = useSelector((state: any) => state.category);
-  const loadStatus = useSelector((state: any) => state.products.status);
+  // const loadStatus = useSelector((state: any) => state.products.status);
   const { list, error, product, variant } = useSelector((state: any) => state.products);
   const [productData, setProductData] = useState<any>(null);
   const [editProductId, setEditProductId] = useState<any>(null);
