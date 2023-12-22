@@ -47,6 +47,7 @@ import { BottomActions } from 'src/components/bottom-actions';
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
 import { useTable, getComparator } from 'src/components/table';
+import Navigator from 'src/components/Navigator';
 // types
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
@@ -68,7 +69,6 @@ import {
   fetchOneCustomer,
   setCustomers,
 } from '../../../redux/store/thunks/customers';
-import Navigator from 'src/components/Navigator';
 
 // ----------------------------------------------------------------------
 

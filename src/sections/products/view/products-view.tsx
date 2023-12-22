@@ -56,13 +56,13 @@ import { BottomActions } from 'src/components/bottom-actions';
 //
 import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
-
+import Navigator from 'src/components/Navigator';
 import { fetchCategorysList, fetchSubCategorysList } from 'src/redux/store/thunks/category';
 
 import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
-import Navigator from 'src/components/Navigator';
+
 
 // ----------------------------------------------------------------------
 
@@ -328,23 +328,23 @@ export default function OrdersListView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenDetails((pv) => !pv);
-        setEditProductId(id);
-        if (id) {
-          dispatch(fetchOneProduct(id));
-        } else {
-          setProductData({});
-          dispatch(setProduct({}));
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenDetails((pv) => !pv);
+          setEditProductId(id);
+          if (id) {
+            dispatch(fetchOneProduct(id));
+          } else {
+            setProductData({});
+            dispatch(setProduct({}));
+          }
+        } else if (state === 'variants') {
+          variantMethods.reset();
+          setOpenVariant((pv) => !pv);
+          dispatch(fetchOneVariant(id));
+          setTempVariantId(id);
         }
-      } else if (state === 'variants') {
-        variantMethods.reset();
-        setOpenVariant((pv) => !pv);
-        dispatch(fetchOneVariant(id));
-        setTempVariantId(id);
-      }
-    };
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -540,7 +540,7 @@ export default function OrdersListView() {
       setProductsLength(response.payload.data.count);
       setData(response.payload.data.data);
     });
-  }, [pageNumber]);
+  }, [dispatch, pageNumber]);
   const listStuff = data;
   const [listItems, setListItems] = useState([]);
   useEffect(() => {
@@ -558,8 +558,8 @@ export default function OrdersListView() {
   useEffect(() => {
     const sortedList = sort
       ? [...listStuff].sort((a: any, b: any) =>
-          b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
-        )
+        b.name.en.toLowerCase().localeCompare(a.name.en.toLowerCase())
+      )
       : listStuff;
     setListItems(sortedList);
   }, [listStuff, sort]);
