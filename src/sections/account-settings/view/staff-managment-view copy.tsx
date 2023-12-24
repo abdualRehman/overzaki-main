@@ -66,7 +66,7 @@ export default function StaffManagment() {
   const [userData, setUserData] = useState<any>({});
   const [toDelId, setToDelId] = useState('');
   const [pageNumber, setPageNumber] = useState<number>(1);
-  const pageSize = 3;
+  const pageSize = 5;
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
     (event: React.SyntheticEvent | React.MouseEvent) => {

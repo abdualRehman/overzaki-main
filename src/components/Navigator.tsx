@@ -1,3 +1,5 @@
+/* eslint-disable no-nested-ternary */
+/* eslint-disable eqeqeq */
 import React from 'react';
 import Pagination from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
@@ -6,7 +8,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Button } from '@mui/material';
 
-const Navigator = ({
+export default Navigator = ({
   itemsLength,
   setPageNumber,
   pageSize,
@@ -15,28 +17,24 @@ const Navigator = ({
   setPageNumber: any;
   pageSize: any;
 }) => {
-  return (
-    <Stack spacing={2}>
-      <Pagination
-        count={Math.ceil(itemsLength / pageSize)}
-        renderItem={(item) => (
-          <Button
-            onClick={() =>
-              setPageNumber(
-                item.page == Math.ceil(itemsLength / pageSize) + 1
-                  ? Math.ceil(itemsLength / pageSize)
-                  : item.page === 0
-                    ? 1
-                    : item.page
-              )
-            }
-          >
-            <PaginationItem slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }} {...item} />
-          </Button>
-        )}
-      />
-    </Stack>
-  );
+  <Stack spacing={2}>
+    <Pagination
+      count={Math.ceil(itemsLength / pageSize)}
+      renderItem={(item: any) => (
+        <Button
+          onClick={() =>
+            setPageNumber(
+              item.page == Math.ceil(itemsLength / pageSize) + 1
+                ? Math.ceil(itemsLength / pageSize)
+                : item.page === 0
+                  ? 1
+                  : item.page
+            )
+          }
+        >
+          <PaginationItem slots={{ previous: ArrowBackIcon, next: ArrowForwardIcon }} {...item} />
+        </Button>
+      )}
+    />
+  </Stack>;
 };
-
-export default Navigator;

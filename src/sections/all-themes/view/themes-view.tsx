@@ -1,3 +1,6 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable no-return-assign */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 
 'use client';
@@ -174,7 +177,7 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
             >
               {data
                 .filter((item) => item.type === theme_type)
-                .map((theme, indx) => (
+                .map((themeD: any, indx: any) => (
                   <SwiperSlide key={indx} className="swiper-slide">
                     <Image
                       style={{ borderRadius: '20px' }}
@@ -182,7 +185,7 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
                       className="swiper-image"
                       width={350}
                       height={550}
-                      src={theme.image}
+                      src={themeD.image}
                     />
                   </SwiperSlide>
                 ))}

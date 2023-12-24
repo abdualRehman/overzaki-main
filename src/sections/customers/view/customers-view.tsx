@@ -48,6 +48,7 @@ import { BottomActions } from 'src/components/bottom-actions';
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
 import { useTable, getComparator } from 'src/components/table';
+import Navigator from 'src/components/Navigator';
 // types
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
@@ -91,7 +92,7 @@ const defaultFilters: IOrderTableFilters = {
 
 export default function OrdersListView() {
   const dispatch = useDispatch<AppDispatch>();
-  const pageSize = 3;
+  const pageSize = 5;
   const { enqueueSnackbar } = useSnackbar();
   const loadStatus = useSelector((state: any) => state.customers.status);
   const { list, error, customer } = useSelector((state: any) => state.customers);
