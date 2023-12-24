@@ -42,6 +42,7 @@ import { _orders } from 'src/_mock';
 import { fTimestamp } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
+import Navigator from 'src/components/Navigator';
 import { UploadAvatar } from 'src/components/upload';
 import { BottomActions } from 'src/components/bottom-actions';
 import { useSettingsContext } from 'src/components/settings';
@@ -68,7 +69,6 @@ import {
   fetchOneCustomer,
   setCustomers,
 } from '../../../redux/store/thunks/customers';
-import Navigator from 'src/components/Navigator';
 
 // ----------------------------------------------------------------------
 

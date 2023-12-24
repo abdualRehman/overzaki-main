@@ -37,7 +37,7 @@ export const fetchOneOrders = createAsyncThunk('orders/fetchOne', async (ordersI
 });
 
 export const createOrders = createAsyncThunk('orders/create', async (data: any) => {
-  const response = await postRequest(endpoints.orders.list, data, defaultConfig);
+  const response = await postRequest(endpoints.orders.viaAdmin, data, defaultConfig);
 
   return response.data;
 });
