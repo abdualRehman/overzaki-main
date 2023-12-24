@@ -33,7 +33,7 @@ import { UploadBox } from 'src/components/upload';
 import { useSnackbar } from 'notistack';
 import { useDispatch, useSelector } from 'react-redux';
 // import { fetchCustomersList, fetchOneCustomer } from '../../../redux/store/thunks/customers';
-import Navigator from 'src/components/Navigator';
+import NavigatorBar from 'src/components/NavigatorBar';
 import {
   createCategory,
   createSubCategory,
@@ -378,27 +378,27 @@ export default function CategoriesView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'cat') {
-        setCategoryDrawer((pv) => !pv);
-        setEditCatId(id);
-        if (id) {
-          dispatch(fetchOneCategory(id));
-        } else {
-          setCategoriesData({});
-          dispatch(setCategory({}));
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'cat') {
+          setCategoryDrawer((pv) => !pv);
+          setEditCatId(id);
+          if (id) {
+            dispatch(fetchOneCategory(id));
+          } else {
+            setCategoriesData({});
+            dispatch(setCategory({}));
+          }
+        } else if (state === 'sub') {
+          setSubCategoryDrawer((pv) => !pv);
+          setEditSubCatId(id);
+          if (id) {
+            dispatch(fetchOneSubCategory(id));
+          } else {
+            setSubCategoriesData({});
+            dispatch(setSubCategory({}));
+          }
         }
-      } else if (state === 'sub') {
-        setSubCategoryDrawer((pv) => !pv);
-        setEditSubCatId(id);
-        if (id) {
-          dispatch(fetchOneSubCategory(id));
-        } else {
-          setSubCategoriesData({});
-          dispatch(setSubCategory({}));
-        }
-      }
-    };
+      };
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
       if (
@@ -459,18 +459,18 @@ export default function CategoriesView() {
               sx={
                 activeCategory === 'main'
                   ? {
-                      borderRadius: '12px',
-                      color: '#0F1349',
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0px 6px 20px #00000033',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                    borderRadius: '12px',
+                    color: '#0F1349',
+                    backgroundColor: '#FFFFFF',
+                    boxShadow: '0px 6px 20px #00000033',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
                   : {
-                      borderRadius: '12px',
-                      color: '#8688A3',
-                      backgroundColor: 'background.neutral',
-                      '&:hover': { backgroundColor: 'background.neutral' },
-                    }
+                    borderRadius: '12px',
+                    color: '#8688A3',
+                    backgroundColor: 'background.neutral',
+                    '&:hover': { backgroundColor: 'background.neutral' },
+                  }
               }
             >
               {' '}
@@ -483,18 +483,18 @@ export default function CategoriesView() {
               sx={
                 activeCategory === 'sub'
                   ? {
-                      borderRadius: '12px',
-                      color: '#0F1349',
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0px 6px 20px #00000033',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                    borderRadius: '12px',
+                    color: '#0F1349',
+                    backgroundColor: '#FFFFFF',
+                    boxShadow: '0px 6px 20px #00000033',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
                   : {
-                      borderRadius: '12px',
-                      color: '#8688A3',
-                      backgroundColor: 'background.neutral',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                    borderRadius: '12px',
+                    color: '#8688A3',
+                    backgroundColor: 'background.neutral',
+                    '&:hover': { backgroundColor: '#FFFFFF' },
+                  }
               }
             >
               {' '}
@@ -675,7 +675,7 @@ export default function CategoriesView() {
               }}
             >
               {Math.ceil(categoriesLength / pageSize) !== 1 && (
-                <Navigator
+                <NavigatorBar
                   setPageNumber={setPageNumber}
                   pageSize={pageSize}
                   itemsLength={categoriesLength}

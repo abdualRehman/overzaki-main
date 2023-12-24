@@ -8,16 +8,15 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Button } from '@mui/material';
 
-export default Navigator = ({
+const NavigatorBar = ({
   itemsLength,
   setPageNumber,
-  pageSize,
+  pageSize
 }: {
   itemsLength: any;
   setPageNumber: any;
   pageSize: any;
-}) => {
-  <Stack spacing={2}>
+}) => <Stack spacing={2}>
     <Pagination
       count={Math.ceil(itemsLength / pageSize)}
       renderItem={(item: any) => (
@@ -37,4 +36,5 @@ export default Navigator = ({
       )}
     />
   </Stack>;
-};
+
+export default NavigatorBar

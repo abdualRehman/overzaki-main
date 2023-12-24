@@ -42,13 +42,12 @@ import { _orders } from 'src/_mock';
 import { fTimestamp } from 'src/utils/format-time';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
-import Navigator from 'src/components/Navigator';
+// import NavigatorBar from 'src/components/NavigatorBar';
 import { UploadAvatar } from 'src/components/upload';
 import { BottomActions } from 'src/components/bottom-actions';
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
 import { useTable, getComparator } from 'src/components/table';
-import Navigator from 'src/components/Navigator';
 // types
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
@@ -62,6 +61,7 @@ import CustomersTableToolbar from '../customers-toolbar';
 import CustomersTableFiltersResult from '../customers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 import CountrySelect from './CountryField';
+import NavigatorBar from "../../../components/NavigatorBar";
 import {
   createCustomer,
   deleteCustomer,
@@ -703,7 +703,7 @@ export default function OrdersListView() {
                 }}
               >
                 {customersLength && Math.ceil(customersLength / pageSize) !== 1 && (
-                  <Navigator
+                  <NavigatorBar
                     pageSize={pageSize}
                     setPageNumber={setPageNumber}
                     itemsLength={customersLength}
