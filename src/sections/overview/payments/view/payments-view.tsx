@@ -3,12 +3,16 @@
 'use client';
 
 import React, { useState } from 'react';
+import * as Yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import { Box, Grid, Typography, Paper, Stack, Switch, MenuItem, FormControl, } from '@mui/material';
+import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import { Box, Grid, Typography, Paper, Stack, Switch, MenuItem, FormControl, Divider, } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
@@ -20,7 +24,10 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
 // import Label from 'src/components/label/label';
 import Iconify from 'src/components/iconify/iconify';
+import { UploadBox } from 'src/components/upload';
 import Linker from '../../subscription-plan/link';
+import PaymentsNavBar from '../PaymentsNavBar';
+
 
 // ----------------------------------------------------------------------
 
@@ -49,12 +56,74 @@ export default function OrdersListView() {
     setValue(newValue);
   };
 
+  // ----------------------------------------------
 
+  // Sub Category
+  const CategorySchema = Yup.object().shape({
+    // name: Yup.object().shape({
+    //   en: Yup.string().required('English Name is required'),
+    //   ar: Yup.string().required('Arabic Name is required'),
+    // }),
+    // category: Yup.string().required('Category is required'),
+  });
+
+  const methods = useForm({
+    resolver: yupResolver(CategorySchema),
+  });
+
+
+  const {
+    reset,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = methods;
+
+  const onSubmit = handleSubmit(async (data) => {
+    console.log("data", data);
+  });
+
+
+  // ----------------------------------------------
+  const [openPayment, setOpenPayment] = useState<any>({
+    open: false,
+  });
+
+  const toggleDrawer = () => (event: React.SyntheticEvent | React.MouseEvent) => {
+    // dispatch(fetchOneOrders(item?._id));
+    setOpenPayment({ open: true });
+  };
+
+  const handleDrawerClose = (event: React.SyntheticEvent | React.KeyboardEvent) => {
+    if (
+      event.type === 'keydown' &&
+      ((event as React.KeyboardEvent).key === 'Tab' ||
+        (event as React.KeyboardEvent).key === 'Shift')
+    ) {
+      return;
+    }
+    setOpenPayment({ open: false });
+  };
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <Grid container justifyContent='space-between' alignItems={{ xs: 'flex-start', md: 'center' }}>
         <Grid item xs={12} md="auto">
           <CustomCrumbs heading="Payment Methods" crums={false} />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Button sx={{
+            float: "right",
+            backgroundColor: 'rgb(27, 252, 182)',
+            '&:hover': { backgroundColor: 'rgb(27, 252, 182)' },
+            color: '#0F1349', fontSize: '13px', borderRadius: '16px',
+            padding: "6px 17px", boxShadow: '0px 6px 20px #1BFCB633'
+          }}
+            onClick={toggleDrawer()}
+            startIcon={<Iconify icon="mingcute:add-fill" />}
+          >
+            Add New Payment Method
+          </Button>
+
         </Grid>
 
         <Grid item xs={12} md={5}>
@@ -254,17 +323,6 @@ export default function OrdersListView() {
                   <Typography mb='20px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
                     Enable bank transfer method for your payments.
                   </Typography>
-
-                  <Button sx={{
-                    backgroundColor: 'rgb(27, 252, 182)',
-                    '&:hover': { backgroundColor: 'rgb(27, 252, 182)' },
-                    color: '#0F1349', fontSize: '13px', borderRadius: '16px',
-                    padding: "6px 17px", boxShadow: '0px 6px 20px #1BFCB633'
-                  }}
-                    startIcon={<Iconify icon="mingcute:add-fill" />}
-                  >
-                    Add Bank Account
-                  </Button>
                 </Stack>
 
                 <Grid container spacing={2}>
@@ -356,6 +414,420 @@ export default function OrdersListView() {
           </Box>
         </Grid>
       </Grid>
+
+
+      <PaymentsNavBar
+        open={openPayment.open}
+        onClose={handleDrawerClose}
+        title="Create Payment Method"
+        actions={
+          <Stack alignItems="center" justifyContent="center" spacing="10px">
+            <Button
+              fullWidth
+              variant="soft"
+              color="success"
+              size="large"
+              startIcon={<Iconify icon="subway:tick" />}
+              sx={{ borderRadius: '30px' }}
+            >
+              Create
+            </Button>
+            {/* 
+
+            <Button
+              fullWidth
+              variant="soft"
+              color="error"
+              size="large"
+              startIcon={<Iconify icon="entypo:cross" />}
+              sx={{ borderRadius: '30px' }}
+              onClick={() => handleChangeStatus(order?._id, 'cancelled')}
+            >
+              Cancel Order
+            </Button> */}
+          </Stack>
+        }
+      >
+        <Divider flexItem />
+
+        <FormProvider methods={methods} onSubmit={onSubmit}>
+          <Stack
+            sx={{ width: '100%' }}
+            direction="column"
+            alignItems="flex-start"
+            justifyContent="space-between"
+            gap="10px"
+          >
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Payment Type
+              </Typography>
+              <RHFSelect
+                fullWidth
+                variant="filled"
+                name="category"
+              // value={subCategoriesData?.category || ''}
+              // settingStateValue={handleChangeMySubCat}
+              >
+
+                <MenuItem value="Payment Gateway">
+                  Payment Gateways
+                </MenuItem>
+                <MenuItem value="Installment Service">
+                  Installment Services
+                </MenuItem>
+                <MenuItem value="Installment Service">
+                  Bank Transfer
+                </MenuItem>
+                <MenuItem value="Installment Service">
+                  Cash on Delivery
+                </MenuItem>
+
+              </RHFSelect>
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Name
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                URL
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Price
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Image
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Supporters
+              </Typography>
+              {/* <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              /> */}
+              <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                {[].map((itration: any, ind: any) => (
+                  <Box key={ind}>
+
+                    {/* {productData?.images?.length > 0 && productData?.images[itration] ? (
+                        <Box
+                          sx={{
+                            width: '100px',
+                            height: '100px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            flexDirection: 'column',
+                            border: '1px dashed rgb(134, 136, 163,.5)',
+                            borderRadius: '16px',
+                            position: 'relative',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={
+                              typeof productData?.images[itration] === 'string'
+                                ? productData?.images[itration]
+                                : URL.createObjectURL(productData?.images[itration])
+                            }
+                            // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
+                            alt=""
+                            sx={{ maxHeight: '95px' }}
+                          />
+                          <Box
+                            onClick={() => handleRemoveImage(itration)}
+                            sx={{
+                              backgroundColor: 'rgb(134, 136, 163,.09)',
+                              padding: '10px 11px 7px 11px',
+                              borderRadius: '36px',
+                              cursor: 'pointer',
+                              position: 'absolute',
+                              top: 0,
+                              right: 0,
+                            }}
+                          >
+                            <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
+                          </Box>
+                        </Box>
+                      ) : ( */}
+                    <UploadBox
+                      sx={{
+                        width: '100px!important',
+                        height: '100px!important',
+                        textAlign: 'center',
+                        padding: '20px',
+                      }}
+                      // onDrop={handleAddImage}
+                      maxFiles={1}
+                      maxSize={5242880}
+                      accept={{
+                        'image/jpeg': [],
+                        'image/png': [],
+                      }}
+                      placeholder={
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            flexDirection: 'column',
+                          }}
+                        >
+                          <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
+                          <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
+                            Upload Image
+                          </span>
+                        </Box>
+                      }
+                    />
+                    {/* )} */}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Description
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Bank Account Name
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Bank IBAN
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Bank IBAN
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Cash On Delivery Cost
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                variant="subtitle2"
+                sx={{ fontWeight: 900, fontSize: '.9rem' }}
+              >
+                Cash on Delivery
+              </Typography>
+              <Switch
+                size="medium"
+                checked={false}
+                onChange={(e: any) =>
+                  console.log(e)
+                  // setProductData({ ...productData, publish_app: e.target.checked })
+                }
+              />
+            </Box>
+            <Box sx={{ width: '100%' }} >
+              <Typography
+                component="p"
+                noWrap
+                variant="subtitle2"
+                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
+              >
+                Available Countries
+              </Typography>
+              <RHFTextField
+                fullWidth
+                variant="filled"
+                value='dwas'
+                settingStateValue={(e: any) => console.log(e)}
+                name="name.en"
+              />
+            </Box>
+
+
+          </Stack>
+
+
+
+          {/* <Box
+          sx={{
+            width: '100%',
+            bgcolor: 'background.neutral',
+            borderRadius: '16px',
+            p: 2.5,
+            display: 'flex',
+            gap: '10px',
+            flexDirection: 'column',
+          }}
+        >
+
+          <FormControl>
+            <Typography
+              component="p"
+              variant="subtitle2"
+              sx={{ opacity: 0.7, fontSize: '.85rem' }}
+            >
+              Type
+            </Typography>
+            <RadioGroup
+              aria-labelledby="Language-selection"
+              defaultValue="A4"
+              name="Language-selection-group"
+            >
+              <Grid container alignItems="center" justifyContent="space-between">
+                <Grid item xs={6}>
+                  <FormControlLabel value="Thermal" control={<Radio />} label="Thermal" />
+                </Grid>
+                <Grid item xs={6}>
+                  <FormControlLabel value="A4" control={<Radio />} label="A4" />
+                </Grid>
+              </Grid>
+            </RadioGroup>
+          </FormControl>
+
+        </Box> */}
+
+
+
+        </FormProvider>
+
+
+      </PaymentsNavBar>
+
 
     </Container >
   );
