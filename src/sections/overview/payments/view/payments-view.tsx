@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -11,14 +11,20 @@ import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
+import { LoadingButton } from '@mui/lab';
 import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
-import { Box, Grid, Typography, Paper, Stack, Switch, MenuItem, FormControl, Divider, } from '@mui/material';
+import { Box, Grid, Typography, Paper, Stack, Switch, MenuItem, FormControl, Divider, Chip, } from '@mui/material';
+import CountrySelect from 'src/sections/customers/view/CountryField';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { AppDispatch } from 'src/redux/store/store';
+import { useSelector, useDispatch } from 'react-redux';
+import { useSnackbar } from 'notistack';
+import { createPaymentMothod, fetchOnePaymentMethods, fetchPaymentMethodsList } from 'src/redux/store/thunks/paymentMethods';
 // components
 import { useSettingsContext } from 'src/components/settings';
 import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
@@ -29,11 +35,13 @@ import Linker from '../../subscription-plan/link';
 import PaymentsNavBar from '../PaymentsNavBar';
 
 
+
+
 // ----------------------------------------------------------------------
 
 const STATUS_OPTIONS = [
-  { value: 'Payment Gateways', label: 'Payment Gateways' },
-  { value: 'Installment Services', label: 'Installment Services' },
+  { value: 'Payment Gateway', label: 'Payment Gateways' },
+  { value: 'Installment Service', label: 'Installment Services' },
   { value: 'Bank Transfer', label: 'Bank Transfer' },
   { value: 'Cash On Delivery', label: 'Cash On Delivery' },
 ];
@@ -42,11 +50,50 @@ const STATUS_OPTIONS = [
 
 export default function OrdersListView() {
 
-  const settings = useSettingsContext();
+  const dispatch = useDispatch<AppDispatch>();
+  const paymentMethodState = useSelector((state: any) => state.paymentMethods);
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [value, setValue] = useState('Payment Gateways');
+  const settings = useSettingsContext();
+  const [openPayment, setOpenPayment] = useState<any>({
+    open: false,
+  });
+
+  const [value, setValue] = useState('Payment Gateway');
 
   const [mySubCat, setMySubCat] = React.useState('5.000');
+
+  const [data, setData] = useState<any>(null);
+  const [editId, setEditId] = useState<any>(null);
+
+  const [paymentMethodsList, setPaymentMethodsList] = useState<any>(paymentMethodState?.list)
+
+  useEffect(() => {
+    console.log("paymentMethodState?.list", paymentMethodState?.list);
+
+    const filterList = paymentMethodState?.list.filter((list: any) => list?.type === value);
+    setPaymentMethodsList(filterList)
+  }, [paymentMethodState?.list, value]);
+
+
+  useEffect(() => {
+    if (paymentMethodState?.paymentMethod) {
+      console.log(paymentMethodState?.paymentMethod);
+
+      // dispatch(fetchOnePaymentMethods(editId));
+    } else {
+      setData(null);
+    }
+  }, [paymentMethodState])
+
+
+
+  useEffect(() => {
+    if (paymentMethodState.status === 'idle') {
+      dispatch(fetchPaymentMethodsList(paymentMethodState.error));
+    }
+  }, [paymentMethodState, dispatch]);
+
 
   const handleChangeMySubCat = (event: SelectChangeEvent) => {
     setMySubCat(event.target.value as string);
@@ -59,16 +106,19 @@ export default function OrdersListView() {
   // ----------------------------------------------
 
   // Sub Category
-  const CategorySchema = Yup.object().shape({
-    // name: Yup.object().shape({
-    //   en: Yup.string().required('English Name is required'),
-    //   ar: Yup.string().required('Arabic Name is required'),
-    // }),
-    // category: Yup.string().required('Category is required'),
+  const PaymentSchema = Yup.object().shape({
+    type: Yup.string().required('Field is required'),
+    name: Yup.string().required('Field is required'),
+    url: Yup.string().required('Field is required'),
+    price: Yup.string().required('Field is required'),
+    // description: Yup.string().required('Field is required'),
+    // bankAccountName: Yup.string().required('Field is required'),
+    // bankIBAN: Yup.string().required('Field is required'),
+    // cashOnDeliveryCost: Yup.string().required('Field is required'),
   });
 
   const methods = useForm({
-    resolver: yupResolver(CategorySchema),
+    resolver: yupResolver(PaymentSchema),
   });
 
 
@@ -78,15 +128,58 @@ export default function OrdersListView() {
     formState: { isSubmitting },
   } = methods;
 
-  const onSubmit = handleSubmit(async (data) => {
-    console.log("data", data);
+  const onSubmit = handleSubmit(async (reqData) => {
+
+    const formData = new FormData();
+
+    Object.entries(data).forEach(([key, value]: any) => {
+      if (key === 'availableAreas') {
+        value.forEach((file: any, index: any) => {
+          formData.append(`${key}[${index}]`, file);
+        });
+      } else if (key === 'image') {
+        if (typeof value !== 'string') {
+          formData.append(`${key}`, value);
+        }
+      } else if (key === 'supporters') {
+        const newImages = value.filter((file: any) => typeof file !== 'string');
+        newImages.forEach((file: any, index: any) => {
+          formData.append(`${key}`, file);
+        });
+      } else {
+        formData.append(key, value);
+      }
+    });
+
+    if (!editId) {
+      handleCreatePaymentMethod(formData);
+    } else {
+      handleEditPaymentMethod(formData);
+    }
   });
+
+
+  const handleCreatePaymentMethod = (data: any) => {
+    dispatch(createPaymentMothod(data)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        setData(null);
+        setOpenPayment({ open: false })
+        enqueueSnackbar('Successfully Created!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response?.error?.message}`, { variant: 'error' });
+      }
+    });
+  }
+
+
+  const handleEditPaymentMethod = (data: any) => {
+    console.log("data", data);
+  }
+
 
 
   // ----------------------------------------------
-  const [openPayment, setOpenPayment] = useState<any>({
-    open: false,
-  });
+
 
   const toggleDrawer = () => (event: React.SyntheticEvent | React.MouseEvent) => {
     // dispatch(fetchOneOrders(item?._id));
@@ -103,6 +196,70 @@ export default function OrdersListView() {
     }
     setOpenPayment({ open: false });
   };
+
+
+
+  const handleChangeData = (event: SelectChangeEvent) => {
+    setData({ ...data, [event.target.name]: event.target.value as string });
+  };
+
+  const handleAddImage = (files: any) => {
+    if (files.length > 0) {
+      setData((prevData: any) => ({
+        ...prevData,
+        image: files[0]
+      }));
+    }
+  };
+
+  const handleAddImages = (files: any) => {
+    if (files.length > 0) {
+      setData((prevData: any) => ({
+        ...prevData,
+        supporters: prevData?.supporters ? [...prevData.supporters, files[0]] : [files[0]],
+      }));
+    }
+  };
+
+  const handleRemoveImage = (type: any, index: any = null) => {
+    setData((current: any) => {
+      if (type === 'image') {
+        const { image, ...rest } = current;
+        return {
+          ...rest,
+        };
+      }
+      const { supporters, ...rest } = current;
+      const updatedImages = supporters.filter((_: any, i: any) => i !== index);
+      return {
+        ...rest,
+        supporters: updatedImages,
+      };
+    });
+  };
+
+  const handleAddCountries = (value: any) => {
+    const list = data?.availableAreas || [];
+    const isExist = list.find((li: any) => li === value?.code);
+    if (!isExist) {
+      list.push(value?.code);
+      setData({ ...data, availableAreas: list })
+    }
+  }
+
+  const handleRemoveCountries = (value: any) => {
+    const list = data?.availableAreas || [];
+    const filteredList = list.filter((li: any) => li !== value);
+    setData({ ...data, availableAreas: filteredList })
+  }
+
+  const handleEdit = (id: any) => {
+    console.log("id", id);
+    setEditId(id);
+    dispatch(fetchOnePaymentMethods(id));
+  }
+
+  const imagesItrations = Array.from({ length: 5 }, (_, index) => index);
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <Grid container justifyContent='space-between' alignItems={{ xs: 'flex-start', md: 'center' }}>
@@ -169,69 +326,21 @@ export default function OrdersListView() {
                 </TabList>
               </Box>
 
-              <TabPanel value="Payment Gateways" sx={{ px: 0, }}>
+              <TabPanel value={value} sx={{ px: 0, }}>
                 <Typography mb='20px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
                   Activate any of the payment options linked to enable your customers to pay
                 </Typography>
 
                 <Grid container spacing={2}>
-                  {[
-                    {
-                      logo: '/raw/pg1.png',
-                      title: 'Tap Gateway',
-                      support: [
-                        '/raw/kf.png',
-                        '/raw/if.png',
-                        '/raw/af.png',
-                        '/raw/mf.png',
-                        '/raw/vf.png',
-                      ]
-                    }, {
-                      logo: '/raw/pg2.png',
-                      title: 'HyperPay Gateway',
-                      support: [
-                        '/raw/if.png',
-                        '/raw/af.png',
-                        '/raw/mf.png',
-                        '/raw/lf.png',
-                      ]
-                    }, {
-                      logo: '/raw/pg3.png',
-                      title: 'PayFort Gateway',
-                      support: [
-                        '/raw/mf.png',
-                        '/raw/vf.png',
-                        '/raw/lf.png',
-                      ]
-                    }, {
-                      logo: '/raw/pg4.png',
-                      title: 'PayTabs Gateway',
-                      support: [
-                        '/raw/kf.png',
-                        '/raw/if.png',
-                        '/raw/af.png',
-                        '/raw/mf.png',
-                        '/raw/vf.png',
-                        '/raw/sf.png',
-                      ]
-                    }, {
-                      logo: '/raw/pg5.png',
-                      title: 'Moyasar Gateway',
-                      support: [
-                        '/raw/mf.png',
-                        '/raw/vf.png',
-                        '/raw/lf.png',
-                      ]
-                    }
-                  ].map((product, indx) =>
+                  {paymentMethodsList.map((paymentM: any, indx: any) =>
                     <Grid item xs={12} sm={6} md={4}>
                       <Paper sx={{ borderRadius: '16px' }}>
                         <Grid container item alignItems='center' columnGap="20px" rowGap="10px" sx={{ p: "30px 22px", minHeight: '150px', boxShadow: '0px 6px 20px #00000014', borderRadius: '16px' }}>
                           <Grid item xs={12} sx={{ minHeight: '57px' }}>
-                            <Box component='img' src={product.logo} alt=" " />
+                            <Box component='img' width='50px' src={paymentM?.image} alt=" " />
                           </Grid>
                           <Grid item xs={12}>
-                            <Typography component='p' variant="subtitle2" sx={{ fontSize: '1.1rem', fontWeight: 900 }} > {product.title} </Typography>
+                            <Typography component='p' variant="subtitle2" sx={{ fontSize: '1.1rem', fontWeight: 900 }} > {paymentM.name} Gateway</Typography>
                           </Grid>
                           <Grid item xs={12}>
                             <Box sx={{
@@ -240,21 +349,23 @@ export default function OrdersListView() {
                               gap: '5px',
                             }} >
                               <Typography component='p' variant="subtitle2" sx={{ fontSize: '.8rem', fontWeight: 800 }} > Support: </Typography>
-                              {product.support.map((flag, indx) => <Box key={indx} component='img' src={flag} alt=" " width='23px' />)}
+                              {paymentM.supporters.map((flag: any, indx: any) => <Box key={indx} component='img' src={flag} alt=" " width='23px' />)}
                             </Box>
                           </Grid>
                           <Grid item xs='auto'>
-                            <Button sx={{
-                              backgroundColor: 'rgb(27, 252, 182)',
-                              '&:hover': { backgroundColor: 'rgb(27, 252, 182)' },
-                              color: '#0F1349', fontSize: '13px', borderRadius: '16px',
-                              padding: "6px 17px", boxShadow: '0px 6px 20px #1BFCB633'
-                            }}>
-                              {indx === 0 ? "Edit Setup" : 'Upgrade to Activate'}
+                            <Button
+                              onClick={() => handleEdit(paymentM?._id)}
+                              sx={{
+                                backgroundColor: 'rgb(27, 252, 182)',
+                                '&:hover': { backgroundColor: 'rgb(27, 252, 182)' },
+                                color: '#0F1349', fontSize: '13px', borderRadius: '16px',
+                                padding: "6px 17px", boxShadow: '0px 6px 20px #1BFCB633'
+                              }}>
+                              Edit Setup
                             </Button>
                           </Grid>
                           <Grid item xs="auto">
-                            <Linker path="https://www.google.com/" target='_blank'
+                            <Linker path={paymentM?.url || "#"} target='_blank'
                               style={{ textDecoration: 'underline', fontSize: '13px', color: "#8688A3" }}
                             >view Website</Linker>
                           </Grid>
@@ -266,7 +377,7 @@ export default function OrdersListView() {
                 </Grid>
               </TabPanel>
 
-              <TabPanel value="Installment Services" sx={{ px: 0, }}>
+              {/* <TabPanel value="Installment Services" sx={{ px: 0, }}>
                 <Typography mb='20px' component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.8rem' }} >
                   Activate any of the payment options linked to enable your customers to pay
                 </Typography>
@@ -408,7 +519,7 @@ export default function OrdersListView() {
                     </Box>
                   </Grid>
                 </Grid>
-              </TabPanel>
+              </TabPanel> */}
 
             </TabContext>
           </Box>
@@ -419,32 +530,21 @@ export default function OrdersListView() {
       <PaymentsNavBar
         open={openPayment.open}
         onClose={handleDrawerClose}
-        title="Create Payment Method"
+        title={editId ? "Edit Payment Method" : "Create Payment Method"}
         actions={
           <Stack alignItems="center" justifyContent="center" spacing="10px">
-            <Button
+            <LoadingButton
               fullWidth
               variant="soft"
               color="success"
               size="large"
-              startIcon={<Iconify icon="subway:tick" />}
+              // onClick={editSubCatId ? handleEditSubCategory : handleCreateSubCategory}
+              loading={isSubmitting}
+              onClick={() => methods.handleSubmit(onSubmit as any)()}
               sx={{ borderRadius: '30px' }}
             >
-              Create
-            </Button>
-            {/* 
-
-            <Button
-              fullWidth
-              variant="soft"
-              color="error"
-              size="large"
-              startIcon={<Iconify icon="entypo:cross" />}
-              sx={{ borderRadius: '30px' }}
-              onClick={() => handleChangeStatus(order?._id, 'cancelled')}
-            >
-              Cancel Order
-            </Button> */}
+              {editId ? 'Update' : 'Save'}
+            </LoadingButton>
           </Stack>
         }
       >
@@ -470,9 +570,9 @@ export default function OrdersListView() {
               <RHFSelect
                 fullWidth
                 variant="filled"
-                name="category"
-              // value={subCategoriesData?.category || ''}
-              // settingStateValue={handleChangeMySubCat}
+                name="type"
+                value={data?.type || ''}
+                settingStateValue={handleChangeData}
               >
 
                 <MenuItem value="Payment Gateway">
@@ -481,10 +581,10 @@ export default function OrdersListView() {
                 <MenuItem value="Installment Service">
                   Installment Services
                 </MenuItem>
-                <MenuItem value="Installment Service">
+                <MenuItem value="Bank Transfer">
                   Bank Transfer
                 </MenuItem>
-                <MenuItem value="Installment Service">
+                <MenuItem value="Cash on Delivery">
                   Cash on Delivery
                 </MenuItem>
 
@@ -502,9 +602,9 @@ export default function OrdersListView() {
               <RHFTextField
                 fullWidth
                 variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
+                name="name"
+                value={data?.name || ""}
+                settingStateValue={handleChangeData}
               />
             </Box>
             <Box sx={{ width: '100%' }} >
@@ -519,9 +619,9 @@ export default function OrdersListView() {
               <RHFTextField
                 fullWidth
                 variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
+                name="url"
+                value={data?.url || ""}
+                settingStateValue={handleChangeData}
               />
             </Box>
             <Box sx={{ width: '100%' }} >
@@ -536,9 +636,9 @@ export default function OrdersListView() {
               <RHFTextField
                 fullWidth
                 variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
+                name="price"
+                value={data?.price || ""}
+                settingStateValue={handleChangeData}
               />
             </Box>
             <Box sx={{ width: '100%' }} >
@@ -550,13 +650,78 @@ export default function OrdersListView() {
               >
                 Image
               </Typography>
-              <RHFTextField
-                fullWidth
-                variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
-              />
+
+              {data?.image ? (
+                <Box
+                  sx={{
+                    width: '100px',
+                    height: '100px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    flexDirection: 'column',
+                    border: '1px dashed rgb(134, 136, 163,.5)',
+                    borderRadius: '16px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={typeof data?.image === 'string' ? data?.image : URL.createObjectURL(data?.image)}
+                    alt=""
+                    sx={{ maxHeight: '95px' }}
+                  />
+                  <Box
+                    onClick={() => handleRemoveImage('image')}
+                    sx={{
+                      backgroundColor: 'rgb(134, 136, 163,.09)',
+                      padding: '10px 11px 7px 11px',
+                      borderRadius: '36px',
+                      cursor: 'pointer',
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                    }}
+                  >
+                    <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
+                  </Box>
+                </Box>
+              ) : (
+                <UploadBox
+                  sx={{
+                    width: '100%!important',
+                    height: '100px!important',
+                    textAlign: 'center',
+                    padding: '20px',
+                  }}
+                  onDrop={handleAddImage}
+                  maxFiles={1}
+                  maxSize={5242880}
+                  accept={{
+                    'image/jpeg': [],
+                    'image/png': [],
+                  }}
+                  placeholder={
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
+                      <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
+                        Upload Image
+                      </span>
+                    </Box>
+                  }
+                />
+              )}
+
             </Box>
             <Box sx={{ width: '100%' }} >
               <Typography
@@ -567,92 +732,78 @@ export default function OrdersListView() {
               >
                 Supporters
               </Typography>
-              {/* <RHFTextField
-                fullWidth
-                variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
-              /> */}
-              <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
-                {[].map((itration: any, ind: any) => (
-                  <Box key={ind}>
 
-                    {/* {productData?.images?.length > 0 && productData?.images[itration] ? (
+              <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {imagesItrations.map((itration: any, ind: any) => (
+                  <Box key={ind}>
+                    {data?.supporters?.length > 0 && data?.supporters[itration] ? (
+                      <Box
+                        sx={{
+                          width: '50px',
+                          height: '50px',
+                          my: '5px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '10px',
+                          flexDirection: 'column',
+                          border: '1px dashed rgb(134, 136, 163,.5)',
+                          borderRadius: '10px',
+                          position: 'relative',
+                          overflow: 'hidden',
+                        }}
+                      >
                         <Box
+                          component="img"
+                          src={typeof data?.supporters[itration] === 'string' ? data?.supporters[itration] : URL.createObjectURL(data?.supporters[itration])}
+                          alt=""
+                          sx={{ maxHeight: '95px' }}
+                        />
+                        <Box
+                          onClick={() => handleRemoveImage('supporters', itration)}
                           sx={{
-                            width: '100px',
-                            height: '100px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '10px',
-                            flexDirection: 'column',
-                            border: '1px dashed rgb(134, 136, 163,.5)',
-                            borderRadius: '16px',
-                            position: 'relative',
-                            overflow: 'hidden',
+                            backgroundColor: 'rgb(134, 136, 163,.09)',
+                            padding: '5px',
+                            borderRadius: '36px',
+                            cursor: 'pointer',
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
                           }}
                         >
+                          <Iconify icon="ic:round-delete" style={{ color: '#8688A3', width: '15px' }} />
+                        </Box>
+                      </Box>
+                    ) : (
+                      <UploadBox
+                        sx={{
+                          width: '50px!important',
+                          height: '50px!important',
+                          textAlign: 'center',
+                          padding: '5px',
+                        }}
+                        onDrop={handleAddImages}
+                        maxFiles={1}
+                        maxSize={5242880}
+                        accept={{
+                          'image/jpeg': [],
+                          'image/png': [],
+                        }}
+                        placeholder={
                           <Box
-                            component="img"
-                            src={
-                              typeof productData?.images[itration] === 'string'
-                                ? productData?.images[itration]
-                                : URL.createObjectURL(productData?.images[itration])
-                            }
-                            // src={typeof productData?.images === 'string' ? productData?.images : URL.createObjectURL(productData?.images)}
-                            alt=""
-                            sx={{ maxHeight: '95px' }}
-                          />
-                          <Box
-                            onClick={() => handleRemoveImage(itration)}
                             sx={{
-                              backgroundColor: 'rgb(134, 136, 163,.09)',
-                              padding: '10px 11px 7px 11px',
-                              borderRadius: '36px',
-                              cursor: 'pointer',
-                              position: 'absolute',
-                              top: 0,
-                              right: 0,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '10px',
+                              flexDirection: 'column',
                             }}
                           >
-                            <Iconify icon="ic:round-delete" style={{ color: '#8688A3' }} />
+                            <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
                           </Box>
-                        </Box>
-                      ) : ( */}
-                    <UploadBox
-                      sx={{
-                        width: '100px!important',
-                        height: '100px!important',
-                        textAlign: 'center',
-                        padding: '20px',
-                      }}
-                      // onDrop={handleAddImage}
-                      maxFiles={1}
-                      maxSize={5242880}
-                      accept={{
-                        'image/jpeg': [],
-                        'image/png': [],
-                      }}
-                      placeholder={
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '10px',
-                            flexDirection: 'column',
-                          }}
-                        >
-                          <Iconify icon="system-uicons:picture" style={{ color: '#8688A3' }} />
-                          <span style={{ color: '#8688A3', fontSize: '.6rem' }}>
-                            Upload Image
-                          </span>
-                        </Box>
-                      }
-                    />
-                    {/* )} */}
+                        }
+                      />
+                    )}
                   </Box>
                 ))}
               </Box>
@@ -669,9 +820,9 @@ export default function OrdersListView() {
               <RHFTextField
                 fullWidth
                 variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
+                name="description"
+                value={data?.description || ""}
+                settingStateValue={handleChangeData}
               />
             </Box>
             <Box sx={{ width: '100%' }} >
@@ -686,9 +837,9 @@ export default function OrdersListView() {
               <RHFTextField
                 fullWidth
                 variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
+                name="bankAccountName"
+                value={data?.bankAccountName || ""}
+                settingStateValue={handleChangeData}
               />
             </Box>
             <Box sx={{ width: '100%' }} >
@@ -703,28 +854,12 @@ export default function OrdersListView() {
               <RHFTextField
                 fullWidth
                 variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
+                name="bankIBAN"
+                value={data?.bankIBAN || ""}
+                settingStateValue={handleChangeData}
               />
             </Box>
-            <Box sx={{ width: '100%' }} >
-              <Typography
-                component="p"
-                noWrap
-                variant="subtitle2"
-                sx={{ opacity: 0.7, fontSize: '.9rem', my: 1, maxWidth: { xs: '120px', md: '218px' } }}
-              >
-                Bank IBAN
-              </Typography>
-              <RHFTextField
-                fullWidth
-                variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
-              />
-            </Box>
+
             <Box sx={{ width: '100%' }} >
               <Typography
                 component="p"
@@ -737,9 +872,9 @@ export default function OrdersListView() {
               <RHFTextField
                 fullWidth
                 variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
+                name="cashOnDeliveryCost"
+                value={data?.cashOnDeliveryCost || ""}
+                settingStateValue={handleChangeData}
               />
             </Box>
 
@@ -753,10 +888,9 @@ export default function OrdersListView() {
               </Typography>
               <Switch
                 size="medium"
-                checked={false}
+                checked={data?.cashOnDelivery || false}
                 onChange={(e: any) =>
-                  console.log(e)
-                  // setProductData({ ...productData, publish_app: e.target.checked })
+                  setData({ ...data, cashOnDelivery: e.target.checked })
                 }
               />
             </Box>
@@ -769,57 +903,27 @@ export default function OrdersListView() {
               >
                 Available Countries
               </Typography>
-              <RHFTextField
-                fullWidth
+
+              <CountrySelect
+                name="availableAreas"
                 variant="filled"
-                value='dwas'
-                settingStateValue={(e: any) => console.log(e)}
-                name="name.en"
+                value=''
+                onChange={(event: any, value: any) => {
+                  if (value) {
+                    handleAddCountries(value)
+                  }
+                }}
               />
+              <Box display='flex' sx={{ flexWrap: "wrap" }} gap={2} >
+                {data?.availableAreas?.map((country: any, ind: any) => (
+                  <Chip variant="outlined" key={ind} label={country} color="info" onDelete={() => handleRemoveCountries(country)} />
+                ))}
+              </Box>
+
             </Box>
 
 
           </Stack>
-
-
-
-          {/* <Box
-          sx={{
-            width: '100%',
-            bgcolor: 'background.neutral',
-            borderRadius: '16px',
-            p: 2.5,
-            display: 'flex',
-            gap: '10px',
-            flexDirection: 'column',
-          }}
-        >
-
-          <FormControl>
-            <Typography
-              component="p"
-              variant="subtitle2"
-              sx={{ opacity: 0.7, fontSize: '.85rem' }}
-            >
-              Type
-            </Typography>
-            <RadioGroup
-              aria-labelledby="Language-selection"
-              defaultValue="A4"
-              name="Language-selection-group"
-            >
-              <Grid container alignItems="center" justifyContent="space-between">
-                <Grid item xs={6}>
-                  <FormControlLabel value="Thermal" control={<Radio />} label="Thermal" />
-                </Grid>
-                <Grid item xs={6}>
-                  <FormControlLabel value="A4" control={<Radio />} label="A4" />
-                </Grid>
-              </Grid>
-            </RadioGroup>
-          </FormControl>
-
-        </Box> */}
 
 
 
