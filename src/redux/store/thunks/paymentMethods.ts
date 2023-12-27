@@ -45,7 +45,6 @@ export const fetchOnePaymentMethods = createAsyncThunk(
       `${endpoints.paymentMethod.list}/${paymentMethodId}`,
       defaultConfig
     );
-    console.log('paymentMethodId....', paymentMethodId);
     return response.data || {};
   }
 );
@@ -77,7 +76,7 @@ export const editPaymentMethods = createAsyncThunk(
 
 export const deletePaymentMethods = createAsyncThunk(
   'paymentMethod/delete',
-  async (paymentMethodId: number) => {
+  async (paymentMethodId: any) => {
     const response = await deleteRequest(
       `${endpoints.paymentMethod.list}/${paymentMethodId}`,
       defaultConfig
