@@ -45,7 +45,7 @@ import PaymentsNavBar from '../PaymentsNavBar';
 
 const STATUS_OPTIONS = [
   { value: 'Payment Gateway', label: 'Payment Gateways' },
-  { value: 'Installment Service', label: 'Installment Services' },
+  { value: 'Installment Services', label: 'Installment Services' },
   { value: 'Bank Transfer', label: 'Bank Transfer' },
   { value: 'Cash On Delivery', label: 'Cash On Delivery' },
 ];
@@ -196,7 +196,7 @@ export default function OrdersListView() {
       if (response.meta.requestStatus === 'fulfilled') {
         setData(null);
         setOpenPayment({ open: false })
-        dispatch(fetchPaymentMethodsList(paymentMethodState.error));
+        dispatch(fetchPaymentMethodsList(null));
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response?.error?.message}`, { variant: 'error' });
@@ -210,7 +210,7 @@ export default function OrdersListView() {
       if (response.meta.requestStatus === 'fulfilled') {
         setData(null);
         setOpenPayment({ open: false })
-        dispatch(fetchPaymentMethodsList(paymentMethodState.error));
+        dispatch(fetchPaymentMethodsList(null));
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response?.error?.message}`, { variant: 'error' });
@@ -222,7 +222,7 @@ export default function OrdersListView() {
     if (removeId) {
       dispatch(deletePaymentMethods(removeId)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchPaymentMethodsList(paymentMethodState.error));
+          dispatch(fetchPaymentMethodsList(null));
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
@@ -525,7 +525,7 @@ export default function OrdersListView() {
                 <MenuItem value="Payment Gateway">
                   Payment Gateways
                 </MenuItem>
-                <MenuItem value="Installment Service">
+                <MenuItem value="Installment Services">
                   Installment Services
                 </MenuItem>
                 <MenuItem value="Bank Transfer">
