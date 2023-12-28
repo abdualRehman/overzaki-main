@@ -9,24 +9,31 @@ import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { ForbiddenIllustration } from 'src/assets/illustrations';
 // components
 import { MotionContainer, varBounce } from 'src/components/animate';
+import { useAuthContext } from '../hooks';
 
 // ----------------------------------------------------------------------
 
 type RoleBasedGuardProp = {
   hasContent?: boolean;
   roles?: string[];
+  permission?: string[];
   children: React.ReactNode;
   sx?: SxProps<Theme>;
 };
 
-export default function RoleBasedGuard({ hasContent, roles, children, sx }: RoleBasedGuardProp) {
-  // Logic here to get current user role
-  const { user } = useMockedUser();
+export default function RoleBasedGuard({ hasContent, roles, permission, children, sx }: RoleBasedGuardProp) {
 
-  // const currentRole = 'user';
-  const currentRole = user?.role; // admin;
+  const { user } = useAuthContext();
 
-  if (typeof roles !== 'undefined' && !roles.includes(currentRole)) {
+
+  const userRoles = user?.roles || [];
+  const userPermissions = user?.permissions || [];
+
+  const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
+  const hasCommonPermission = permission ? userPermissions.includes(permission) : false;
+
+
+  if (!hasCommonRole || !hasCommonPermission) {
     return hasContent ? (
       <Container component={MotionContainer} sx={{ textAlign: 'center', ...sx }}>
         <m.div variants={varBounce().in}>

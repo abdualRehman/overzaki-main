@@ -26,7 +26,7 @@ export default function NavItem({
   externalLink,
   ...other
 }: Props) {
-  const { title, path, icon, info, children, disabled, caption, roles } = item;
+  const { title, path, icon, info, children, disabled, caption, roles, permissions } = item;
 
   const subItem = depth !== 1;
 
@@ -90,9 +90,21 @@ export default function NavItem({
     </StyledItem>
   );
 
-  // Hidden item by role
-  if (roles && !roles.includes(`${config.currentRole}`)) {
-    return null;
+
+  if (roles && permissions) {
+
+    const userRoles = config.currentRoles || [];
+    const userPermissions = config.currentPermissions || [];
+
+    const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
+    const hasCommonPermission = permissions && permissions.some((permission: string) => userPermissions && userPermissions.includes(permission));
+    // Hidden item by role
+    if (roles && !roles.includes(`${config.currentRole}`)) {
+      return null;
+    }
+    // if (!hasCommonRole || !hasCommonPermission) {
+    //   return null;
+    // }
   }
 
   // External link
