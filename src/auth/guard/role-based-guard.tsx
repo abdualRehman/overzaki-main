@@ -16,7 +16,7 @@ import { useAuthContext } from '../hooks';
 type RoleBasedGuardProp = {
   hasContent?: boolean;
   roles?: string[];
-  permission?: string[];
+  permission?: string;
   children: React.ReactNode;
   sx?: SxProps<Theme>;
 };
@@ -30,10 +30,10 @@ export default function RoleBasedGuard({ hasContent, roles, permission, children
   const userPermissions = user?.permissions || [];
 
   const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
-  const hasCommonPermission = permission ? userPermissions.includes(permission) : false;
+  const hasCommonPermission = permission && userPermissions.includes(permission);
 
 
-  if (!hasCommonRole || !hasCommonPermission) {
+  if ((roles && !hasCommonRole) || (permission && !hasCommonPermission)) {
     return hasContent ? (
       <Container component={MotionContainer} sx={{ textAlign: 'center', ...sx }}>
         <m.div variants={varBounce().in}>

@@ -91,21 +91,21 @@ export default function NavItem({
   );
 
 
-  if (roles && permissions) {
 
-    const userRoles = config.currentRoles || [];
-    const userPermissions = config.currentPermissions || [];
+  const userRoles = config.currentRoles || [];
+  const userPermissions = config.currentPermissions || [];
 
-    const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
-    const hasCommonPermission = permissions && permissions.some((permission: string) => userPermissions && userPermissions.includes(permission));
-    // Hidden item by role
-    if (roles && !roles.includes(`${config.currentRole}`)) {
-      return null;
-    }
-    // if (!hasCommonRole || !hasCommonPermission) {
-    //   return null;
-    // }
+  const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role)) || false;
+  const hasCommonPermission = permissions && permissions.some((permission: string) => userPermissions && userPermissions.includes(permission)) || false;
+  
+  // Hidden item by role
+  if ((roles && !hasCommonRole) || (permissions && !hasCommonPermission)) {
+    return null;
   }
+  
+  // if (roles && !roles.includes(`${config.currentRole}`)) {
+  //   return null;
+  // }
 
   // External link
   if (externalLink)
