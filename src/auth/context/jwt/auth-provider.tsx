@@ -112,6 +112,8 @@ export function AuthProvider({ children }: Props) {
 
         const { accessToken, refreshToken } = response.data.data;
 
+        console.log("response" , response);
+        
 
         setSession(accessToken);
         sessionStorage.setItem(REFRESH_KEY, refreshToken);
