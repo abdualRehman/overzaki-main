@@ -34,6 +34,8 @@ import { useSnackbar } from 'notistack';
 import { useDispatch, useSelector } from 'react-redux';
 // import { fetchCustomersList, fetchOneCustomer } from '../../../redux/store/thunks/customers';
 import NavigatorBar from 'src/components/NavigatorBar';
+import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 import {
   createCategory,
   createSubCategory,
@@ -49,7 +51,7 @@ import {
   setSubCategory,
 } from '../../../redux/store/thunks/category';
 import type { AppDispatch } from '../../../redux/store/store';
-import { RoleBasedGuard } from 'src/auth/guard';
+
 
 // ----------------------------------------------------------------------
 
@@ -61,6 +63,8 @@ export default function CategoriesView() {
   const [editCatId, setEditCatId] = useState<any>(null);
   const [editSubCatId, setEditSubCatId] = useState<any>(null);
   const [removeData, setRemoveData] = useState<any>(null);
+
+  const { verifyPermission } = useAuthContext();
 
   const settings = useSettingsContext();
 
@@ -379,27 +383,27 @@ export default function CategoriesView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'cat') {
-        setCategoryDrawer((pv) => !pv);
-        setEditCatId(id);
-        if (id) {
-          dispatch(fetchOneCategory(id));
-        } else {
-          setCategoriesData({});
-          dispatch(setCategory({}));
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'cat') {
+          setCategoryDrawer((pv) => !pv);
+          setEditCatId(id);
+          if (id) {
+            dispatch(fetchOneCategory(id));
+          } else {
+            setCategoriesData({});
+            dispatch(setCategory({}));
+          }
+        } else if (state === 'sub') {
+          setSubCategoryDrawer((pv) => !pv);
+          setEditSubCatId(id);
+          if (id) {
+            dispatch(fetchOneSubCategory(id));
+          } else {
+            setSubCategoriesData({});
+            dispatch(setSubCategory({}));
+          }
         }
-      } else if (state === 'sub') {
-        setSubCategoryDrawer((pv) => !pv);
-        setEditSubCatId(id);
-        if (id) {
-          dispatch(fetchOneSubCategory(id));
-        } else {
-          setSubCategoriesData({});
-          dispatch(setSubCategory({}));
-        }
-      }
-    };
+      };
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
       if (
@@ -431,18 +435,34 @@ export default function CategoriesView() {
     setListItems(items);
   };
 
-  // ----------------------------- permissions
-  const getPermission = (moduleName: string) => (
-    <RoleBasedGuard permission={moduleName}>
-      <></>
-    </RoleBasedGuard>
-  );
+  // ----------------------------- permissions -----------------------------
 
-  const editPermission = getPermission('UPDATE_CATEGORY_BY_ID');
-  const removePermission = getPermission('DELETE_CATEGORY_BY_ID');
+  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({ edit: false, remove: false });
+  const getPermission = async (moduleName: string, permissionName: string): Promise<void> => {
+    try {
+      const data = { permission: permissionName };
+      const responseData = await verifyPermission?.(data);
 
-  console.log('editPermission', editPermission);
-  console.log('removePermission', removePermission);
+      if (moduleName === 'edit') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, edit: responseData }));
+      } else if (moduleName === 'remove') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, remove: responseData }));
+      }
+    } catch (error) {
+      console.error(`Error while checking ${moduleName} permission:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPermission('edit', 'UPDATE_CATEGORY_BY_ID');
+      await getPermission('remove', 'DELETE_CATEGORY_BY_ID');
+    };
+    fetchData();
+  }, []);
+
+
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <RoleBasedGuard returnBoolean hasContent permission="GET_CATEGORYS">
@@ -474,18 +494,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'main'
                     ? {
-                        borderRadius: '12px',
-                        color: '#0F1349',
-                        backgroundColor: '#FFFFFF',
-                        boxShadow: '0px 6px 20px #00000033',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#0F1349',
+                      backgroundColor: '#FFFFFF',
+                      boxShadow: '0px 6px 20px #00000033',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                     : {
-                        borderRadius: '12px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: 'background.neutral' },
-                      }
+                      borderRadius: '12px',
+                      color: '#8688A3',
+                      backgroundColor: 'background.neutral',
+                      '&:hover': { backgroundColor: 'background.neutral' },
+                    }
                 }
               >
                 {' '}
@@ -498,18 +518,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'sub'
                     ? {
-                        borderRadius: '12px',
-                        color: '#0F1349',
-                        backgroundColor: '#FFFFFF',
-                        boxShadow: '0px 6px 20px #00000033',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#0F1349',
+                      backgroundColor: '#FFFFFF',
+                      boxShadow: '0px 6px 20px #00000033',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                     : {
-                        borderRadius: '12px',
-                        color: '#8688A3',
-                        backgroundColor: 'background.neutral',
-                        '&:hover': { backgroundColor: '#FFFFFF' },
-                      }
+                      borderRadius: '12px',
+                      color: '#8688A3',
+                      backgroundColor: 'background.neutral',
+                      '&:hover': { backgroundColor: '#FFFFFF' },
+                    }
                 }
               >
                 {' '}

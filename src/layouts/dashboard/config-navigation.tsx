@@ -78,7 +78,6 @@ export function useNavData() {
             title: t('orders'),
             path: paths.dashboard.orders.root,
             icon: ICONS.order,
-            roles: ['BUSINESS_OWNER', 'ADMIN'],
             permissions: ['GET_ORDERS'],
           },
           {

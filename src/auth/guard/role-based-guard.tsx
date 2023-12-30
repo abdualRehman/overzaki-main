@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import { m } from 'framer-motion';
 // @mui
 import { Theme, SxProps } from '@mui/material/styles';
@@ -8,6 +9,7 @@ import { useMockedUser } from 'src/hooks/use-mocked-user';
 // assets
 import { ForbiddenIllustration } from 'src/assets/illustrations';
 // components
+import { useEffect, useState } from 'react';
 import { MotionContainer, varBounce } from 'src/components/animate';
 import { useAuthContext } from '../hooks';
 
@@ -17,19 +19,19 @@ type RoleBasedGuardProp = {
   hasContent?: boolean;
   roles?: string[];
   permission?: string;
-  returnBoolean: boolean;
-  children: React.ReactNode;
+  returnBoolean?: boolean;
+  children?: React.ReactNode;
   sx?: SxProps<Theme>;
 };
 
-export default function RoleBasedGuard({
+const RoleBasedGuard = ({
   hasContent,
   roles,
   permission,
   children,
   sx,
   returnBoolean,
-}: RoleBasedGuardProp) {
+}: RoleBasedGuardProp) => {
   const { user } = useAuthContext();
 
   const userRoles = user?.roles || [];
@@ -37,11 +39,16 @@ export default function RoleBasedGuard({
 
   const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
   const hasCommonPermission = permission && userPermissions.includes(permission);
-  if (returnBoolean) {
-    if ((roles && !hasCommonRole) || (permission && !hasCommonPermission)) {
-      return 'true';
+
+
+  if (returnBoolean && !hasContent) {
+    if (permission === 'UPDATE_CATEGORY_BY_ID' || permission === 'DELETE_CATEGORY_BY_ID') {
+      // console.log("permission", permission);
+      // console.log("hasCommonPermission", hasCommonPermission);
+      // console.log("hasCommonRole", hasCommonRole);
     }
-    return 'false';
+    // return (roles && !hasCommonRole) || (permission && !hasCommonPermission);
+    return null;
   }
   if ((roles && !hasCommonRole) || (permission && !hasCommonPermission)) {
     return hasContent ? (
@@ -69,6 +76,11 @@ export default function RoleBasedGuard({
       </Container>
     ) : null;
   }
+  if (children) {
+    return <> {children} </>;
+  }
 
-  return <> {children} </>;
 }
+export default RoleBasedGuard;
+
+
