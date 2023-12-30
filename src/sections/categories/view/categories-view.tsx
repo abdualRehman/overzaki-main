@@ -445,7 +445,7 @@ export default function CategoriesView() {
   console.log('removePermission', removePermission);
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <RoleBasedGuard hasContent permission="GET_CATEGORYS">
+      <RoleBasedGuard returnBoolean hasContent permission="GET_CATEGORYS">
         <Grid
           container
           justifyContent="space-between"

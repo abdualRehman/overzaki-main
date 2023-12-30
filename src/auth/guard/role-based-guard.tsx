@@ -17,22 +17,32 @@ type RoleBasedGuardProp = {
   hasContent?: boolean;
   roles?: string[];
   permission?: string;
+  returnBoolean: boolean;
   children: React.ReactNode;
   sx?: SxProps<Theme>;
 };
 
-export default function RoleBasedGuard({ hasContent, roles, permission, children, sx }: RoleBasedGuardProp) {
-
+export default function RoleBasedGuard({
+  hasContent,
+  roles,
+  permission,
+  children,
+  sx,
+  returnBoolean,
+}: RoleBasedGuardProp) {
   const { user } = useAuthContext();
-
 
   const userRoles = user?.roles || [];
   const userPermissions = user?.permissions || [];
 
   const hasCommonRole = userRoles.some((role: string) => roles && roles.includes(role));
   const hasCommonPermission = permission && userPermissions.includes(permission);
-
-
+  if (returnBoolean) {
+    if ((roles && !hasCommonRole) || (permission && !hasCommonPermission)) {
+      return 'true';
+    }
+    return 'false';
+  }
   if ((roles && !hasCommonRole) || (permission && !hasCommonPermission)) {
     return hasContent ? (
       <Container component={MotionContainer} sx={{ textAlign: 'center', ...sx }}>
