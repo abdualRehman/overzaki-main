@@ -52,7 +52,6 @@ import {
 } from '../../../redux/store/thunks/category';
 import type { AppDispatch } from '../../../redux/store/store';
 
-
 // ----------------------------------------------------------------------
 
 export default function CategoriesView() {
@@ -383,27 +382,27 @@ export default function CategoriesView() {
   // common
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'cat') {
-          setCategoryDrawer((pv) => !pv);
-          setEditCatId(id);
-          if (id) {
-            dispatch(fetchOneCategory(id));
-          } else {
-            setCategoriesData({});
-            dispatch(setCategory({}));
-          }
-        } else if (state === 'sub') {
-          setSubCategoryDrawer((pv) => !pv);
-          setEditSubCatId(id);
-          if (id) {
-            dispatch(fetchOneSubCategory(id));
-          } else {
-            setSubCategoriesData({});
-            dispatch(setSubCategory({}));
-          }
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'cat') {
+        setCategoryDrawer((pv) => !pv);
+        setEditCatId(id);
+        if (id) {
+          dispatch(fetchOneCategory(id));
+        } else {
+          setCategoriesData({});
+          dispatch(setCategory({}));
         }
-      };
+      } else if (state === 'sub') {
+        setSubCategoryDrawer((pv) => !pv);
+        setEditSubCatId(id);
+        if (id) {
+          dispatch(fetchOneSubCategory(id));
+        } else {
+          setSubCategoriesData({});
+          dispatch(setSubCategory({}));
+        }
+      }
+    };
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
       if (
@@ -437,7 +436,10 @@ export default function CategoriesView() {
 
   // ----------------------------- permissions -----------------------------
 
-  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({ edit: false, remove: false });
+  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({
+    edit: false,
+    remove: false,
+  });
   const getPermission = async (moduleName: string, permissionName: string): Promise<void> => {
     try {
       const data = { permission: permissionName };
@@ -460,8 +462,6 @@ export default function CategoriesView() {
     };
     fetchData();
   }, []);
-
-
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -494,18 +494,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'main'
                     ? {
-                      borderRadius: '12px',
-                      color: '#0F1349',
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0px 6px 20px #00000033',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                        borderRadius: '12px',
+                        color: '#0F1349',
+                        backgroundColor: '#FFFFFF',
+                        boxShadow: '0px 6px 20px #00000033',
+                        '&:hover': { backgroundColor: '#FFFFFF' },
+                      }
                     : {
-                      borderRadius: '12px',
-                      color: '#8688A3',
-                      backgroundColor: 'background.neutral',
-                      '&:hover': { backgroundColor: 'background.neutral' },
-                    }
+                        borderRadius: '12px',
+                        color: '#8688A3',
+                        backgroundColor: 'background.neutral',
+                        '&:hover': { backgroundColor: 'background.neutral' },
+                      }
                 }
               >
                 {' '}
@@ -518,18 +518,18 @@ export default function CategoriesView() {
                 sx={
                   activeCategory === 'sub'
                     ? {
-                      borderRadius: '12px',
-                      color: '#0F1349',
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0px 6px 20px #00000033',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                        borderRadius: '12px',
+                        color: '#0F1349',
+                        backgroundColor: '#FFFFFF',
+                        boxShadow: '0px 6px 20px #00000033',
+                        '&:hover': { backgroundColor: '#FFFFFF' },
+                      }
                     : {
-                      borderRadius: '12px',
-                      color: '#8688A3',
-                      backgroundColor: 'background.neutral',
-                      '&:hover': { backgroundColor: '#FFFFFF' },
-                    }
+                        borderRadius: '12px',
+                        color: '#8688A3',
+                        backgroundColor: 'background.neutral',
+                        '&:hover': { backgroundColor: '#FFFFFF' },
+                      }
                 }
               >
                 {' '}
@@ -675,18 +675,25 @@ export default function CategoriesView() {
                                         </Grid>
 
                                         <Grid item xs="auto" textAlign="right">
-                                          <Iconify
-                                            icon="carbon:delete"
-                                            onClick={() => {
-                                              setRemoveData({ type: 'category', id: category._id });
-                                              confirm.onTrue();
-                                            }}
-                                          />{' '}
+                                          {allowAction.remove && (
+                                            <Iconify
+                                              icon="carbon:delete"
+                                              onClick={() => {
+                                                setRemoveData({
+                                                  type: 'category',
+                                                  id: category._id,
+                                                });
+                                                confirm.onTrue();
+                                              }}
+                                            />
+                                          )}{' '}
                                           &nbsp; &nbsp; &nbsp;
-                                          <Iconify
-                                            icon="bx:edit"
-                                            onClick={toggleDrawerCommon('cat', category._id)}
-                                          />
+                                          {allowAction.edit && (
+                                            <Iconify
+                                              icon="bx:edit"
+                                              onClick={toggleDrawerCommon('cat', category._id)}
+                                            />
+                                          )}
                                         </Grid>
                                       </Grid>
                                     </Paper>

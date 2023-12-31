@@ -73,6 +73,7 @@ import VouchersToolbar from '../vouchers-toolbar';
 import VouchersFiltersResult from '../vouchers-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 // .....
 // ----------------------------------------------------------------------
 const activeTab = {
@@ -468,6 +469,35 @@ export default function OrdersListView() {
     setListItems(items);
   };
 
+  // -----
+  const { verifyPermission } = useAuthContext();
+  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({
+    edit: false,
+    remove: false,
+  });
+  const getPermission = async (moduleName: string, permissionName: string): Promise<void> => {
+    try {
+      const data = { permission: permissionName };
+      const responseData = await verifyPermission?.(data);
+
+      if (moduleName === 'edit') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, edit: responseData }));
+      } else if (moduleName === 'remove') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, remove: responseData }));
+      }
+    } catch (error) {
+      console.error(`Error while checking ${moduleName} permission:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPermission('edit', 'UPDATE_VOUCHER_BY_ID');
+      await getPermission('remove', 'DELETE_VOUCHER_BY_ID');
+    };
+    fetchData();
+  }, []);
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <RoleBasedGuard hasContent roles={['BUSINESS_OWNER', 'ADMIN']} permission="GET_VOUCHERS">
@@ -710,11 +740,13 @@ export default function OrdersListView() {
                                             confirm.onTrue();
                                           }}
                                         >
-                                          <Box
-                                            component="img"
-                                            src="/raw/trash-can-solid.svg"
-                                            width="13px"
-                                          />
+                                          {allowAction.remove && (
+                                            <Box
+                                              component="img"
+                                              src="/raw/trash-can-solid.svg"
+                                              width="13px"
+                                            />
+                                          )}
                                         </Box>
                                         <Box
                                           sx={{
@@ -732,11 +764,13 @@ export default function OrdersListView() {
                                           }}
                                           onClick={toggleDrawerCommon('new', voucher._id)}
                                         >
-                                          <Box
-                                            component="img"
-                                            src="/raw/edit-pen.svg"
-                                            width="13px"
-                                          />
+                                          {allowAction.edit && (
+                                            <Box
+                                              component="img"
+                                              src="/raw/edit-pen.svg"
+                                              width="13px"
+                                            />
+                                          )}
                                         </Box>
                                         {/* <Switch checked={voucher.status} /> */}
                                       </Box>

@@ -64,6 +64,7 @@ import Link from 'next/link';
 import DetailsNavBar from '../DetailsNavBar';
 import ProductTableToolbar from '../product-table-toolbar';
 import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -73,6 +74,7 @@ export default function OrdersListView() {
   const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
   const categoryState = useSelector((state: any) => state.category);
+  const { verifyPermission } = useAuthContext();
   // const loadStatus = useSelector((state: any) => state.products.status);
   const { list, error, product, variant } = useSelector((state: any) => state.products);
   const [productData, setProductData] = useState<any>(null);
@@ -565,8 +567,32 @@ export default function OrdersListView() {
     setListItems(sortedList);
   }, [listStuff, sort]);
   const imagesItrations = Array.from({ length: 3 }, (_, index) => index);
-  // Pagination
-  // For Length
+  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({
+    edit: false,
+    remove: false,
+  });
+  const getPermission = async (moduleName: string, permissionName: string): Promise<void> => {
+    try {
+      const data = { permission: permissionName };
+      const responseData = await verifyPermission?.(data);
+
+      if (moduleName === 'edit') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, edit: responseData }));
+      } else if (moduleName === 'remove') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, remove: responseData }));
+      }
+    } catch (error) {
+      console.error(`Error while checking ${moduleName} permission:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPermission('edit', 'UPDATE_PRODUCT_BY_ID');
+      await getPermission('remove', 'DELETE_PRODUCT_BY_ID');
+    };
+    fetchData();
+  }, []);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -775,20 +801,24 @@ export default function OrdersListView() {
                                               />{' '}
                                             </Link>
                                             &nbsp; &nbsp;
-                                            <Iconify
-                                              icon="carbon:delete"
-                                              onClick={() => {
-                                                setRemoveData(product._id);
-                                                confirm.onTrue();
-                                              }}
-                                              style={{ cursor: 'pointer' }}
-                                            />{' '}
+                                            {allowAction.remove && (
+                                              <Iconify
+                                                icon="carbon:delete"
+                                                onClick={() => {
+                                                  setRemoveData(product._id);
+                                                  confirm.onTrue();
+                                                }}
+                                                style={{ cursor: 'pointer' }}
+                                              />
+                                            )}{' '}
                                             &nbsp; &nbsp;
-                                            <Iconify
-                                              icon="bx:edit"
-                                              onClick={toggleDrawerCommon('new', product._id)}
-                                              style={{ cursor: 'pointer' }}
-                                            />
+                                            {allowAction.edit && (
+                                              <Iconify
+                                                icon="bx:edit"
+                                                onClick={toggleDrawerCommon('new', product._id)}
+                                                style={{ cursor: 'pointer' }}
+                                              />
+                                            )}
                                           </Box>
                                         </Grid>
                                       </Grid>

@@ -71,6 +71,7 @@ import {
   setCustomers,
 } from '../../../redux/store/thunks/customers';
 import { RoleBasedGuard } from 'src/auth/guard';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -407,7 +408,34 @@ export default function OrdersListView() {
       )
   );
 
-  // Pagination
+  // -----
+  const { verifyPermission } = useAuthContext();
+  const [allowAction, setAllowAction] = useState<{ edit: boolean; remove: boolean }>({
+    edit: false,
+    remove: false,
+  });
+  const getPermission = async (moduleName: string, permissionName: string): Promise<void> => {
+    try {
+      const data = { permission: permissionName };
+      const responseData = await verifyPermission?.(data);
+
+      if (moduleName === 'edit') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, edit: responseData }));
+      } else if (moduleName === 'remove') {
+        setAllowAction((prevAllowAction) => ({ ...prevAllowAction, remove: responseData }));
+      }
+    } catch (error) {
+      console.error(`Error while checking ${moduleName} permission:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await getPermission('edit', 'UPDATE_CUSTOMER_BY_ID');
+      await getPermission('remove', 'DELETE_CUSTOMER_BY_ID');
+    };
+    fetchData();
+  }, []);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -671,23 +699,30 @@ export default function OrdersListView() {
                                         </Grid>
 
                                         <Grid item xs="auto" textAlign="right">
-                                          <Iconify
-                                            icon="carbon:delete"
-                                            sx={{ height: '60px' }}
-                                            onClick={() => {
-                                              setRemoveData({ type: 'customer', id: itemObj._id });
-                                              confirm.onTrue();
-                                            }}
-                                          />{' '}
+                                          {allowAction.remove && (
+                                            <Iconify
+                                              icon="carbon:delete"
+                                              sx={{ height: '60px' }}
+                                              onClick={() => {
+                                                setRemoveData({
+                                                  type: 'customer',
+                                                  id: itemObj._id,
+                                                });
+                                                confirm.onTrue();
+                                              }}
+                                            />
+                                          )}{' '}
                                           &nbsp; &nbsp; &nbsp;
-                                          <Iconify
-                                            icon="bx:edit"
-                                            sx={{ height: '60px' }}
-                                            onClick={toggleDrawerCommon(
-                                              'createOrEdit',
-                                              itemObj._id
-                                            )}
-                                          />
+                                          {allowAction.remove && (
+                                            <Iconify
+                                              icon="bx:edit"
+                                              sx={{ height: '60px' }}
+                                              onClick={toggleDrawerCommon(
+                                                'createOrEdit',
+                                                itemObj._id
+                                              )}
+                                            />
+                                          )}
                                         </Grid>
                                       </Grid>
                                     </Paper>
