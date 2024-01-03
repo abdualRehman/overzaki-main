@@ -26,7 +26,7 @@ import FormProvider from 'src/components/hook-form/form-provider';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
-import { RHFTextField } from 'src/components/hook-form';
+import { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import { useDispatch } from 'react-redux';
 import {
   createStaffManagement,
@@ -36,11 +36,13 @@ import {
   fetchStaffManagementsList,
   fetchStaffManagementsWithParams,
 } from 'src/redux/store/thunks/staffManagement';
-import { AppDispatch } from 'src/redux/store/store';
+// import { AppDispatch } from 'src/redux/store/store';
 import { enqueueSnackbar } from 'notistack';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useAuthContext } from 'src/auth/hooks';
 import NavigatorBar from 'src/components/NavigatorBar';
+import { fetchRolesList } from 'src/redux/store/thunks/roles';
+import { MenuItem, Option } from '@mui/base';
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -58,7 +60,7 @@ export default function StaffManagment() {
   const settings = useSettingsContext();
   const dispatch = useDispatch<any>();
   // const [data] = useState(users);
-  const [usersData, setUsersData] = useState([]);
+  // const [usersData, setUsersData] = useState([]);
   const [editId, setEditId] = useState('');
   const [newUsersData, setNewUsersData] = useState<any>();
   // new order
@@ -70,29 +72,29 @@ export default function StaffManagment() {
   const pageSize = 5;
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-      (event: React.SyntheticEvent | React.MouseEvent) => {
-        if (state === 'new') {
-          setOpenCreateStaff((pv) => !pv);
-          setEditId(id);
-          if (id) {
-            dispatch(fetchOneStaffManagement(id)).then((response: any) => {
-              const { user, adminName } = response.payload;
-              const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
-              delete adminName.localized;
-              const userObj = {
-                adminName,
-                gender,
-                email,
-                location,
-                phoneNumber,
-                preferedLanguage,
-                roles,
-              };
-              setUserData(userObj);
-            });
-          }
-        } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
-      };
+    (event: React.SyntheticEvent | React.MouseEvent) => {
+      if (state === 'new') {
+        setOpenCreateStaff((pv) => !pv);
+        setEditId(id);
+        if (id) {
+          dispatch(fetchOneStaffManagement(id)).then((response: any) => {
+            const { user, adminName } = response.payload;
+            const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
+            delete adminName.localized;
+            const userObj = {
+              adminName,
+              gender,
+              email,
+              location,
+              phoneNumber,
+              preferedLanguage,
+              roles,
+            };
+            setUserData(userObj);
+          });
+        }
+      } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
+    };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -285,6 +287,11 @@ export default function StaffManagment() {
     };
     fetchData();
   }, []);
+  const [permissions, setPermissions] = useState<any>([]);
+  useEffect(() => {
+    dispatch(fetchRolesList(Error)).then((response: any) => setPermissions(response.payload.data));
+  }, []);
+  console.log(permissions);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -297,12 +304,13 @@ export default function StaffManagment() {
         <Grid item xs={12} md="auto">
           <CustomCrumbs
             heading="Staff Management"
-            description={`${staffLength
-              ? staffLength === 1
-                ? `${staffLength} Staff Member`
-                : `${staffLength} Staff Members`
-              : `${0} Staff Members`
-              }`}
+            description={`${
+              staffLength
+                ? staffLength === 1
+                  ? `${staffLength} Staff Member`
+                  : `${staffLength} Staff Members`
+                : `${0} Staff Members`
+            }`}
           />
         </Grid>
 
@@ -805,28 +813,14 @@ export default function StaffManagment() {
             <Typography variant="body1" color="#8688A3" sx={{ my: '5px', fontWeight: 900 }}>
               Admin Powers
             </Typography>
-            <Box>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Edit Theme & Layout</Typography>
-                <Switch />
-              </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Add/Edit Categories</Typography>
-                <Switch defaultChecked />
-              </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Add/Edit Products</Typography>
-                <Switch defaultChecked />
-              </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Manage Orders</Typography>
-                <Switch />
-              </Stack>
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography variant="button">Get Notifications</Typography>
-                <Switch defaultChecked />
-              </Stack>
-            </Box>
+            <RHFSelect fullWidth variant="filled" name="adminPower">
+              {permissions.length > 0 &&
+                permissions?.map((item: any, i: any) => (
+                  <p key={i} value={item._id}>
+                    {item?.name}
+                  </p>
+                ))}
+            </RHFSelect>
           </Box>
         </FormProvider>
       </DetailsNavBar>
