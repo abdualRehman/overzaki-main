@@ -815,11 +815,7 @@ export default function StaffManagment() {
             </Typography>
             <RHFSelect fullWidth variant="filled" name="adminPower">
               {permissions.length > 0 &&
-                permissions?.map((item: any, i: any) => (
-                  <p key={i} value={item._id}>
-                    {item?.name}
-                  </p>
-                ))}
+                permissions?.map((item: any, i: any) => <p key={i}>{item?.name}</p>)}
             </RHFSelect>
           </Box>
         </FormProvider>
