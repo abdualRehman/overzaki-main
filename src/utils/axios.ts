@@ -152,7 +152,7 @@ export const endpoints = {
     search: '/voucher/search',
   },
   role: {
-    list: '/roles/all',
+    list: '/roles',
     search: '/roles/search',
   },
   permission: {

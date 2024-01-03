@@ -12,7 +12,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Card from '@mui/material/Card/Card';
-import { Box, Grid, Stack, Chip, Typography } from '@mui/material';
+import { Box, Grid, Stack, Chip, Typography, MenuItem } from '@mui/material';
 import TextField from '@mui/material/TextField';
 // components
 import { BottomActions } from 'src/components/bottom-actions';
@@ -42,7 +42,6 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { useAuthContext } from 'src/auth/hooks';
 import NavigatorBar from 'src/components/NavigatorBar';
 import { fetchRolesList } from 'src/redux/store/thunks/roles';
-import { MenuItem, Option } from '@mui/base';
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -72,29 +71,29 @@ export default function StaffManagment() {
   const pageSize = 5;
   const toggleDrawerCommon =
     (state: string, id: any = null) =>
-    (event: React.SyntheticEvent | React.MouseEvent) => {
-      if (state === 'new') {
-        setOpenCreateStaff((pv) => !pv);
-        setEditId(id);
-        if (id) {
-          dispatch(fetchOneStaffManagement(id)).then((response: any) => {
-            const { user, adminName } = response.payload;
-            const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
-            delete adminName.localized;
-            const userObj = {
-              adminName,
-              gender,
-              email,
-              location,
-              phoneNumber,
-              preferedLanguage,
-              roles,
-            };
-            setUserData(userObj);
-          });
-        }
-      } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
-    };
+      (event: React.SyntheticEvent | React.MouseEvent) => {
+        if (state === 'new') {
+          setOpenCreateStaff((pv) => !pv);
+          setEditId(id);
+          if (id) {
+            dispatch(fetchOneStaffManagement(id)).then((response: any) => {
+              const { user, adminName } = response.payload;
+              const { gender, email, location, phoneNumber, preferedLanguage, roles } = user;
+              delete adminName.localized;
+              const userObj = {
+                adminName,
+                gender,
+                email,
+                location,
+                phoneNumber,
+                preferedLanguage,
+                roles,
+              };
+              setUserData(userObj);
+            });
+          }
+        } else if (state === 'delstaff') setOpenDelStaff((pv) => !pv);
+      };
 
   const handleDrawerCloseCommon =
     (state: string) => (event: React.SyntheticEvent | React.KeyboardEvent) => {
@@ -119,6 +118,7 @@ export default function StaffManagment() {
     email: Yup.string().email().required('Email is required'),
     phoneNumber: Yup.string().required(),
     password: Yup.string().required('Password is required'),
+    roles: Yup.string().required('Field is required'),
   });
   const methods = useForm({
     resolver: yupResolver(StaffAdminSchema),
@@ -128,7 +128,7 @@ export default function StaffManagment() {
   const createAdmin = () => {
     const toPushData = {
       ...userData,
-      roles: ['ACCOUNTENT_ADMIN'],
+      // roles: ['ACCOUNTENT_ADMIN'],
       country: 'SY',
       gender: 'MALE',
       location: ['banias, tartus, syria'],
@@ -291,7 +291,6 @@ export default function StaffManagment() {
   useEffect(() => {
     dispatch(fetchRolesList(Error)).then((response: any) => setPermissions(response.payload.data));
   }, []);
-  console.log(permissions);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -304,13 +303,12 @@ export default function StaffManagment() {
         <Grid item xs={12} md="auto">
           <CustomCrumbs
             heading="Staff Management"
-            description={`${
-              staffLength
-                ? staffLength === 1
-                  ? `${staffLength} Staff Member`
-                  : `${staffLength} Staff Members`
-                : `${0} Staff Members`
-            }`}
+            description={`${staffLength
+              ? staffLength === 1
+                ? `${staffLength} Staff Member`
+                : `${staffLength} Staff Members`
+              : `${0} Staff Members`
+              }`}
           />
         </Grid>
 
@@ -580,26 +578,27 @@ export default function StaffManagment() {
                                       width={24}
                                     />
                                   )}
-                                  <Box
-                                    sx={{
-                                      width: '36px',
-                                      height: '36px',
-                                      borderRadius: '20px',
-                                      background: 'rgb(134, 136, 163,0.09)',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      cursor: 'pointer',
-                                      '&:hover': {
-                                        background: 'rgb(134, 136, 163,0.2)',
-                                      },
-                                    }}
-                                    onClick={toggleDrawerCommon('new', user?.user?._id)}
-                                  >
-                                    {allowAction.edit && (
+                                  {allowAction.edit && (
+                                    <Box
+                                      sx={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '20px',
+                                        background: 'rgb(134, 136, 163,0.09)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        '&:hover': {
+                                          background: 'rgb(134, 136, 163,0.2)',
+                                        },
+                                      }}
+                                      onClick={toggleDrawerCommon('new', user?.user?._id)}
+                                    >
+
                                       <Box component="img" src="/raw/edit-pen.svg" width="13px" />
-                                    )}
-                                  </Box>
+                                    </Box>
+                                  )}
                                   {/* {order.role !== 'Owner' && (
                   <Iconify
                       style={{ cursor: 'pointer' }}
@@ -813,9 +812,20 @@ export default function StaffManagment() {
             <Typography variant="body1" color="#8688A3" sx={{ my: '5px', fontWeight: 900 }}>
               Select Role
             </Typography>
-            <RHFSelect fullWidth variant="filled" name="adminPower">
+            <RHFSelect
+              value={userData?.roles?.length > 0 && userData?.roles[0] || ''}
+              settingStateValue={(event: any) => setUserData({ ...userData, roles: [event.target.value as string] })}
+              fullWidth
+              variant="filled"
+              name="roles"
+            >
               {permissions.length > 0 &&
-                permissions?.map((item: any, i: any) => <p key={i}>{item?.name}</p>)}
+                permissions?.map((item: any, i: any) => (
+                  <MenuItem key={i} value={item.name}>
+                    {item?.name}
+                  </MenuItem>
+                ))}
+              {/* permissions?.map((item: any, i: any) => <p key={i}>{item?.name}</p>)} */}
             </RHFSelect>
           </Box>
         </FormProvider>
