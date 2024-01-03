@@ -811,7 +811,7 @@ export default function StaffManagment() {
             )}
 
             <Typography variant="body1" color="#8688A3" sx={{ my: '5px', fontWeight: 900 }}>
-              Admin Powers
+              Select Role
             </Typography>
             <RHFSelect fullWidth variant="filled" name="adminPower">
               {permissions.length > 0 &&
