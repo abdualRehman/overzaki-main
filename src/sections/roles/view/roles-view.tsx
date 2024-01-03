@@ -59,6 +59,7 @@ import {
   deleteRole,
   editRole,
   fetchOneRole,
+  fetchPermissionsByGroupList,
   fetchRolesList,
   setRole,
 } from 'src/redux/store/thunks/roles';
@@ -128,10 +129,10 @@ export default function RolesView() {
   const [removeData, setRemoveData] = useState<any>(null);
   const confirm = useBoolean();
 
-  const [roleData, setRoleData] = useState<any>(null);
+  const [roleName, setRoleName] = useState<any>("");
+  const [rolePermissions, setRolePermissions] = useState<any>([]);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const [productList, setProductList] = useState<any>([]);
 
   const [discountTypeToggle, setDiscountTypeToggle] = useState('FIXED_AMOUNT');
   const { copy } = useCopyToClipboard();
@@ -148,47 +149,38 @@ export default function RolesView() {
 
   const [value, setValue] = useState('All');
 
-  // const [data, setData] = useState(allRoles)
-  const [data, setData] = useState(list);
+  const [data, setData] = useState([]);
 
   // const [tableData] = useState(_orders);
 
   const [filters, setFilters] = useState(defaultFilters);
   const [roleStatus, setRoleStatus] = useState(true);
 
+  const [defaultPermissionOption, setDefaultPermissionOption] = useState<any>([]);
+
+  // ----------------------------------------------------------------------------------
+
+
+  useEffect(() => {
+    if (defaultPermissionOption.length === 0) {
+      dispatch(fetchPermissionsByGroupList(error)).then((response: any) => {
+        if (response?.meta?.requestStatus === 'fulfilled') {
+          setDefaultPermissionOption(response.payload)
+        } else {
+          setDefaultPermissionOption([]);
+        }
+      });
+    }
+  }, [defaultPermissionOption, dispatch, error]);
+
+
+
+
+
   // ----------------------------------------------------------------------------------
 
   const RoleSchema = Yup.object().shape({
-    name: Yup.object().shape({
-      en: Yup.string().required('English Name is required'),
-      ar: Yup.string().required('Arabic Name is required'),
-    }),
-    code: Yup.string().required('Field is required'),
-    discountAmount:
-      discountTypeToggle === 'FIXED_AMOUNT'
-        ? Yup.number().required('Field is required').typeError('Must be a valid number')
-        : Yup.number().typeError('Must be a valid number'),
-    discountPercentage:
-      discountTypeToggle === 'PERCENTAGE'
-        ? Yup.number().required('Field is required').typeError('Must be a valid number')
-        : Yup.number().typeError('Must be a valid number'),
-    upTo:
-      discountTypeToggle === 'PERCENTAGE'
-        ? Yup.number().required('Field is required').typeError('Must be a valid number')
-        : Yup.number().typeError('Must be a valid number'),
-    totalUses: Yup.number().required('Field is required').typeError('Must be a valid number'),
-    availabitiyStarts: Yup.string().required('Field is required'),
-    availabitiyEnds: Yup.string().required('Field is required'),
-    coverage: Yup.array().test({
-      name: 'coverage',
-      message: 'Please select at least one option',
-      test: (value: any) => {
-        if (roleData?.converageAll) {
-          return true;
-        }
-        return value && value.length > 0;
-      },
-    }),
+    name: Yup.string().required('Field is required'),
   });
 
   const methods = useForm({
@@ -204,7 +196,6 @@ export default function RolesView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       if (editId) {
-        console.log('data', roleData);
         await editRoleFun();
       } else {
         await createRoleFun();
@@ -219,27 +210,15 @@ export default function RolesView() {
   useEffect(() => {
     if (loadStatus === 'idle') {
       dispatch(fetchRolesList(error)).then((response: any) => {
-        console.log(list);
-        // setData(list)
+        if (response?.meta?.requestStatus === 'fulfilled') {
+          setData(response.payload.data);
+        } else {
+          setData([]);
+        }
       });
     }
   }, [loadStatus, dispatch, error, list]);
 
-  useEffect(() => {
-    if (productsState.status === 'idle') {
-      dispatch(fetchProductsList(productsState.error)).then((response: any) => {
-        console.log(response?.data?.data);
-        // setProductList(response.data.data)
-      });
-    } else {
-      setProductList(
-        productsState.list.map((item: any) => ({
-          value: item._id,
-          label: item?.name?.en || item?.name,
-        }))
-      );
-    }
-  }, [productsState, dispatch]);
 
   useEffect(() => {
     setData(list || []);
@@ -256,98 +235,43 @@ export default function RolesView() {
   useEffect(() => {
     if (role) {
       if (role && Object.entries(role).length > 0) {
-        // Convert the string dates to Date objects
-        const startDate = new Date(role?.availabitiyStarts);
-        const endDate = new Date(role?.availabitiyEnds);
-
-        const updatedData = {
-          name: {
-            en: role?.name?.en || role?.name,
-            ar: role?.name?.ar || role?.name,
-          },
-          code: role?.code,
-          status: role?.status,
-          discountAmount: role?.discountAmount,
-          discountCurrency: role?.discountCurrency,
-          discountPercentage: role?.discountPercentage,
-          upTo: role?.upTo,
-          totalUses: role?.totalUses,
-          availabitiyStarts: startDate.toISOString().split('T')[0],
-          availabitiyEnds: endDate.toISOString().split('T')[0],
-          converageAll: role?.converageAll,
-          coverage: role?.coverage,
-        };
-        setRoleData(updatedData);
-        setDiscountTypeToggle(role?.type);
-        Object.entries(updatedData).forEach(([fieldName, value]: any) => {
-          if (fieldName === 'name') {
-            methods.setValue('name.en', value.en);
-            methods.setValue('name.ar', value.ar);
-          } else {
-            methods.setValue(fieldName, value);
-          }
-        });
+        console.log("Edit Role ");
+        console.log(role);
+        setRoleName(role?.name);
+        setRolePermissions(role?.permissions);
+        methods.setValue('name', role?.name);
       }
     } else {
-      setDiscountTypeToggle('FIXED_AMOUNT');
-      setRoleData(null);
+      setRoleName(null);
+      setRolePermissions([]);
       reset();
     }
   }, [role, methods, reset]);
 
-  const handleRoleData = (e: any) => {
-    setRoleData((prevData: any) => ({
-      ...prevData,
-      [e.target.name]: e.target.type === 'number' ? Number(e.target.value) : e.target.value,
-    }));
-  };
-  const handleNestedRoleData = (e: any) => {
-    const { name, value } = e.target;
-    const [parentKey, nestedKey] = name.split('.');
-    setRoleData((prevData: any) => ({
-      ...prevData,
-      [parentKey]: {
-        ...(prevData[parentKey] || {}),
-        [nestedKey]: value,
-      },
-    }));
-  };
 
   const createRoleFun = () => {
-    const fotmData = {
-      ...roleData,
-      status: roleData?.status || true,
-      type: roleData?.type || discountTypeToggle,
-      discountPercentage: roleData?.discountPercentage || 0,
-      upTo: roleData?.upTo || 0,
-      discountCurrency: roleData?.discountCurrency || 'KWD',
-      converageAll: roleData?.converageAll || false,
-    };
-    if (fotmData) {
-      dispatch(createRole(fotmData)).then((response: any) => {
-        console.log(response);
-        if (response.meta.requestStatus === 'fulfilled') {
-          setRoleData(null);
-          dispatch(fetchRolesList(error));
-          enqueueSnackbar('Successfully Created!', { variant: 'success' });
-        } else {
-          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-        }
-      });
+    const FormData = {
+      name: roleName || "",
+      permissions: rolePermissions
     }
+    dispatch(createRole(FormData)).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        setRoleName(null);
+        setRolePermissions([]);
+        dispatch(fetchRolesList(error));
+        enqueueSnackbar('Successfully Created!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
   };
 
   const editRoleFun = () => {
-    const fotmData = {
-      ...roleData,
-      status: roleData?.status || true,
-      type: discountTypeToggle,
-      discountPercentage: roleData?.discountPercentage || 0,
-      upTo: roleData?.upTo || 0,
-      discountCurrency: roleData?.discountCurrency || 'KWD',
-      converageAll: roleData?.converageAll || false,
-    };
-    dispatch(editRole({ roleId: editId, data: fotmData })).then((response: any) => {
+    const FormData = {
+      name: roleName || "",
+      permissions: rolePermissions
+    }
+    dispatch(editRole({ roleId: editId, data: FormData })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         dispatch(fetchRolesList(error));
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
@@ -358,8 +282,6 @@ export default function RolesView() {
   };
 
   const removeRoleFun = () => {
-    console.log('removeData', removeData);
-
     if (removeData) {
       dispatch(deleteRole(removeData)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
@@ -374,35 +296,7 @@ export default function RolesView() {
   };
 
   // ----------------------------------------------------------------------------------
-  // const dateError =
-  //   filters.startDate && filters.endDate
-  //     ? filters.startDate.getTime() > filters.endDate.getTime()
-  //     : false;
 
-  // const dataFiltered = applyFilter({
-  //   inputData: tableData,
-  //   comparator: getComparator(table.order, table.orderBy),
-  //   filters,
-  //   dateError,
-  // });
-
-  // const canReset =
-  //   !!filters.name || filters.status !== 'all' || (!!filters.startDate && !!filters.endDate);
-
-  // const handleFilters = useCallback(
-  //   (name: string, value: IOrderTableFilterValue) => {
-  //     table.onResetPage();
-  //     setFilters((prevState) => ({
-  //       ...prevState,
-  //       [name]: value,
-  //     }));
-  //   },
-  //   [table]
-  // );
-
-  // const handleResetFilters = useCallback(() => {
-  //   setFilters(defaultFilters);
-  // }, []);
 
   const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -430,7 +324,7 @@ export default function RolesView() {
           if (id) {
             dispatch(fetchOneRole(id));
           } else {
-            setRoleData({});
+            // setRoleData({});
             dispatch(setRole({}));
           }
         } else if (state === 'delete') {
@@ -453,11 +347,7 @@ export default function RolesView() {
       else if (state === 'delete') setOpenDelete(false);
     };
 
-  const [mySubCat, setMySubCat] = React.useState('All Products');
 
-  const handleChangeMySubCat = (event: SelectChangeEvent) => {
-    setMySubCat(event.target.value as string);
-  };
   const listStuff = data;
   const [listItems, setListItems] = useState<any>([]);
   useEffect(() => {
@@ -513,14 +403,6 @@ export default function RolesView() {
           </Grid>
 
           <Grid item xs={12} md={3}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent={{ xs: 'flex-start', md: 'flex-end' }}
-              spacing="20px"
-            >
-              {/* <Button startIcon={<Box component='img' src='/raw/orderreport.svg' />} fullWidth sx={{ borderRadius: '30px', color: '#8688A3', backgroundColor: '#F0F0F4' }} component='h5' variant='contained' color='primary' onClick={toggleDrawerCommon('analytics')}> Analytics </Button> */}
-            </Stack>
             <RoleBasedGuard permission="CREATE_ROLE">
               <BottomActions>
                 <Stack
@@ -547,29 +429,7 @@ export default function RolesView() {
             </RoleBasedGuard>
           </Grid>
 
-          <Grid item xs={12}>
-            <Box mt="20px">
-              {/* <RolesToolbar
-                filters={filters}
-                onFilters={handleFilters}
-                //
-                canReset={canReset}
-                onResetFilters={handleResetFilters}
-              /> */}
 
-              {/* {canReset && (
-                <RolesFiltersResult
-                  filters={filters}
-                  onFilters={handleFilters}
-                  //
-                  onResetFilters={handleResetFilters}
-                  //
-                  results={dataFiltered.length}
-                  sx={{ p: 2.5, pt: 0 }}
-                />
-              )} */}
-            </Box>
-          </Grid>
 
           <Grid item xs={12}>
             <Box>
@@ -602,11 +462,11 @@ export default function RolesView() {
                               'default'
                             }
                           >
-                            {tab.value === 'All' && list.length}
+                            {tab.value === 'All' && list && list.length}
                             {tab.value === 'Expired' &&
-                              list.filter((order: any) => !order.status).length}
+                              list && list?.filter((order: any) => !order?.status).length}
                             {tab.value === 'Active' &&
-                              list.filter((order: any) => order.status).length}
+                              list && list?.filter((order: any) => order?.status).length}
                           </Label>
                         }
                       />
@@ -624,7 +484,7 @@ export default function RolesView() {
                           container
                           spacing={2}
                         >
-                          {listItems.map((role: any, indx: any) => (
+                          {data.map((role: any, indx: any) => (
                             <Draggable key={indx} index={indx} draggableId={indx.toString()}>
                               {(provided) => (
                                 <Grid
@@ -643,11 +503,11 @@ export default function RolesView() {
                                     rowGap={3}
                                     p={3}
                                     minHeight="80px"
-                                    sx={role.status ? stylesActive : stylesDisabled}
+                                    sx={stylesActive}
                                   >
                                     <Grid
                                       item
-                                      sx={{ display: 'flex', alignItems: 'end' }}
+                                      sx={{ display: 'flex', alignItems: 'center' }}
                                       xs={6}
                                       md="auto"
                                     >
@@ -661,120 +521,69 @@ export default function RolesView() {
                                           variant="subtitle2"
                                           sx={{ fontSize: '.8rem' }}
                                         >
-                                          {role?.name?.en || role?.name}
+                                          {role?.name || ""}
                                         </Typography>
-                                        {role.status ? (
-                                          <Typography
-                                            component="p"
-                                            color="#0D6EFD"
-                                            variant="subtitle2"
-                                            sx={{
-                                              mt: '5px',
-                                              fontWeight: 900,
-                                              cursor: 'pointer',
-                                              fontSize: '.8rem',
-                                              display: 'flex',
-                                              alignItems: 'center',
-                                              gap: '8px',
-                                            }}
-                                            onClick={() => onCopy(role.code)}
-                                          >
-                                            {role.code} <Iconify icon="tabler:copy" />{' '}
-                                          </Typography>
-                                        ) : (
-                                          <Typography
-                                            component="p"
-                                            color="#8688A3"
-                                            variant="subtitle2"
-                                            sx={{ mt: '5px', fontWeight: 900, fontSize: '.8rem' }}
-                                          >
-                                            {role.code}
-                                          </Typography>
-                                        )}
                                       </Box>
                                     </Grid>
 
-                                    <Grid item xs={6} md="auto">
-                                      <Typography
-                                        component="p"
-                                        color="#0F1349"
-                                        variant="subtitle2"
-                                        sx={{ fontSize: '.8rem' }}
-                                      >
-                                        {role.type === 'FIXED_AMOUNT'
-                                          ? `${role.discountAmount} KWD`
-                                          : `${role.discountPercentage}%`}{' '}
-                                        <span style={{ fontSize: '.7rem' }}>({role.type})</span>{' '}
-                                      </Typography>
-                                    </Grid>
-                                    <Grid item xs={6} md="auto">
-                                      <Typography
-                                        component="p"
-                                        color="#0F1349"
-                                        variant="subtitle2"
-                                        sx={{ fontSize: '.8rem' }}
-                                      >
-                                        {role.totalUses} Uses{' '}
-                                      </Typography>
-                                    </Grid>
+
 
                                     <Grid item xs={6} md="auto">
                                       <Box
                                         sx={{ display: 'flex', alignItems: 'center', gap: '13px' }}
                                       >
-                                        <Box
-                                          sx={{
-                                            width: '36px',
-                                            height: '36px',
-                                            borderRadius: '20px',
-                                            background: 'rgb(134, 136, 163,0.09)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                              background: 'rgb(134, 136, 163,0.2)',
-                                            },
-                                          }}
-                                          // onClick={toggleDrawerCommon("delete", role._id)}
-                                          onClick={() => {
-                                            setRemoveData(role._id);
-                                            confirm.onTrue();
-                                          }}
-                                        >
-                                          {allowAction.remove && (
+                                        {allowAction.remove && (
+                                          <Box
+                                            sx={{
+                                              width: '36px',
+                                              height: '36px',
+                                              borderRadius: '20px',
+                                              background: 'rgb(134, 136, 163,0.09)',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              cursor: 'pointer',
+                                              '&:hover': {
+                                                background: 'rgb(134, 136, 163,0.2)',
+                                              },
+                                            }}
+                                            // onClick={toggleDrawerCommon("delete", role._id)}
+                                            onClick={() => {
+                                              setRemoveData(role._id);
+                                              confirm.onTrue();
+                                            }}
+                                          >
                                             <Box
                                               component="img"
                                               src="/raw/trash-can-solid.svg"
                                               width="13px"
                                             />
-                                          )}
-                                        </Box>
-                                        <Box
-                                          sx={{
-                                            width: '36px',
-                                            height: '36px',
-                                            borderRadius: '20px',
-                                            background: 'rgb(134, 136, 163,0.09)',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                              background: 'rgb(134, 136, 163,0.2)',
-                                            },
-                                          }}
-                                          onClick={toggleDrawerCommon('new', role._id)}
-                                        >
-                                          {allowAction.edit && (
+                                          </Box>
+                                        )}
+                                        {allowAction.edit && (
+                                          <Box
+                                            sx={{
+                                              width: '36px',
+                                              height: '36px',
+                                              borderRadius: '20px',
+                                              background: 'rgb(134, 136, 163,0.09)',
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              justifyContent: 'center',
+                                              cursor: 'pointer',
+                                              '&:hover': {
+                                                background: 'rgb(134, 136, 163,0.2)',
+                                              },
+                                            }}
+                                            onClick={toggleDrawerCommon('new', role._id)}
+                                          >
                                             <Box
                                               component="img"
                                               src="/raw/edit-pen.svg"
                                               width="13px"
                                             />
-                                          )}
-                                        </Box>
-                                        {/* <Switch checked={role.status} /> */}
+                                          </Box>
+                                        )}
                                       </Box>
                                     </Grid>
                                   </Grid>
@@ -789,264 +598,6 @@ export default function RolesView() {
                   </DragDropContext>
                 </TabPanel>
               </TabContext>
-
-              <DetailsNavBar
-                open={openDetails}
-                onClose={handleDrawerCloseCommon('details')}
-                title="Role Details"
-                actions={
-                  <Button
-                    fullWidth
-                    variant="soft"
-                    color="success"
-                    size="large"
-                    sx={{ borderRadius: '30px' }}
-                  >
-                    Save
-                  </Button>
-                }
-              >
-                <Divider flexItem />
-                <Box width="100%">
-                  <Typography
-                    pb="5px"
-                    component="p"
-                    noWrap
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                  >
-                    Role Name (English)
-                  </Typography>
-                  <TextField fullWidth variant="filled" defaultValue="Happy Eid" name="NAME" />
-
-                  <Typography
-                    mt="20px"
-                    pb="5px"
-                    component="p"
-                    noWrap
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                  >
-                    Role Name (Arabic)
-                  </Typography>
-                  <TextField fullWidth variant="filled" defaultValue="عيد سعيد" name="NAME" />
-
-                  <Typography
-                    mt="20px"
-                    pb="5px"
-                    component="p"
-                    noWrap
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                  >
-                    Role Code
-                  </Typography>
-                  <TextField fullWidth variant="filled" defaultValue="H@PPYEID2023" name="Code" />
-
-                  <Stack
-                    mt="20px"
-                    pb="5px"
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Box>
-                      <Typography
-                        component="p"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                      >
-                        Role Status
-                      </Typography>
-                      <Typography
-                        component="p"
-                        variant="subtitle2"
-                        sx={{ fontWeight: 900, fontSize: '1rem' }}
-                      >
-                        Available
-                      </Typography>
-                    </Box>
-                    <Switch defaultChecked />
-                  </Stack>
-
-                  <Grid
-                    container
-                    mt="20px"
-                    columnSpacing="20px"
-                    pb="5px"
-                    alignItems="flex-end"
-                    rowGap="20px"
-                    justifyContent="space-between"
-                  >
-                    <Grid item xs={6}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        Select Discount Type
-                      </Typography>
-                      <Box
-                        sx={{
-                          width: '100%',
-                          height: '56px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#8688A3',
-                          fontSize: '.9rem',
-                          background: 'rgb(245, 245, 248)',
-                          borderRadius: '16px',
-                          fontWeight: 800,
-                        }}
-                      >
-                        Fixed Amount
-                      </Box>
-                    </Grid>
-
-                    <Grid item xs={6}>
-                      <Box
-                        sx={{
-                          width: '100%',
-                          height: '56px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#0F1349',
-                          fontSize: '.9rem',
-                          background: 'rgb(209, 255, 240)',
-                          borderRadius: '16px',
-                          fontWeight: 800,
-                          border: '2px solid #1AF9B3',
-                        }}
-                      >
-                        Percentage
-                      </Box>
-                    </Grid>
-
-                    <Grid item xs={6}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        Discount Percentage
-                      </Typography>
-                      <TextField fullWidth variant="filled" defaultValue="20%" name="Percentage" />
-                    </Grid>
-
-                    <Grid item xs={6}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        Up to
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        variant="filled"
-                        defaultValue="10"
-                        name="PHONE"
-                        sx={{
-                          '& .MuiInputAdornment-root': {
-                            marginTop: '0px !important',
-                          },
-                          '& input': {
-                            paddingRight: '0px !important',
-                          },
-                        }}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <Stack direction="row" alignItems="center" spacing="5px">
-                                <Typography
-                                  component="p"
-                                  variant="subtitle2"
-                                  sx={{ opacity: 0.7, fontSize: '.6rem' }}
-                                >
-                                  KWD
-                                </Typography>
-                                <Iconify icon="mingcute:down-fill" width={20} />
-                              </Stack>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        Total Uses
-                      </Typography>
-                      <TextField fullWidth variant="filled" defaultValue="500" name="PHONE" />
-                    </Grid>
-
-                    <Grid item xs={6}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        Start Date
-                      </Typography>
-                      <TextField fullWidth variant="filled" defaultValue="2023-06-28" name="sd" />
-                    </Grid>
-                    <Grid item xs={6}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        End Date
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        type="date"
-                        variant="filled"
-                        defaultValue="2023-10-07"
-                        name="ed"
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <Typography
-                        component="p"
-                        mb="5px"
-                        variant="subtitle2"
-                        sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                      >
-                        Role Coverage
-                      </Typography>
-                      <FormControl fullWidth>
-                        <Select
-                          variant="filled"
-                          value={mySubCat}
-                          sx={{
-                            fontWeight: 900,
-                          }}
-                          onChange={handleChangeMySubCat}
-                        // endAdornment={<div style={{ fontSize: '12px', marginRight: '20px', marginTop: '3px' }}>KWD</div>}
-                        >
-                          <MenuItem value="All Products">All Products</MenuItem>
-                          <MenuItem value="Laptops">Laptops</MenuItem>
-                          <MenuItem value="Clothes">Clothes</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </DetailsNavBar>
 
               {/* create new Vocher */}
               <DetailsNavBar
@@ -1082,425 +633,72 @@ export default function RolesView() {
                     >
                       Role Name (English)
                     </Typography>
-                    {/* <TextField fullWidth variant='filled' defaultValue='Happy Eid' name='NAME' /> */}
+
                     <RHFTextField
                       fullWidth
                       variant="filled"
-                      settingStateValue={handleNestedRoleData}
-                      value={roleData?.name?.en || ''}
-                      name="name.en"
-                    />
-                    <Typography
-                      mt="20px"
-                      pb="5px"
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                    >
-                      Role Name (Arabic)
-                    </Typography>
-                    {/* <TextField fullWidth variant='filled' defaultValue='عيد سعيد' name='NAME' /> */}
-                    <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      settingStateValue={handleNestedRoleData}
-                      value={roleData?.name?.ar || ''}
-                      name="name.ar"
+                      settingStateValue={(e: any) => setRoleName(e.target.value)}
+                      value={roleName || ''}
+                      name="name"
                     />
 
-                    <Typography
-                      mt="20px"
-                      pb="5px"
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{ opacity: 0.7, fontSize: '.9rem' }}
-                    >
-                      Role Code
-                    </Typography>
-                    {/* <TextField fullWidth variant='filled' defaultValue="H@PPYEID2023" name='Code' /> */}
-                    <RHFTextField
-                      fullWidth
-                      variant="filled"
-                      settingStateValue={handleRoleData}
-                      value={roleData?.code || ''}
-                      name="code"
-                    />
-
-                    <Stack
-                      mt="20px"
-                      pb="5px"
-                      direction="row"
-                      alignItems="center"
-                      justifyContent="space-between"
-                    >
-                      <Box>
+                    {defaultPermissionOption.map((permissionsObj: any, index: any) => (
+                      <Stack
+                        key={index}
+                        mt="20px"
+                        pb="5px"
+                        direction="column"
+                        alignItems="flex-start"
+                        justifyContent="flex-start"
+                      >
                         <Typography
                           component="p"
-                          variant="subtitle2"
-                          sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                          variant="subtitle1"
                         >
-                          Role Status
+                          {permissionsObj?.subject}
                         </Typography>
-                        <Typography
-                          component="p"
-                          variant="subtitle2"
-                          sx={{ fontWeight: 900, fontSize: '1rem' }}
-                        >
-                          Available
-                        </Typography>
-                      </Box>
-
-                      {/* <Switch
-                      checked={roleData?.status || true}
-                      onChange={(e) => {
-                        setRoleData({ ...roleData, status: e.target.checked })
-                      }}
-                      inputProps={{ 'aria-label': 'controlled' }}
-                      name='status'
-                    /> */}
-                      <RHFSwitch
-                        label="status"
-                        checked={roleData?.status || true}
-                        onChange={(e: any) => {
-                          console.log(e.target.checked);
-                          setRoleData((prevData: any) => {
-                            if (prevData && Object.entries(prevData).length > 0) {
-                              return { ...roleData, status: e.target.checked };
-                            }
-                            return { status: e.target.checked };
-                          });
-                        }}
-                        name="status"
-                        inputProps={{ 'aria-label': 'secondary checkbox' }}
-                      />
-                    </Stack>
-
-                    <Grid
-                      container
-                      mt="20px"
-                      columnSpacing="20px"
-                      pb="5px"
-                      alignItems="flex-end"
-                      rowGap="20px"
-                      justifyContent="space-between"
-                    >
-                      <Grid item xs={6}>
-                        <Typography
-                          component="p"
-                          mb="5px"
-                          variant="subtitle2"
-                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                        >
-                          Select Discount Type
-                        </Typography>
-                        <Box
-                          sx={{
-                            width: '100%',
-                            height: '56px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '.9rem',
-                            borderRadius: '16px',
-                            fontWeight: 800,
-                            ...(discountTypeToggle === 'FIXED_AMOUNT' ? activeTab : nonActiveTab),
-                          }}
-                          onClick={() => setDiscountTypeToggle('FIXED_AMOUNT')}
-                        >
-                          Fixed Amount
-                        </Box>
-                      </Grid>
-
-                      <Grid item xs={6}>
-                        <Box
-                          sx={{
-                            width: '100%',
-                            height: '56px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '.9rem',
-                            borderRadius: '16px',
-                            fontWeight: 800,
-                            ...(discountTypeToggle === 'PERCENTAGE' ? activeTab : nonActiveTab),
-                          }}
-                          onClick={() => setDiscountTypeToggle('PERCENTAGE')}
-                        >
-                          Percentage
-                        </Box>
-                      </Grid>
-
-                      {discountTypeToggle === 'FIXED_AMOUNT' ? (
-                        <Grid item xs={6}>
-                          <Typography
-                            component="p"
-                            mb="5px"
-                            variant="subtitle2"
-                            sx={{ opacity: 0.7, fontSize: '.8rem' }}
+                        <Divider />
+                        {permissionsObj?.permissions?.map((permissionObj: any, ind: any) => (
+                          <Stack
+                            key={ind}
+                            width="100%"
+                            mt="20px"
+                            pb="5px"
+                            direction="row"
+                            alignItems="center"
+                            justifyContent="space-between"
                           >
-                            Discount Amount
-                          </Typography>
-                          <RHFTextField
-                            type="number"
-                            fullWidth
-                            variant="filled"
-                            settingStateValue={handleRoleData}
-                            value={roleData?.discountAmount || ''}
-                            name="discountAmount"
-                            sx={{
-                              '& .MuiInputAdornment-root': {
-                                marginTop: '0px !important',
-                              },
-                              '& input': {
-                                paddingRight: '0px !important',
-                              },
-                            }}
-                            InputProps={{
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  <Stack direction="row" alignItems="center" spacing="5px">
-                                    <Typography
-                                      component="p"
-                                      variant="subtitle2"
-                                      sx={{ opacity: 0.7, fontSize: '.6rem' }}
-                                    >
-                                      KWD
-                                    </Typography>
-                                    <Iconify icon="mingcute:down-fill" width={20} />
-                                  </Stack>
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
-                        </Grid>
-                      ) : (
-                        <>
-                          <Grid item xs={6}>
-                            <Typography
-                              component="p"
-                              mb="5px"
-                              variant="subtitle2"
-                              sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                            >
-                              Discount Percentage
-                            </Typography>
-                            <RHFTextField
-                              type="number"
-                              fullWidth
-                              variant="filled"
-                              settingStateValue={handleRoleData}
-                              value={roleData?.discountPercentage || ''}
-                              name="discountPercentage"
-                            />
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography
-                              component="p"
-                              mb="5px"
-                              variant="subtitle2"
-                              sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                            >
-                              Up to
-                            </Typography>
-                            <RHFTextField
-                              type="number"
-                              fullWidth
-                              variant="filled"
-                              settingStateValue={handleRoleData}
-                              value={roleData?.upTo || ''}
-                              name="upTo"
-                              sx={{
-                                '& .MuiInputAdornment-root': {
-                                  marginTop: '0px !important',
-                                },
-                                '& input': {
-                                  paddingRight: '0px !important',
-                                },
+                            <Box>
+                              <Typography
+                                component="p"
+                                variant="subtitle2"
+                                sx={{ opacity: 0.7, fontSize: '.9rem' }}
+                              >
+                                {permissionObj?.function}
+                              </Typography>
+                            </Box>
+                            <RHFSwitch
+                              label=""
+                              checked={rolePermissions?.includes(permissionObj?.action) || false}
+                              onChange={(e: any) => {
+                                if (e.target.checked) {
+                                  const rolePermissionsArray = [...rolePermissions, permissionObj?.action]
+                                  setRolePermissions(rolePermissionsArray);
+                                } else {
+                                  const rolePermissionsArray = rolePermissions.filter((item: any) => item !== permissionObj?.action);
+                                  setRolePermissions(rolePermissionsArray);
+                                }
                               }}
-                              InputProps={{
-                                endAdornment: (
-                                  <InputAdornment position="end">
-                                    <Stack direction="row" alignItems="center" spacing="5px">
-                                      <Typography
-                                        component="p"
-                                        variant="subtitle2"
-                                        sx={{ opacity: 0.7, fontSize: '.6rem' }}
-                                      >
-                                        KWD
-                                      </Typography>
-                                      <Iconify icon="mingcute:down-fill" width={20} />
-                                    </Stack>
-                                  </InputAdornment>
-                                ),
-                              }}
+                              name="status"
+                              inputProps={{ 'aria-label': 'secondary checkbox' }}
                             />
-                          </Grid>
-                        </>
-                      )}
-
-                      <Grid item xs={12}>
-                        <Typography
-                          component="p"
-                          mb="5px"
-                          variant="subtitle2"
-                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                        >
-                          Total Uses
-                        </Typography>
-                        <RHFTextField
-                          type="number"
-                          fullWidth
-                          variant="filled"
-                          settingStateValue={handleRoleData}
-                          value={roleData?.totalUses || ''}
-                          name="totalUses"
-                        />
-                      </Grid>
-
-                      <Grid item xs={6}>
-                        <Typography
-                          component="p"
-                          mb="5px"
-                          variant="subtitle2"
-                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                        >
-                          Start Date
-                        </Typography>
-                        <RHFTextField
-                          fullWidth
-                          type="date"
-                          variant="filled"
-                          settingStateValue={handleRoleData}
-                          value={roleData?.availabitiyStarts || ''}
-                          name="availabitiyStarts"
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography
-                          component="p"
-                          mb="5px"
-                          variant="subtitle2"
-                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                        >
-                          End Date
-                        </Typography>
-                        <RHFTextField
-                          fullWidth
-                          type="date"
-                          variant="filled"
-                          settingStateValue={handleRoleData}
-                          value={roleData?.availabitiyEnds || ''}
-                          name="availabitiyEnds"
-                        />
-                      </Grid>
-
-                      <Grid item xs={12}>
-                        <Typography
-                          component="p"
-                          mb="5px"
-                          variant="subtitle2"
-                          sx={{ opacity: 0.7, fontSize: '.8rem' }}
-                        >
-                          Role Coverage
-                        </Typography>
-                        <FormControl fullWidth>
-                          {/* <Select
-                          variant='filled'
-                          sx={{
-                            fontWeight: 900
-                          }}
-                          // value={mySubCat}
-                          // onChange={handleChangeMySubCat}
-                          value={roleData?.coverage || null}
-                          onChange={handleRoleData}
-                          name='coverage'
-                        >
-                          <MenuItem value='AllProducts'>All Products</MenuItem>
-                          <MenuItem value='Laptops'>Laptops</MenuItem>
-                          <MenuItem value='Clothes'>Clothes</MenuItem>
-                        </Select> */}
-                          <RHFMultiSelect
-                            variant="filled"
-                            checkbox
-                            name="coverage"
-                            label="Multi select"
-                            options={productList}
-                            settingStateValue={handleRoleData}
-                            value={roleData?.coverage || []}
-                          />
-                        </FormControl>
-
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              size="medium"
-                              onChange={(e) => {
-                                setRoleData({ ...roleData, converageAll: e.target.checked });
-                              }}
-                              name="converageAll"
-                              color="primary"
-                              checked={roleData?.converageAll || false}
-                            />
-                          }
-                          label="All Products"
-                        />
-                      </Grid>
-                    </Grid>
-
-                    {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-                  Mobile Number
-                </Typography>
-
-                <TextField fullWidth variant='filled' defaultValue='965128743291' name='PHONE'
-                  sx={{
-                    '& .MuiInputAdornment-root': {
-                      marginTop: '0px !important',
-                      // paddingLeft: '10px'
-                    },
-                    '& input': {
-                      paddingLeft: '2px !important'
-                    }
-                  }}
-                  InputProps={{
-                    startAdornment: <InputAdornment position="start">
-                      <Stack direction='row' alignItems='center' spacing="8px">
-                        <Iconify icon="mingcute:down-fill" width={43} />
-                        <Box component='img' src='/raw/flagN.png' />
-                        <Divider orientation="vertical" variant='middle' flexItem />
+                          </Stack>
+                        ))}
                       </Stack>
-                    </InputAdornment>,
-                  }}
-                /> */}
 
-                    {/* <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-                  Email Address (Optional)
-                </Typography>
-                <TextField fullWidth variant='filled' type='email' defaultValue='ahmed.omar@gmail.com' name='email' />
+                    ))}
 
 
-                <Typography mt='20px' mb='5px' component='p' noWrap variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem' }} >
-                  Delivery Address
-                </Typography>
-
-                <Box sx={{ borderRadius: '12px', padding: '24px', background: 'rgb(245, 245, 248)' }}>
-                  <Stack direction='row' alignItems='center' spacing='10px'>
-                    <Iconify icon="ion:location" width={45} style={{ color: '#8688A3' }} />
-                    <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 900 }} >
-                      Ali Sabah Al-Salem - Block 5A - Street 8 House 4 - Floor 2
-                    </Typography>
-                  </Stack>
-
-                  <Divider sx={{ my: '22px' }} />
-                  <Stack direction='row' alignItems='center' spacing='10px'>
-                    <Iconify icon="mingcute:add-fill" width={30} style={{ color: '#8688A3' }} />
-                    <Typography component='p' variant="subtitle2" sx={{ opacity: 0.7, fontSize: '.9rem', fontWeight: 900 }} >
-                      Add Delivery Location
-                    </Typography>
-                  </Stack>
-
-                </Box> */}
                   </Box>
                 </FormProvider>
               </DetailsNavBar>

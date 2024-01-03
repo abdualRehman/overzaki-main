@@ -14,7 +14,7 @@ export const fetchRolesList = createAsyncThunk(
   'role/fetchList',
   async (params: IRequest, { rejectWithValue }) => {
     try {
-      const response = await getRequest(`${endpoints.role.list}`, defaultConfig);
+      const response = await getRequest(`${endpoints.role.list}/all`, defaultConfig);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -64,7 +64,7 @@ export const deleteRole = createAsyncThunk('role/delete', async (roleId: number)
 const roleSlice = createSlice({
   name: 'role',
   initialState: {
-    list: [],
+    list: [] as any,
     role: null as any,
     loading: false,
     error: null as string | null,
