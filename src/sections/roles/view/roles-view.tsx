@@ -41,7 +41,7 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 // _mock
-import { _orders, allVouchers } from 'src/_mock';
+// import { _orders, allRoles } from 'src/_mock';
 // utils
 import { fTimestamp } from 'src/utils/format-time';
 // components
@@ -55,13 +55,13 @@ import { useSnackbar } from 'src/components/snackbar';
 import { IOrderItem, IOrderTableFilters, IOrderTableFilterValue } from 'src/types/order';
 //
 import {
-  createVoucher,
-  deleteVoucher,
-  editVoucher,
-  fetchOneVoucher,
-  fetchVouchersList,
-  setVoucher,
-} from 'src/redux/store/thunks/defaultVouchers';
+  createRole,
+  deleteRole,
+  editRole,
+  fetchOneRole,
+  fetchRolesList,
+  setRole,
+} from 'src/redux/store/thunks/roles';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -72,8 +72,8 @@ import Iconify from 'src/components/iconify/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { RoleBasedGuard } from 'src/auth/guard';
 import { useAuthContext } from 'src/auth/hooks';
-import VouchersToolbar from '../vouchers-toolbar';
-import VouchersFiltersResult from '../vouchers-filters-result';
+// import RolesToolbar from '../roles-toolbar';
+// import RolesFiltersResult from '../roles-filters-result';
 import DetailsNavBar from '../DetailsNavBar';
 
 // .....
@@ -90,8 +90,8 @@ const nonActiveTab = {
 
 const STATUS_OPTIONS = [
   { value: 'All', label: 'All' },
-  { value: 'Active', label: 'Active' },
-  { value: 'Expired', label: 'Expired' },
+  // { value: 'Active', label: 'Active' },
+  // { value: 'Expired', label: 'Expired' },
 ];
 
 const defaultFilters: IOrderTableFilters = {
@@ -117,18 +117,18 @@ const stylesDisabled = {
 };
 // ----------------------------------------------------------------------
 
-export default function OrdersListView() {
+export default function RolesView() {
   const dispatch = useDispatch<AppDispatch>();
   const { enqueueSnackbar } = useSnackbar();
 
   const productsState = useSelector((state: any) => state.products);
-  const loadStatus = useSelector((state: any) => state.vouchers.status);
-  const { list, error, voucher } = useSelector((state: any) => state.vouchers);
+  const loadStatus = useSelector((state: any) => state.roles.status);
+  const { list, error, role } = useSelector((state: any) => state.roles);
   const [editId, setEditId] = useState(null);
   const [removeData, setRemoveData] = useState<any>(null);
   const confirm = useBoolean();
 
-  const [voucherData, setVoucherData] = useState<any>(null);
+  const [roleData, setRoleData] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
   const [productList, setProductList] = useState<any>([]);
@@ -148,17 +148,17 @@ export default function OrdersListView() {
 
   const [value, setValue] = useState('All');
 
-  // const [data, setData] = useState(allVouchers)
+  // const [data, setData] = useState(allRoles)
   const [data, setData] = useState(list);
 
-  const [tableData] = useState(_orders);
+  // const [tableData] = useState(_orders);
 
   const [filters, setFilters] = useState(defaultFilters);
-  const [voucherStatus, setVoucherStatus] = useState(true);
+  const [roleStatus, setRoleStatus] = useState(true);
 
   // ----------------------------------------------------------------------------------
 
-  const VoucherSchema = Yup.object().shape({
+  const RoleSchema = Yup.object().shape({
     name: Yup.object().shape({
       en: Yup.string().required('English Name is required'),
       ar: Yup.string().required('Arabic Name is required'),
@@ -183,7 +183,7 @@ export default function OrdersListView() {
       name: 'coverage',
       message: 'Please select at least one option',
       test: (value: any) => {
-        if (voucherData?.converageAll) {
+        if (roleData?.converageAll) {
           return true;
         }
         return value && value.length > 0;
@@ -192,7 +192,7 @@ export default function OrdersListView() {
   });
 
   const methods = useForm({
-    resolver: yupResolver(VoucherSchema),
+    resolver: yupResolver(RoleSchema),
   });
 
   const {
@@ -204,10 +204,10 @@ export default function OrdersListView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       if (editId) {
-        console.log('data', voucherData);
-        await editVoucherFun();
+        console.log('data', roleData);
+        await editRoleFun();
       } else {
-        await createVoucherFun();
+        await createRoleFun();
       }
     } catch (error) {
       console.error(error);
@@ -218,7 +218,7 @@ export default function OrdersListView() {
 
   useEffect(() => {
     if (loadStatus === 'idle') {
-      dispatch(fetchVouchersList(error)).then((response: any) => {
+      dispatch(fetchRolesList(error)).then((response: any) => {
         console.log(list);
         // setData(list)
       });
@@ -254,31 +254,31 @@ export default function OrdersListView() {
 
   // Edit customer
   useEffect(() => {
-    if (voucher) {
-      if (voucher && Object.entries(voucher).length > 0) {
+    if (role) {
+      if (role && Object.entries(role).length > 0) {
         // Convert the string dates to Date objects
-        const startDate = new Date(voucher?.availabitiyStarts);
-        const endDate = new Date(voucher?.availabitiyEnds);
+        const startDate = new Date(role?.availabitiyStarts);
+        const endDate = new Date(role?.availabitiyEnds);
 
         const updatedData = {
           name: {
-            en: voucher?.name?.en || voucher?.name,
-            ar: voucher?.name?.ar || voucher?.name,
+            en: role?.name?.en || role?.name,
+            ar: role?.name?.ar || role?.name,
           },
-          code: voucher?.code,
-          status: voucher?.status,
-          discountAmount: voucher?.discountAmount,
-          discountCurrency: voucher?.discountCurrency,
-          discountPercentage: voucher?.discountPercentage,
-          upTo: voucher?.upTo,
-          totalUses: voucher?.totalUses,
+          code: role?.code,
+          status: role?.status,
+          discountAmount: role?.discountAmount,
+          discountCurrency: role?.discountCurrency,
+          discountPercentage: role?.discountPercentage,
+          upTo: role?.upTo,
+          totalUses: role?.totalUses,
           availabitiyStarts: startDate.toISOString().split('T')[0],
           availabitiyEnds: endDate.toISOString().split('T')[0],
-          converageAll: voucher?.converageAll,
-          coverage: voucher?.coverage,
+          converageAll: role?.converageAll,
+          coverage: role?.coverage,
         };
-        setVoucherData(updatedData);
-        setDiscountTypeToggle(voucher?.type);
+        setRoleData(updatedData);
+        setDiscountTypeToggle(role?.type);
         Object.entries(updatedData).forEach(([fieldName, value]: any) => {
           if (fieldName === 'name') {
             methods.setValue('name.en', value.en);
@@ -290,21 +290,21 @@ export default function OrdersListView() {
       }
     } else {
       setDiscountTypeToggle('FIXED_AMOUNT');
-      setVoucherData(null);
+      setRoleData(null);
       reset();
     }
-  }, [voucher, methods, reset]);
+  }, [role, methods, reset]);
 
-  const handleVoucherData = (e: any) => {
-    setVoucherData((prevData: any) => ({
+  const handleRoleData = (e: any) => {
+    setRoleData((prevData: any) => ({
       ...prevData,
       [e.target.name]: e.target.type === 'number' ? Number(e.target.value) : e.target.value,
     }));
   };
-  const handleNestedVoucherData = (e: any) => {
+  const handleNestedRoleData = (e: any) => {
     const { name, value } = e.target;
     const [parentKey, nestedKey] = name.split('.');
-    setVoucherData((prevData: any) => ({
+    setRoleData((prevData: any) => ({
       ...prevData,
       [parentKey]: {
         ...(prevData[parentKey] || {}),
@@ -313,22 +313,22 @@ export default function OrdersListView() {
     }));
   };
 
-  const createVoucherFun = () => {
+  const createRoleFun = () => {
     const fotmData = {
-      ...voucherData,
-      status: voucherData?.status || true,
-      type: voucherData?.type || discountTypeToggle,
-      discountPercentage: voucherData?.discountPercentage || 0,
-      upTo: voucherData?.upTo || 0,
-      discountCurrency: voucherData?.discountCurrency || 'KWD',
-      converageAll: voucherData?.converageAll || false,
+      ...roleData,
+      status: roleData?.status || true,
+      type: roleData?.type || discountTypeToggle,
+      discountPercentage: roleData?.discountPercentage || 0,
+      upTo: roleData?.upTo || 0,
+      discountCurrency: roleData?.discountCurrency || 'KWD',
+      converageAll: roleData?.converageAll || false,
     };
     if (fotmData) {
-      dispatch(createVoucher(fotmData)).then((response: any) => {
+      dispatch(createRole(fotmData)).then((response: any) => {
         console.log(response);
         if (response.meta.requestStatus === 'fulfilled') {
-          setVoucherData(null);
-          dispatch(fetchVouchersList(error));
+          setRoleData(null);
+          dispatch(fetchRolesList(error));
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -337,19 +337,19 @@ export default function OrdersListView() {
     }
   };
 
-  const editVoucherFun = () => {
+  const editRoleFun = () => {
     const fotmData = {
-      ...voucherData,
-      status: voucherData?.status || true,
+      ...roleData,
+      status: roleData?.status || true,
       type: discountTypeToggle,
-      discountPercentage: voucherData?.discountPercentage || 0,
-      upTo: voucherData?.upTo || 0,
-      discountCurrency: voucherData?.discountCurrency || 'KWD',
-      converageAll: voucherData?.converageAll || false,
+      discountPercentage: roleData?.discountPercentage || 0,
+      upTo: roleData?.upTo || 0,
+      discountCurrency: roleData?.discountCurrency || 'KWD',
+      converageAll: roleData?.converageAll || false,
     };
-    dispatch(editVoucher({ voucherId: editId, data: fotmData })).then((response: any) => {
+    dispatch(editRole({ roleId: editId, data: fotmData })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchVouchersList(error));
+        dispatch(fetchRolesList(error));
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -357,13 +357,13 @@ export default function OrdersListView() {
     });
   };
 
-  const removeVoucherFun = () => {
+  const removeRoleFun = () => {
     console.log('removeData', removeData);
 
     if (removeData) {
-      dispatch(deleteVoucher(removeData)).then((response: any) => {
+      dispatch(deleteRole(removeData)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchVouchersList(error));
+          dispatch(fetchRolesList(error));
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
@@ -374,42 +374,42 @@ export default function OrdersListView() {
   };
 
   // ----------------------------------------------------------------------------------
-  const dateError =
-    filters.startDate && filters.endDate
-      ? filters.startDate.getTime() > filters.endDate.getTime()
-      : false;
+  // const dateError =
+  //   filters.startDate && filters.endDate
+  //     ? filters.startDate.getTime() > filters.endDate.getTime()
+  //     : false;
 
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-    dateError,
-  });
+  // const dataFiltered = applyFilter({
+  //   inputData: tableData,
+  //   comparator: getComparator(table.order, table.orderBy),
+  //   filters,
+  //   dateError,
+  // });
 
-  const canReset =
-    !!filters.name || filters.status !== 'all' || (!!filters.startDate && !!filters.endDate);
+  // const canReset =
+  //   !!filters.name || filters.status !== 'all' || (!!filters.startDate && !!filters.endDate);
 
-  const handleFilters = useCallback(
-    (name: string, value: IOrderTableFilterValue) => {
-      table.onResetPage();
-      setFilters((prevState) => ({
-        ...prevState,
-        [name]: value,
-      }));
-    },
-    [table]
-  );
+  // const handleFilters = useCallback(
+  //   (name: string, value: IOrderTableFilterValue) => {
+  //     table.onResetPage();
+  //     setFilters((prevState) => ({
+  //       ...prevState,
+  //       [name]: value,
+  //     }));
+  //   },
+  //   [table]
+  // );
 
-  const handleResetFilters = useCallback(() => {
-    setFilters(defaultFilters);
-  }, []);
+  // const handleResetFilters = useCallback(() => {
+  //   setFilters(defaultFilters);
+  // }, []);
 
   const handleChangeTab = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
     if (newValue === 'All') {
-      setData(allVouchers);
+      setData(list);
     } else {
-      const newData = allVouchers.filter((order) =>
+      const newData = list.filter((order: any) =>
         newValue === 'Active' ? order.status : !order.status
       );
       setData(newData);
@@ -417,7 +417,7 @@ export default function OrdersListView() {
   };
 
   // new order
-  const [openCreateVoucher, setOpenCreateVoucher] = useState(false);
+  const [openCreateRole, setOpenCreateRole] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
@@ -425,13 +425,13 @@ export default function OrdersListView() {
     (state: string, id: any = null) =>
       (event: React.SyntheticEvent | React.MouseEvent) => {
         if (state === 'new') {
-          setOpenCreateVoucher((pv) => !pv);
+          setOpenCreateRole((pv) => !pv);
           setEditId(id);
           if (id) {
-            dispatch(fetchOneVoucher(id));
+            dispatch(fetchOneRole(id));
           } else {
-            setVoucherData({});
-            dispatch(setVoucher({}));
+            setRoleData({});
+            dispatch(setRole({}));
           }
         } else if (state === 'delete') {
           setOpenDelete((pv) => !pv);
@@ -448,7 +448,7 @@ export default function OrdersListView() {
         return;
       }
 
-      if (state === 'new') setOpenCreateVoucher(false);
+      if (state === 'new') setOpenCreateRole(false);
       else if (state === 'details') setOpenDetails(false);
       else if (state === 'delete') setOpenDelete(false);
     };
@@ -494,22 +494,22 @@ export default function OrdersListView() {
 
   useEffect(() => {
     const fetchData = async () => {
-      await getPermission('edit', 'UPDATE_VOUCHER_BY_ID');
-      await getPermission('remove', 'DELETE_VOUCHER_BY_ID');
+      await getPermission('edit', 'UPDATE_ROLE_BY_ID');
+      await getPermission('remove', 'DELETE_ROLE_BY_ID');
     };
     fetchData();
   }, []);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      <RoleBasedGuard hasContent permission="GET_VOUCHERS">
+      <RoleBasedGuard hasContent permission="GET_ROLES">
         <Grid
           container
           justifyContent="space-between"
           alignItems={{ xs: 'flex-start', md: 'center' }}
         >
           <Grid item xs={12} md="auto">
-            <CustomCrumbs heading="Vouchers" crums={false} />
+            <CustomCrumbs heading="Roles" crums={false} />
           </Grid>
 
           <Grid item xs={12} md={3}>
@@ -521,7 +521,7 @@ export default function OrdersListView() {
             >
               {/* <Button startIcon={<Box component='img' src='/raw/orderreport.svg' />} fullWidth sx={{ borderRadius: '30px', color: '#8688A3', backgroundColor: '#F0F0F4' }} component='h5' variant='contained' color='primary' onClick={toggleDrawerCommon('analytics')}> Analytics </Button> */}
             </Stack>
-            <RoleBasedGuard permission="CREATE_VOUCHER">
+            <RoleBasedGuard permission="CREATE_ROLE">
               <BottomActions>
                 <Stack
                   direction={{ xs: 'column', sm: 'row' }}
@@ -540,7 +540,7 @@ export default function OrdersListView() {
                     onClick={toggleDrawerCommon('new')}
                   >
                     {' '}
-                    Create New Voucher{' '}
+                    Create New Role{' '}
                   </Button>
                 </Stack>
               </BottomActions>
@@ -549,16 +549,16 @@ export default function OrdersListView() {
 
           <Grid item xs={12}>
             <Box mt="20px">
-              <VouchersToolbar
+              {/* <RolesToolbar
                 filters={filters}
                 onFilters={handleFilters}
                 //
                 canReset={canReset}
                 onResetFilters={handleResetFilters}
-              />
+              /> */}
 
-              {canReset && (
-                <VouchersFiltersResult
+              {/* {canReset && (
+                <RolesFiltersResult
                   filters={filters}
                   onFilters={handleFilters}
                   //
@@ -567,7 +567,7 @@ export default function OrdersListView() {
                   results={dataFiltered.length}
                   sx={{ p: 2.5, pt: 0 }}
                 />
-              )}
+              )} */}
             </Box>
           </Grid>
 
@@ -602,11 +602,11 @@ export default function OrdersListView() {
                               'default'
                             }
                           >
-                            {tab.value === 'All' && allVouchers.length}
+                            {tab.value === 'All' && list.length}
                             {tab.value === 'Expired' &&
-                              allVouchers.filter((order) => !order.status).length}
+                              list.filter((order: any) => !order.status).length}
                             {tab.value === 'Active' &&
-                              allVouchers.filter((order) => order.status).length}
+                              list.filter((order: any) => order.status).length}
                           </Label>
                         }
                       />
@@ -624,7 +624,7 @@ export default function OrdersListView() {
                           container
                           spacing={2}
                         >
-                          {listItems.map((voucher: any, indx: any) => (
+                          {listItems.map((role: any, indx: any) => (
                             <Draggable key={indx} index={indx} draggableId={indx.toString()}>
                               {(provided) => (
                                 <Grid
@@ -643,7 +643,7 @@ export default function OrdersListView() {
                                     rowGap={3}
                                     p={3}
                                     minHeight="80px"
-                                    sx={voucher.status ? stylesActive : stylesDisabled}
+                                    sx={role.status ? stylesActive : stylesDisabled}
                                   >
                                     <Grid
                                       item
@@ -661,9 +661,9 @@ export default function OrdersListView() {
                                           variant="subtitle2"
                                           sx={{ fontSize: '.8rem' }}
                                         >
-                                          {voucher?.name?.en || voucher?.name}
+                                          {role?.name?.en || role?.name}
                                         </Typography>
-                                        {voucher.status ? (
+                                        {role.status ? (
                                           <Typography
                                             component="p"
                                             color="#0D6EFD"
@@ -677,9 +677,9 @@ export default function OrdersListView() {
                                               alignItems: 'center',
                                               gap: '8px',
                                             }}
-                                            onClick={() => onCopy(voucher.code)}
+                                            onClick={() => onCopy(role.code)}
                                           >
-                                            {voucher.code} <Iconify icon="tabler:copy" />{' '}
+                                            {role.code} <Iconify icon="tabler:copy" />{' '}
                                           </Typography>
                                         ) : (
                                           <Typography
@@ -688,7 +688,7 @@ export default function OrdersListView() {
                                             variant="subtitle2"
                                             sx={{ mt: '5px', fontWeight: 900, fontSize: '.8rem' }}
                                           >
-                                            {voucher.code}
+                                            {role.code}
                                           </Typography>
                                         )}
                                       </Box>
@@ -701,10 +701,10 @@ export default function OrdersListView() {
                                         variant="subtitle2"
                                         sx={{ fontSize: '.8rem' }}
                                       >
-                                        {voucher.type === 'FIXED_AMOUNT'
-                                          ? `${voucher.discountAmount} KWD`
-                                          : `${voucher.discountPercentage}%`}{' '}
-                                        <span style={{ fontSize: '.7rem' }}>({voucher.type})</span>{' '}
+                                        {role.type === 'FIXED_AMOUNT'
+                                          ? `${role.discountAmount} KWD`
+                                          : `${role.discountPercentage}%`}{' '}
+                                        <span style={{ fontSize: '.7rem' }}>({role.type})</span>{' '}
                                       </Typography>
                                     </Grid>
                                     <Grid item xs={6} md="auto">
@@ -714,7 +714,7 @@ export default function OrdersListView() {
                                         variant="subtitle2"
                                         sx={{ fontSize: '.8rem' }}
                                       >
-                                        {voucher.totalUses} Uses{' '}
+                                        {role.totalUses} Uses{' '}
                                       </Typography>
                                     </Grid>
 
@@ -736,9 +736,9 @@ export default function OrdersListView() {
                                               background: 'rgb(134, 136, 163,0.2)',
                                             },
                                           }}
-                                          // onClick={toggleDrawerCommon("delete", voucher._id)}
+                                          // onClick={toggleDrawerCommon("delete", role._id)}
                                           onClick={() => {
-                                            setRemoveData(voucher._id);
+                                            setRemoveData(role._id);
                                             confirm.onTrue();
                                           }}
                                         >
@@ -764,7 +764,7 @@ export default function OrdersListView() {
                                               background: 'rgb(134, 136, 163,0.2)',
                                             },
                                           }}
-                                          onClick={toggleDrawerCommon('new', voucher._id)}
+                                          onClick={toggleDrawerCommon('new', role._id)}
                                         >
                                           {allowAction.edit && (
                                             <Box
@@ -774,7 +774,7 @@ export default function OrdersListView() {
                                             />
                                           )}
                                         </Box>
-                                        {/* <Switch checked={voucher.status} /> */}
+                                        {/* <Switch checked={role.status} /> */}
                                       </Box>
                                     </Grid>
                                   </Grid>
@@ -793,7 +793,7 @@ export default function OrdersListView() {
               <DetailsNavBar
                 open={openDetails}
                 onClose={handleDrawerCloseCommon('details')}
-                title="Voucher Details"
+                title="Role Details"
                 actions={
                   <Button
                     fullWidth
@@ -815,7 +815,7 @@ export default function OrdersListView() {
                     variant="subtitle2"
                     sx={{ opacity: 0.7, fontSize: '.9rem' }}
                   >
-                    Voucher Name (English)
+                    Role Name (English)
                   </Typography>
                   <TextField fullWidth variant="filled" defaultValue="Happy Eid" name="NAME" />
 
@@ -827,7 +827,7 @@ export default function OrdersListView() {
                     variant="subtitle2"
                     sx={{ opacity: 0.7, fontSize: '.9rem' }}
                   >
-                    Voucher Name (Arabic)
+                    Role Name (Arabic)
                   </Typography>
                   <TextField fullWidth variant="filled" defaultValue="عيد سعيد" name="NAME" />
 
@@ -839,7 +839,7 @@ export default function OrdersListView() {
                     variant="subtitle2"
                     sx={{ opacity: 0.7, fontSize: '.9rem' }}
                   >
-                    Voucher Code
+                    Role Code
                   </Typography>
                   <TextField fullWidth variant="filled" defaultValue="H@PPYEID2023" name="Code" />
 
@@ -856,7 +856,7 @@ export default function OrdersListView() {
                         variant="subtitle2"
                         sx={{ opacity: 0.7, fontSize: '.9rem' }}
                       >
-                        Voucher Status
+                        Role Status
                       </Typography>
                       <Typography
                         component="p"
@@ -1026,7 +1026,7 @@ export default function OrdersListView() {
                         variant="subtitle2"
                         sx={{ opacity: 0.7, fontSize: '.8rem' }}
                       >
-                        Voucher Coverage
+                        Role Coverage
                       </Typography>
                       <FormControl fullWidth>
                         <Select
@@ -1050,9 +1050,9 @@ export default function OrdersListView() {
 
               {/* create new Vocher */}
               <DetailsNavBar
-                open={openCreateVoucher}
+                open={openCreateRole}
                 onClose={handleDrawerCloseCommon('new')}
-                title={editId ? 'Edit Voucher' : 'Add New Voucher'}
+                title={editId ? 'Edit Role' : 'Add New Role'}
                 actions={
                   <Stack alignItems="center" justifyContent="center" spacing="10px">
                     <LoadingButton
@@ -1080,14 +1080,14 @@ export default function OrdersListView() {
                       variant="subtitle2"
                       sx={{ opacity: 0.7, fontSize: '.9rem' }}
                     >
-                      Voucher Name (English)
+                      Role Name (English)
                     </Typography>
                     {/* <TextField fullWidth variant='filled' defaultValue='Happy Eid' name='NAME' /> */}
                     <RHFTextField
                       fullWidth
                       variant="filled"
-                      settingStateValue={handleNestedVoucherData}
-                      value={voucherData?.name?.en || ''}
+                      settingStateValue={handleNestedRoleData}
+                      value={roleData?.name?.en || ''}
                       name="name.en"
                     />
                     <Typography
@@ -1098,14 +1098,14 @@ export default function OrdersListView() {
                       variant="subtitle2"
                       sx={{ opacity: 0.7, fontSize: '.9rem' }}
                     >
-                      Voucher Name (Arabic)
+                      Role Name (Arabic)
                     </Typography>
                     {/* <TextField fullWidth variant='filled' defaultValue='عيد سعيد' name='NAME' /> */}
                     <RHFTextField
                       fullWidth
                       variant="filled"
-                      settingStateValue={handleNestedVoucherData}
-                      value={voucherData?.name?.ar || ''}
+                      settingStateValue={handleNestedRoleData}
+                      value={roleData?.name?.ar || ''}
                       name="name.ar"
                     />
 
@@ -1117,14 +1117,14 @@ export default function OrdersListView() {
                       variant="subtitle2"
                       sx={{ opacity: 0.7, fontSize: '.9rem' }}
                     >
-                      Voucher Code
+                      Role Code
                     </Typography>
                     {/* <TextField fullWidth variant='filled' defaultValue="H@PPYEID2023" name='Code' /> */}
                     <RHFTextField
                       fullWidth
                       variant="filled"
-                      settingStateValue={handleVoucherData}
-                      value={voucherData?.code || ''}
+                      settingStateValue={handleRoleData}
+                      value={roleData?.code || ''}
                       name="code"
                     />
 
@@ -1141,7 +1141,7 @@ export default function OrdersListView() {
                           variant="subtitle2"
                           sx={{ opacity: 0.7, fontSize: '.9rem' }}
                         >
-                          Voucher Status
+                          Role Status
                         </Typography>
                         <Typography
                           component="p"
@@ -1153,21 +1153,21 @@ export default function OrdersListView() {
                       </Box>
 
                       {/* <Switch
-                      checked={voucherData?.status || true}
+                      checked={roleData?.status || true}
                       onChange={(e) => {
-                        setVoucherData({ ...voucherData, status: e.target.checked })
+                        setRoleData({ ...roleData, status: e.target.checked })
                       }}
                       inputProps={{ 'aria-label': 'controlled' }}
                       name='status'
                     /> */}
                       <RHFSwitch
                         label="status"
-                        checked={voucherData?.status || true}
+                        checked={roleData?.status || true}
                         onChange={(e: any) => {
                           console.log(e.target.checked);
-                          setVoucherData((prevData: any) => {
+                          setRoleData((prevData: any) => {
                             if (prevData && Object.entries(prevData).length > 0) {
-                              return { ...voucherData, status: e.target.checked };
+                              return { ...roleData, status: e.target.checked };
                             }
                             return { status: e.target.checked };
                           });
@@ -1246,8 +1246,8 @@ export default function OrdersListView() {
                             type="number"
                             fullWidth
                             variant="filled"
-                            settingStateValue={handleVoucherData}
-                            value={voucherData?.discountAmount || ''}
+                            settingStateValue={handleRoleData}
+                            value={roleData?.discountAmount || ''}
                             name="discountAmount"
                             sx={{
                               '& .MuiInputAdornment-root': {
@@ -1290,8 +1290,8 @@ export default function OrdersListView() {
                               type="number"
                               fullWidth
                               variant="filled"
-                              settingStateValue={handleVoucherData}
-                              value={voucherData?.discountPercentage || ''}
+                              settingStateValue={handleRoleData}
+                              value={roleData?.discountPercentage || ''}
                               name="discountPercentage"
                             />
                           </Grid>
@@ -1308,8 +1308,8 @@ export default function OrdersListView() {
                               type="number"
                               fullWidth
                               variant="filled"
-                              settingStateValue={handleVoucherData}
-                              value={voucherData?.upTo || ''}
+                              settingStateValue={handleRoleData}
+                              value={roleData?.upTo || ''}
                               name="upTo"
                               sx={{
                                 '& .MuiInputAdornment-root': {
@@ -1353,8 +1353,8 @@ export default function OrdersListView() {
                           type="number"
                           fullWidth
                           variant="filled"
-                          settingStateValue={handleVoucherData}
-                          value={voucherData?.totalUses || ''}
+                          settingStateValue={handleRoleData}
+                          value={roleData?.totalUses || ''}
                           name="totalUses"
                         />
                       </Grid>
@@ -1372,8 +1372,8 @@ export default function OrdersListView() {
                           fullWidth
                           type="date"
                           variant="filled"
-                          settingStateValue={handleVoucherData}
-                          value={voucherData?.availabitiyStarts || ''}
+                          settingStateValue={handleRoleData}
+                          value={roleData?.availabitiyStarts || ''}
                           name="availabitiyStarts"
                         />
                       </Grid>
@@ -1390,8 +1390,8 @@ export default function OrdersListView() {
                           fullWidth
                           type="date"
                           variant="filled"
-                          settingStateValue={handleVoucherData}
-                          value={voucherData?.availabitiyEnds || ''}
+                          settingStateValue={handleRoleData}
+                          value={roleData?.availabitiyEnds || ''}
                           name="availabitiyEnds"
                         />
                       </Grid>
@@ -1403,7 +1403,7 @@ export default function OrdersListView() {
                           variant="subtitle2"
                           sx={{ opacity: 0.7, fontSize: '.8rem' }}
                         >
-                          Voucher Coverage
+                          Role Coverage
                         </Typography>
                         <FormControl fullWidth>
                           {/* <Select
@@ -1413,8 +1413,8 @@ export default function OrdersListView() {
                           }}
                           // value={mySubCat}
                           // onChange={handleChangeMySubCat}
-                          value={voucherData?.coverage || null}
-                          onChange={handleVoucherData}
+                          value={roleData?.coverage || null}
+                          onChange={handleRoleData}
                           name='coverage'
                         >
                           <MenuItem value='AllProducts'>All Products</MenuItem>
@@ -1427,8 +1427,8 @@ export default function OrdersListView() {
                             name="coverage"
                             label="Multi select"
                             options={productList}
-                            settingStateValue={handleVoucherData}
-                            value={voucherData?.coverage || []}
+                            settingStateValue={handleRoleData}
+                            value={roleData?.coverage || []}
                           />
                         </FormControl>
 
@@ -1437,11 +1437,11 @@ export default function OrdersListView() {
                             <Checkbox
                               size="medium"
                               onChange={(e) => {
-                                setVoucherData({ ...voucherData, converageAll: e.target.checked });
+                                setRoleData({ ...roleData, converageAll: e.target.checked });
                               }}
                               name="converageAll"
                               color="primary"
-                              checked={voucherData?.converageAll || false}
+                              checked={roleData?.converageAll || false}
                             />
                           }
                           label="All Products"
@@ -1516,7 +1516,7 @@ export default function OrdersListView() {
                     color="error"
                     variant="soft"
                     size="large"
-                    onClick={removeVoucherFun}
+                    onClick={removeRoleFun}
                     sx={{ borderRadius: '30px' }}
                   >
                     Delete
@@ -1533,7 +1533,7 @@ export default function OrdersListView() {
                     <Grid item xs={12} md={12}>
                       <Typography component="p" variant="subtitle2">
                         {' '}
-                        Delete this Voucher ?
+                        Delete this Role ?
                       </Typography>
                     </Grid>
                   </Grid>
