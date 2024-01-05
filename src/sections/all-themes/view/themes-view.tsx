@@ -147,20 +147,10 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
               grabCursor
               centeredSlides
               breakpoints={{
-                0: {
-                  slidesPerView: 1.3,
-                },
-
-                768: {
-                  // width: 768,
-                  slidesPerView: 2,
-                },
-                820: {
-                  slidesPerView: 2,
-                },
-                1024: {
-                  slidesPerView: 3,
-                },
+                0: { slidesPerView: 1 },
+                540: { slidesPerView: 2 },
+                1040: { slidesPerView: 3 },
+                1280: { slidesPerView: 3 },
               }}
               coverflowEffect={{
                 rotate: 0,
