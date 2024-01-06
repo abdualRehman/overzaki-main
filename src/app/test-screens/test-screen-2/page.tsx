@@ -6,10 +6,13 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { Grid } from '@mui/material';
+import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
+import { useState } from 'react';
 // components
 import { paths } from 'src/routes/paths';
 import Linker from 'src/sections/overview/subscription-plan/link';
 import { Icon } from '@iconify/react';
+import Link from 'next/link';
 
 const page = () => {
   const data = [
@@ -82,20 +85,26 @@ const page = () => {
       title: 'Cars',
     },
   ];
+  const [selectedItem, setSelectedItem] = useState<string>();
+
   return (
     <Box sx={{ height: '100%', transition: 'all .5', paddingBottom: '30px' }}>
-      <Typography variant="h6" sx={{ padding: { xs: '5px', sm: '13px' } }}>
-        Please Select a Category
+      <Typography variant="h3" sx={{ textAlign: 'center', padding: { xs: '5px', sm: '13px' } }}>
+        What is the type of your business?
+      </Typography>
+      <Typography variant="h6" sx={{ textAlign: 'center', padding: { xs: '5px', sm: '13px' } }}>
+        Select your story type
       </Typography>
 
       <Grid container spacing={2} mt={2} px={2}>
         {data.map((item, indx) => (
-          <Grid item key={indx} xs={6} sm={4} md={3}>
+          <Grid onClick={() => setSelectedItem(item.title)} item key={indx} xs={6} sm={4} md={3}>
             <Box
               sx={{
                 width: '100%',
                 height: '120px',
-                backgroundColor: 'rgb(134, 136, 163,.09)',
+                backgroundColor:
+                  selectedItem === item.title ? 'rgb(27, 252, 182)' : 'rgb(134, 136, 163,.09)',
                 borderRadius: '16px',
                 textAlign: 'center',
                 display: 'flex',
@@ -105,9 +114,6 @@ const page = () => {
                 flexDirection: 'column',
                 transition: 'all .5s',
                 cursor: { xs: 'default', sm: 'pointer' },
-                '&:hover': {
-                  backgroundColor: 'rgb(27, 252, 182)',
-                },
               }}
             >
               <Icon width={24} icon={item.icon} />
@@ -122,6 +128,30 @@ const page = () => {
           </Grid>
         ))}
       </Grid>
+
+      {selectedItem !== '' && (
+        <Link
+          href="/test-screens/test-screen-3"
+          style={{
+            color: 'black',
+            width: '100%',
+            display: selectedItem ? 'flex' : 'none',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ArrowForwardIosOutlinedIcon
+            sx={{
+              fontSize: 40,
+              backgroundColor: '#1BFDB7',
+              borderRadius: '50%',
+              padding: '7px',
+              position: 'fixed',
+              bottom: '20px',
+            }}
+          />
+        </Link>
+      )}
     </Box>
   );
 };

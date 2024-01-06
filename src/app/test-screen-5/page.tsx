@@ -16,6 +16,7 @@ import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 import 'swiper/css/navigation';
 import './styles.css';
+import Link from 'next/link';
 
 const page = () => {
   const data = [
@@ -168,11 +169,12 @@ const page = () => {
               gap: '8px',
             }}
           >
-            <button
-              type="button"
+            <Link
+              href="/test-screen-6"
               style={{
                 backgroundColor: '#1bfcb6',
                 color: '#10134a',
+                textDecoration: 'none',
                 border: 'none',
                 paddingLeft: '50px',
                 paddingRight: '50px',
@@ -182,8 +184,8 @@ const page = () => {
                 fontWeight: 700,
               }}
             >
-              Preview
-            </button>
+              Apply
+            </Link>
             <button
               type="button"
               style={{
@@ -199,7 +201,7 @@ const page = () => {
                 textDecoration: 'none',
               }}
             >
-              Edit
+              Preview
             </button>
           </div>
         </Swiper>

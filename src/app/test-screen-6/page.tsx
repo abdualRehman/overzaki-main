@@ -1,5 +1,6 @@
 import { Box, Button, Typography } from '@mui/material';
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 
 const page = () => (
@@ -39,7 +40,19 @@ const page = () => (
       <Image alt="" width={30} height={40} src="/sparkle.svg" />
       <p style={{ color: '#0F1349', fontWeight: 700 }}>You have 7 days Free on the Trial Plan</p>
     </Box>
-    <Button sx={{ backgroundColor: '#0F1349', width: '20%', marginTop: '12px' }}>Continue</Button>
+    <Link
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        textDecoration: 'none',
+      }}
+      href="/dashboard"
+    >
+      <Button sx={{ backgroundColor: '#0F1349', width: '20%', marginTop: '12px' }}>Continue</Button>
+    </Link>
   </div>
 );
 

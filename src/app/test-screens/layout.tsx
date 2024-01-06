@@ -27,20 +27,10 @@ const layout = ({ children }: { children: React.ReactNode }) => (
           width: '100%',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
         }}
       >
-        <Icon
-          style={{ padding: '7px', background: 'gray', borderRadius: '50%' }}
-          width={35}
-          icon="iconamoon:restart-bold"
-        />
         <img alt="" src="/Face.png" />
-        <Icon
-          style={{ padding: '7px', background: 'gray', borderRadius: '50%' }}
-          width={35}
-          icon="mingcute:volume-mute-fill"
-        />
       </div>
       <img alt="" src="/Voice.png" />
       {children}
