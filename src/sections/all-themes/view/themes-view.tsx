@@ -75,11 +75,11 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
       num: 3,
     },
     {
-      name: 'burgerboutique',
-      image: rest1,
+      name: 'cafe',
+      image: Cafe,
       type: 'restaurant',
-      url: 'https://burgerboutique.vercel.app',
-      num: 4,
+      url: 'https://resturant-ui-mu.vercel.app',
+      num: 6,
     },
     {
       name: 'burgerboutique',
@@ -88,20 +88,7 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
       url: 'https://burgerboutique.vercel.app',
       num: 4,
     },
-    {
-      name: 'burgerboutique',
-      image: rest1,
-      type: 'restaurant',
-      url: 'https://burgerboutique.vercel.app',
-      num: 4,
-    },
-    {
-      name: 'fatayer',
-      image: rest2,
-      type: 'restaurant',
-      url: 'https://fatayeralaaltayer.vercel.app',
-      num: 5,
-    },
+
     {
       name: 'fatayer',
       image: rest2,
