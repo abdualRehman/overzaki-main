@@ -10,8 +10,17 @@ const page = () => {
     eng: false,
     ar: false,
   });
-  const [arDefault, setArDefault] = useState('set as default');
-  const [enDefault, setEnDefault] = useState('default');
+  const [arDefault, setArDefault] = useState<string>('set as default');
+  const [enDefault, setEnDefault] = useState<string>('default');
+  const handleDefault = () => {
+    if (arDefault === 'set as default') {
+      setArDefault('default');
+      setEnDefault('set as default');
+    } else {
+      setArDefault('set as default');
+      setEnDefault('default');
+    }
+  };
   return (
     <div style={{ width: '40%' }}>
       <Typography variant="h3" sx={{ textAlign: 'center', padding: { xs: '5px', sm: '13px' } }}>
@@ -41,9 +50,7 @@ const page = () => {
             English
           </Typography>
         </div>
-        <Box onClick={() => [setEnDefault('default'), () => setArDefault('set as default')]}>
-          {enDefault}
-        </Box>
+        <Box onClick={handleDefault}>{enDefault}</Box>
       </div>
       <div
         style={{
@@ -69,9 +76,7 @@ const page = () => {
             Arabic
           </Typography>
         </div>
-        <Box onClick={() => [setEnDefault('set as default'), setArDefault('default')]}>
-          {arDefault}
-        </Box>
+        <Box onClick={arDefault === 'set as default' && handleDefault}>{arDefault}</Box>
       </div>
       {languages.en == true ||
         (languages.ar == true && (
