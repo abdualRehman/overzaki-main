@@ -8,7 +8,7 @@
 import 'react-multi-carousel/lib/styles.css';
 import './style.css';
 import Container from '@mui/material/Container';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 // components
 // import Linker from 'src/sections/overview/subscription-plan-checkout/link';
 // import { paths } from 'src/routes/paths';
@@ -114,6 +114,7 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
   // const notAvaliableThemes = ((allCategories.join(' ').toLowerCase()).includes(themeType));
   const notAvaliableThemes = data.filter((item) => item.type === themeType).length === 0;
   const theme = filteredData[centredTheme];
+  const matches = useMediaQuery('(max-width:540px)');
 
   return (
     <Box sx={{ height: '100%' }}>
@@ -147,8 +148,8 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
               grabCursor
               centeredSlides
               breakpoints={{
-                0: { slidesPerView: 1 },
-                540: { slidesPerView: 2 },
+                0: { slidesPerView: 1.3 },
+                540: { slidesPerView: 1.8 },
                 1040: { slidesPerView: 3 },
                 1280: { slidesPerView: 3 },
               }}
@@ -173,8 +174,8 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
                       style={{ borderRadius: '20px' }}
                       alt="sc"
                       className="swiper-image"
-                      width={350}
-                      height={550}
+                      width={!matches ? 360 : 270}
+                      height={!matches ? 520 : 460}
                       src={themeD.image}
                     />
                   </SwiperSlide>
