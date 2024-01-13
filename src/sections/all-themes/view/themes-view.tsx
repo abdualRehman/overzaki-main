@@ -100,7 +100,7 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
   const filteredData = data.filter((item) => item.type === theme_type);
   // const notAvaliableThemes = ((allCategories.join(' ').toLowerCase()).includes(theme_type));
   const notAvaliableThemes = data.filter((item) => item.type === theme_type).length === 0;
-  const theme = filteredData[centredTheme];
+  const [theme, setTheme] = useState(filteredData[centredTheme]);
   const matches = useMediaQuery('(max-width:540px)');
 
   return (
@@ -127,12 +127,16 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
             }}
           >
             <Swiper
+              onSlideChange={(e) => setTheme(filteredData[e.realIndex])}
               effect="coverflow"
               spaceBetween={80}
               slidesPerGroup={1}
               loop
-              dir="rtl"
               grabCursor
+              // allowSlideNext={false}
+              // allowSlidePrev={false}
+              // allowTouchMove={false}
+              dir="rtl"
               centeredSlides
               breakpoints={{
                 0: { slidesPerView: 1.3 },
@@ -147,7 +151,7 @@ export default function ThemesViewRoot({ theme_type }: PersonalProps) {
                 modifier: 2,
                 slideShadows: true,
               }}
-              modules={[EffectCoverflow, Pagination, Navigation]}
+              modules={[EffectCoverflow, Navigation]}
               navigation={{
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev',
