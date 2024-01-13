@@ -249,5 +249,8 @@ export const paths = {
         theme: (theme_name: string) => `${ROOTS.DASHBOARD}/design/market/${theme_name}`,
       },
     },
+    newDesign: {
+      root: `${ROOTS.DASHBOARD}/new-design`,
+    },
   },
 };
