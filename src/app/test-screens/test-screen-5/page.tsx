@@ -76,7 +76,7 @@ const page = () => {
             Arabic
           </Typography>
         </div>
-        <Box onClick={arDefault === 'set as default' && handleDefault}>{arDefault}</Box>
+        <Box onClick={handleDefault}>{arDefault}</Box>
       </div>
       {languages.en == true ||
         (languages.ar == true && (
