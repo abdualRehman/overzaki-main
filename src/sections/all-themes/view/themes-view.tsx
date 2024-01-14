@@ -59,17 +59,14 @@ interface PersonalProps {
 export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalProps) {
   const [centredTheme, setCentredTheme] = useState(0);
 
-  const [themeType, setThemeType] = useState<any>("");
+  const [themeType, setThemeType] = useState<any>('');
 
   useLayoutEffect(() => {
     setThemeType(theme_type.toLowerCase());
-
-  }, [theme_type])
+  }, [theme_type]);
 
   // useEffect(() => {
   // }, [theme_type])
-
-
 
   const data = [
     { name: 'ecom', image: ECom, type: 'market', url: 'https://ecom-zaki.vercel.app', num: 1 },
@@ -113,7 +110,7 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
   const filteredData = data.filter((item) => item.type === themeType);
   // const notAvaliableThemes = ((allCategories.join(' ').toLowerCase()).includes(themeType));
   const notAvaliableThemes = data.filter((item) => item.type === themeType).length === 0;
-  const theme = filteredData[centredTheme];
+  const [theme, setTheme] = useState(filteredData[centredTheme]);
   const matches = useMediaQuery('(max-width:540px)');
 
   return (
@@ -140,12 +137,16 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
             }}
           >
             <Swiper
+              onSlideChange={(e) => setTheme(filteredData[e.realIndex])}
               effect="coverflow"
               spaceBetween={80}
               slidesPerGroup={1}
               loop
-              dir="rtl"
               grabCursor
+              // allowSlideNext={false}
+              // allowSlidePrev={false}
+              // allowTouchMove={false}
+              dir="rtl"
               centeredSlides
               breakpoints={{
                 0: { slidesPerView: 1.3 },
@@ -160,7 +161,7 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
                 modifier: 2,
                 slideShadows: true,
               }}
-              modules={[EffectCoverflow, Pagination, Navigation]}
+              modules={[EffectCoverflow, Navigation]}
               navigation={{
                 nextEl: '.swiper-button-next',
                 prevEl: '.swiper-button-prev',
@@ -228,7 +229,6 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
                     gap: '8px',
                   }}
                 >
-
                   <button
                     onClick={() => onSelectTheme(theme.name)}
                     type="button"
@@ -274,7 +274,7 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
                     Preview
                   </button>
                   <Link
-                    href={paths.dashboard.design.theme(themeType, theme.name, theme.url)}
+                    href={paths.dashboard.design.theme(themeType, theme?.name, theme?.url)}
                     type="button"
                     style={{
                       backgroundColor: '#10134a',
