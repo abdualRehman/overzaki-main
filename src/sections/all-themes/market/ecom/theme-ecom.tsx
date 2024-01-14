@@ -317,7 +317,7 @@ export default function EcomDesignMain() {
               {/* View and Dsiplay Section */}
               <Box sx={{ pb: '20px' }}>
                 {/* <OutPutView deviceView={deviceView} page={linker(controlls.page)} /> */}
-                <OutPutView deviceView={deviceView} page={`${url}??builder_id=${builder_Id}`} />
+                <OutPutView deviceView={deviceView} page={`${url}?builder_id=${builder_Id}`} />
               </Box>
 
             </Box>
