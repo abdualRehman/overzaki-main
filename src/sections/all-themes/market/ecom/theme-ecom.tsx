@@ -52,6 +52,7 @@ import UserViewDealer from './out-put/user-view-selection';
 import Actions from './Actions';
 import SaveSettings from '../../utils/save-settings';
 import { socketClient } from '../../utils/helper-functions';
+import { useSnackbar } from 'notistack';
 
 const dataPages = [
   { title: "Home Page", link: 'https://ecom-zaki.vercel.app/' },
@@ -75,6 +76,10 @@ interface ControllsState {
 export default function EcomDesignMain() {
   const socket = socketClient();
   // const settings = useSettingsContext();
+
+  const { enqueueSnackbar } = useSnackbar();
+
+
   const [activeSection, setActiveSection] = useState('Style');
   const [deviceView, setDeviceView] = useState('mobile');
   const [controlls, setControlls] = useState<ControllsState>({

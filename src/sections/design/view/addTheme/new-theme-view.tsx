@@ -20,6 +20,7 @@ import ThemeBusinessDetails from './ThemeBusinessDetails';
 import AppDetails from './appDetails';
 import AppLang from './AppLang';
 import { AppDispatch } from 'src/redux/store/store';
+import { useSnackbar } from 'notistack';
 
 
 
@@ -104,6 +105,8 @@ const AddNewTheme: React.FC<DesignMainProps> = () => {
     const [addData, setAddData] = useState<any>({});
 
     const [step, setStep] = useState<number>(1); // Explicitly specify the type as number
+    const { enqueueSnackbar } = useSnackbar();
+
 
 
     useEffect(() => {
@@ -141,13 +144,17 @@ const AddNewTheme: React.FC<DesignMainProps> = () => {
         dispatch(createBuilderFun(formData) as unknown as AnyAction).then((response: any) => {
             if (response.meta.requestStatus === 'fulfilled') {
                 console.log('Successfully Created!', { variant: 'success' });
+                enqueueSnackbar('Successfully Created!', { variant: 'success' });
                 dispatch(fetchBuilderList({}));
+                router.push(paths.dashboard.design.root);
+
             } else {
                 console.log(`Error! ${response.error.message}`, { variant: 'error' });
+                enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+
             }
         });
 
-        router.push(paths.dashboard.design.root);
 
 
     }
