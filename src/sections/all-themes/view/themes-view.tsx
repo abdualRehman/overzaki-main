@@ -274,7 +274,7 @@ export default function ThemesViewRoot({ theme_type, onSelectTheme }: PersonalPr
                     Preview
                   </button>
                   <Link
-                    href={paths.dashboard.design.theme(themeType, theme?.name, theme?.url)}
+                    href={paths.dashboard.design.theme(themeType, theme?.name, theme?.url, 'temporary')}
                     type="button"
                     style={{
                       backgroundColor: '#10134a',

@@ -5,7 +5,7 @@ import { useEffect, useReducer, useCallback, useMemo } from 'react';
 import axios, { endpoints } from 'src/utils/axios';
 //
 import { AuthContext } from './auth-context';
-import { isValidToken, setSession } from './utils';
+import { getBuilderDomain, isValidToken, setBuilderDomain, setSession, setSocketURL } from './utils';
 import { ActionMapType, AuthStateType, AuthUserType } from '../../types';
 
 // ----------------------------------------------------------------------
@@ -30,24 +30,31 @@ enum Types {
 type Payload = {
   [Types.INITIAL]: {
     user: AuthUserType;
+    socketURL?: any;
   };
   [Types.LOGIN]: {
     user: AuthUserType;
+    socketURL?: any;
   };
   [Types.REGISTER]: {
     user: AuthUserType;
+    socketURL?: any;
   };
   [Types.SENDOTP]: {
     user: AuthUserType;
+    socketURL?: any;
   };
   [Types.VERIFYOTP]: {
     user: AuthUserType;
+    socketURL?: any;
   };
   [Types.FORGOTPASSWORD]: {
     user: AuthUserType;
+    socketURL?: any;
   };
   [Types.NEWPASSWORD]: {
     user: AuthUserType;
+    socketURL?: any;
   };
   [Types.LOGOUT]: undefined;
 };
@@ -58,6 +65,7 @@ type ActionsType = ActionMapType<Payload>[keyof ActionMapType<Payload>];
 
 const initialState: AuthStateType = {
   user: null,
+  socketURL: null,
   loading: true,
 };
 
@@ -66,24 +74,28 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
     return {
       loading: false,
       user: action.payload.user,
+      socketURL: action.payload.socketURL
     };
   }
   if (action.type === Types.LOGIN) {
     return {
       ...state,
       user: action.payload.user,
+      socketURL: action.payload.socketURL
     };
   }
   if (action.type === Types.REGISTER) {
     return {
       ...state,
       user: action.payload.user,
+      socketURL: action.payload.socketURL
     };
   }
   if (action.type === Types.LOGOUT) {
     return {
       ...state,
       user: null,
+      socketURL: null
     };
   }
   return state;
@@ -97,6 +109,13 @@ const REFRESH_KEY = 'refreshToken';
 type Props = {
   children: React.ReactNode;
 };
+
+const getSocketURL = (tokenKey: any) => {
+  const socketBaseURL = process.env.NEXT_PUBLIC_SOCKET_URL;
+  const newSocketURL = socketBaseURL + tokenKey;
+  setSocketURL(newSocketURL);
+  return newSocketURL;
+}
 
 export function AuthProvider({ children }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -114,6 +133,7 @@ export function AuthProvider({ children }: Props) {
 
         console.log("response", response);
 
+        const newSocketURL = getSocketURL(accessToken);
 
         setSession(accessToken);
         sessionStorage.setItem(REFRESH_KEY, refreshToken);
@@ -122,6 +142,7 @@ export function AuthProvider({ children }: Props) {
           type: Types.INITIAL,
           payload: {
             user: response.data.data,
+            socketURL: newSocketURL,
           },
         });
       } else {
@@ -129,6 +150,7 @@ export function AuthProvider({ children }: Props) {
           type: Types.INITIAL,
           payload: {
             user: null,
+            socketURL: null,
           },
         });
       }
@@ -138,6 +160,7 @@ export function AuthProvider({ children }: Props) {
         type: Types.INITIAL,
         payload: {
           user: null,
+          socketURL: null,
         },
       });
     }
@@ -162,13 +185,16 @@ export function AuthProvider({ children }: Props) {
     console.log(accessToken);
     console.log(response.data.data);
 
+    const newSocketURL = getSocketURL(accessToken);
+
     sessionStorage.setItem(REFRESH_KEY, refreshToken);
     setSession(accessToken);
-
+    setBuilderDomain(null);
     dispatch({
       type: Types.LOGIN,
       payload: {
         user: response.data.data,
+        socketURL: newSocketURL,
       },
     });
   }, []);
@@ -194,13 +220,15 @@ export function AuthProvider({ children }: Props) {
 
       const { accessToken, refreshToken } = response.data.data;
 
+      const newSocketURL = getSocketURL(accessToken);
       setSession(accessToken);
       sessionStorage.setItem(REFRESH_KEY, refreshToken);
-
+      setBuilderDomain(null);
       dispatch({
         type: Types.REGISTER,
         payload: {
           user: response.data.data,
+          socketURL: newSocketURL,
         },
       });
     },
@@ -279,9 +307,31 @@ export function AuthProvider({ children }: Props) {
     await axios.get(endpoints.auth.loutout);
     setSession(null);
     sessionStorage.removeItem(REFRESH_KEY)
+    setBuilderDomain(null);
     dispatch({
       type: Types.LOGOUT,
     });
+  }, []);
+
+
+
+  // Get Builder
+  const getBuilders = useCallback(async () => {
+    const alreadyExistDomain = getBuilderDomain();
+    if (alreadyExistDomain) {
+      return true;
+    } else {
+      const response = await axios.get(endpoints.builder.list);
+      const { data } = response.data;
+      if (data?.length > 0) {
+        let builderDomain = data[0].domain
+        setBuilderDomain(builderDomain);
+        return true;
+      } else {
+        setBuilderDomain(null);
+        return false;
+      }
+    }
   }, []);
 
   // ----------------------------------------------------------------------
@@ -293,6 +343,7 @@ export function AuthProvider({ children }: Props) {
   const memoizedValue = useMemo(
     () => ({
       user: state.user,
+      socketURL: state.socketURL,
       method: 'jwt',
       loading: status === 'loading',
       authenticated: status === 'authenticated',
@@ -305,9 +356,10 @@ export function AuthProvider({ children }: Props) {
       verifyOtp,
       forgotPassword,
       newPassword,
-      verifyPermission
+      verifyPermission,
+      getBuilders,
     }),
-    [login, logout, register, sendOtp, verifyOtp, forgotPassword, newPassword, verifyPermission, state.user, status]
+    [login, logout, register, sendOtp, verifyOtp, forgotPassword, newPassword, verifyPermission, state.user, status, getBuilders]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

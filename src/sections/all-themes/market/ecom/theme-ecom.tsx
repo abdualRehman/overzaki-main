@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import './out-put/view/view.css';
 // @mui
@@ -24,7 +24,6 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar/scrollbar';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { BottomActions } from 'src/components/bottom-actions';
-import io from 'socket.io-client';
 import OutPutView from './out-put/view/out-put-view';
 import Buttons from './out-put/Buttons-Design-selection';
 import HeaderSection from './out-put/header-section';
@@ -52,6 +51,9 @@ import ProductPageProductCardDealer from './out-put/product-page-product-card-se
 import UserViewDealer from './out-put/user-view-selection';
 import Actions from './Actions';
 import SaveSettings from '../../utils/save-settings';
+import { socketClient } from '../../utils/helper-functions';
+import { useSnackbar } from 'notistack';
+import { useSettingsContext } from 'src/components/settings';
 
 const dataPages = [
   { title: "Home Page", link: 'https://ecom-zaki.vercel.app/' },
@@ -71,14 +73,14 @@ interface ControllsState {
   // analytics: EventTarget & (Element | HTMLElement) | null;
 }
 
-const domain = 'https://www.overzaki.io';
-const token =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NTcwOTgwMTI0MTUwZjQ3YzQwNGI2ODQiLCJkZXZpY2VOYW1lIjoidW5pcXVlIGRldmljZSBuYW1lIiwiaWF0IjoxNzA0MzU5MzY4LCJleHAiOjE3MDUyMjMzNjh9.wC0JtvEO3wrCG7qpLJbipZijZTt0Z3znEgCwuXafBBw';
-const socket = io(`${domain}/design?token=${token}`);
-
 
 export default function EcomDesignMain() {
+  const socket = socketClient();
   // const settings = useSettingsContext();
+
+  const { enqueueSnackbar } = useSnackbar();
+
+
   const [activeSection, setActiveSection] = useState('Style');
   const [deviceView, setDeviceView] = useState('mobile');
   const [controlls, setControlls] = useState<ControllsState>({
@@ -88,7 +90,7 @@ export default function EcomDesignMain() {
   });
 
   const [themeConfig, setThemeConfig] = useState({
-    font: 'Avernir',
+    fontStyle: 'Avernir',
     btns_Radius: 10,
     primaryColor: '#0D6EFD',
     secondaryColor: '#8688A3',
@@ -144,29 +146,32 @@ export default function EcomDesignMain() {
 
   const searchParams = useSearchParams();
   const url = searchParams.get('url')?.toString() || "";
+  const builder_Id = searchParams.get('id')?.toString() || "";
 
 
-  const dispatch = useDispatch();
+  let timeoutId: string | number | NodeJS.Timeout | undefined;
+
+  const debounce = (callback: any, delay: any) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(callback, delay);
+  }
 
 
   const handleThemeConfig = (key: string, newValue: string) => {
+
     setThemeConfig(pv => ({ ...pv, [key]: newValue }));
 
+    debounce(() => {
+      const data = {
+        builderId: builder_Id,
+        key: "foneStyle.en",
+        value: newValue,
+      };
+      if (socket) {
+        socket.emit('website:cmd', data)
+      }
 
-
-
-    // console.log(`{"msg" :"ok"}`);
-    const data = {
-      builderId: "659676a66df6d491eedf922d",
-      key: "font-style",
-      value: "Sunsarif"
-    };
-    const responseData = socket.emit('website:cmd', data)
-
-
-    // dispatch(createSocketRequest(data)).then((response: any) => {
-    //   console.log("response", response);
-    // })
+    }, 300);
   };
 
 
@@ -327,7 +332,7 @@ export default function EcomDesignMain() {
               {/* View and Dsiplay Section */}
               <Box sx={{ pb: '20px' }}>
                 {/* <OutPutView deviceView={deviceView} page={linker(controlls.page)} /> */}
-                <OutPutView deviceView={deviceView} page={url} />
+                <OutPutView deviceView={deviceView} page={`${url}?builder_id=${builder_Id}`} />
               </Box>
 
             </Box>
@@ -343,7 +348,7 @@ export default function EcomDesignMain() {
                   <HeaderSection
                     name='Font Style'
                     description=''
-                    cancel={{ key: 'font', value: 'Avernir' }}
+                    cancel={{ key: 'fontStyle', value: 'Avernir' }}
                     handleThemeConfig={handleThemeConfig}
                   >
                     <Button sx={{ background: '#F5F5F8', borderRadius: '16px', fontSize: '11px', color: '#8688A3', px: '19px' }} endIcon={<Iconify icon='ep:arrow-down-bold' width={15} />}>
@@ -1110,7 +1115,7 @@ export default function EcomDesignMain() {
               {/* View and Dsiplay Section */}
               <Box sx={{ pb: '20px' }}>
                 {/* <OutPutView deviceView={deviceView} page={linker(controlls.page)} /> */}
-                <OutPutView deviceView={deviceView} page={url} />
+                <OutPutView deviceView={deviceView} page={`${url}??builder_id=${builder_Id}`} />
               </Box>
             </Grid>
 

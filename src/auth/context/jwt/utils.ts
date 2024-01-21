@@ -73,3 +73,23 @@ export const setSession = (accessToken: string | null) => {
     delete axios.defaults.headers.common.Authorization;
   }
 };
+// ----------------------------------------------------------------------
+
+export const setSocketURL = (URL: string | null) => {
+  if (URL) {
+    sessionStorage.setItem('socketURL', URL);
+  } else {
+    sessionStorage.removeItem('socketURL');
+  }
+};
+
+export const setBuilderDomain = (domainURL: string | null) => {
+  if (domainURL) {
+    sessionStorage.setItem('builder', domainURL);
+  } else {
+    sessionStorage.removeItem('builder');
+  }
+};
+export const getBuilderDomain = () => {
+  return sessionStorage.getItem('builder');
+};
