@@ -20,7 +20,7 @@ export const fetchBuilderList = createAsyncThunk(
   'builder/fetchList',
   async (params: IRequest, { rejectWithValue }) => {
     try {
-      const response = await getRequest(endpoints.builder.list, defaultConfig());
+      const response = await getRequest(endpoints.builder.get, defaultConfig());
       return response;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -57,6 +57,35 @@ export const builderActivateWebsite = createAsyncThunk(
       defaultConfig()
     );
 
+    return response.data;
+  }
+);
+
+export const saveBuilderSettings = createAsyncThunk(
+  'builder/saveBuilderSettings',
+  async (data: any) => {
+    const response = await putRequest(endpoints?.builder?.save, data, defaultConfig());
+
+    return response.data;
+  }
+);
+
+export const saveLogo = createAsyncThunk('builder/saveLogo', async ({ builderId, data }: any) => {
+  let headersObj = defaultConfig();
+  headersObj.headers['Content-Type'] = 'multipart/form-data';
+  const response = await putRequest(`${endpoints?.builder?.logo}/${builderId}`, data, headersObj);
+  return response.data;
+});
+export const saveHeaderImage = createAsyncThunk(
+  'builder/saveHeaderImage',
+  async ({ builderId, data }: any) => {
+    let headersObj = defaultConfig();
+    headersObj.headers['Content-Type'] = 'multipart/form-data';
+    const response = await putRequest(
+      `${endpoints?.builder?.headerImage}/${builderId}`,
+      data,
+      headersObj
+    );
     return response.data;
   }
 );
@@ -102,6 +131,11 @@ const builderSlice = createSlice({
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })
+      .addCase(saveBuilderSettings.pending, (state) => {})
+      .addCase(saveBuilderSettings.fulfilled, (state, action) => {
+        state.builder = action.payload;
+      })
+      .addCase(saveBuilderSettings.rejected, (state, action) => {})
 
       .addCase(createBuilderFun.pending, (state) => {
         state.loading = true;

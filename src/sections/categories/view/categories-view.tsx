@@ -225,7 +225,7 @@ export default function CategoriesView() {
         setCategoriesData(null);
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
       } else {
-        enqueueSnackbar(`Error! ${error}`, { variant: 'error' });
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
       }
     });
   };
@@ -244,7 +244,7 @@ export default function CategoriesView() {
         dispatch(fetchCategorysList({ pageNumber, pageSize }));
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
       } else {
-        enqueueSnackbar(`Error! ${error}`, { variant: 'error' });
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
       }
     });
   };
@@ -257,7 +257,7 @@ export default function CategoriesView() {
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
-          enqueueSnackbar(`Error! ${error}`, { variant: 'error' });
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
         }
       });
     } else if (removeData && removeData.type === 'subcategory') {
@@ -267,7 +267,7 @@ export default function CategoriesView() {
           enqueueSnackbar('Successfully Deleted!', { variant: 'success' });
           confirm.onFalse();
         } else {
-          enqueueSnackbar(`Error! ${error}`, { variant: 'error' });
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
         }
       });
     }
@@ -292,7 +292,7 @@ export default function CategoriesView() {
         dispatch(fetchSubCategorysList(error));
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
       } else {
-        enqueueSnackbar(`Error! ${error}`, { variant: 'error' });
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
       }
     });
   };
@@ -314,7 +314,7 @@ export default function CategoriesView() {
           dispatch(fetchSubCategorysList(error));
           enqueueSnackbar('Successfully Updated!', { variant: 'success' });
         } else {
-          enqueueSnackbar(`Error! ${error}`, { variant: 'error' });
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
         }
       }
     );
@@ -419,12 +419,15 @@ export default function CategoriesView() {
 
   const [listItems, setListItems] = useState([]);
   useEffect(() => {
-    dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
-      setCategoriesLength(response.payload.data.count);
-      setListItems(response.payload.data.data);
-      // dispatch(fetchSubCategorysList(error));
-    });
-  }, [pageNumber]);
+    if (loadStatus === 'idle') {
+      dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
+        setCategoriesLength(response.payload.data.count);
+        setListItems(response.payload.data.data);
+        // dispatch(fetchSubCategorysList(error));
+      });
+    }
+  }, [loadStatus, dispatch, pageNumber]);
+
 
   const handleOnDragEnd = (result: any) => {
     if (!result.destination) return;
