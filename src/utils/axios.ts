@@ -129,9 +129,8 @@ export const endpoints = {
     search: '/payment-methods/search',
   },
   analytic: {
-    customers: '/analytics/customers',
-    summary: '/analytics/summary',
-    vouchers: '/analytics/vouchers',
+    global: '/analytics/global-analytics?filter=last-week',
+    order: '/analytics/order-analytics?filter=last-week',
   },
   deliveryPickup: {
     branches: '/delivery-pickup/branches',

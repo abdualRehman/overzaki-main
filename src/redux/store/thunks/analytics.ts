@@ -15,32 +15,37 @@ export interface IAnalyticsForm extends IRequest {
   balance: number;
   // examples
 }
-export const fetchAnalyticssCustomer = createAsyncThunk('analytics/fetchCustomer', async () => {
-  const response = await getRequest(endpoints.analytic.customers, defaultConfig());
+export const fetchAnalyticsGlobal = createAsyncThunk('analytics/fetchCustomer', async () => {
+  const response = await getRequest(endpoints.analytic.global, defaultConfig());
+
+  return response;
+});
+export const fetchAnalyticsOrder = createAsyncThunk('analytics/fetchCustomer', async () => {
+  const response = await getRequest(endpoints.analytic.order, defaultConfig());
 
   return response;
 });
 
-export const fetchAnalyticsSummary = createAsyncThunk(
-  'analytics/fetchSummary',
-  async (analyticsId: number) => {
-    const response = await getRequest(
-      `${endpoints.analytic.summary}/${analyticsId}`,
-      defaultConfig()
-    );
+// export const fetchAnalyticsSummary = createAsyncThunk(
+//   'analytics/fetchSummary',
+//   async (analyticsId: number) => {
+//     const response = await getRequest(
+//       `${endpoints.analytic.summary}/${analyticsId}`,
+//       defaultConfig()
+//     );
 
-    return response.data;
-  }
-);
+//     return response.data;
+//   }
+// );
 
-export const fetchAnalyticsVouchers = createAsyncThunk(
-  'analytics/fetchVouchers',
-  async (data: IAnalyticsForm) => {
-    const response = await postRequest(endpoints.analytic.vouchers, data, defaultConfig());
+// export const fetchAnalyticsVouchers = createAsyncThunk(
+//   'analytics/fetchVouchers',
+//   async (data: IAnalyticsForm) => {
+//     const response = await postRequest(endpoints.analytic.vouchers, data, defaultConfig());
 
-    return response.data;
-  }
-);
+//     return response.data;
+//   }
+// );
 
 const analyticsSlice = createSlice({
   name: 'analytics',
@@ -64,43 +69,43 @@ const analyticsSlice = createSlice({
         state.status = 'idle';
         state.list = []; // Replace with your initial state
       })
-      .addCase(fetchAnalyticssCustomer.pending, (state) => {
+      .addCase(fetchAnalyticsGlobal.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAnalyticssCustomer.fulfilled, (state, action) => {
+      .addCase(fetchAnalyticsGlobal.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload;
       })
-      .addCase(fetchAnalyticssCustomer.rejected, (state, action) => {
+      .addCase(fetchAnalyticsGlobal.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       })
 
-      .addCase(fetchAnalyticsSummary.pending, (state) => {
+      .addCase(fetchAnalyticsOrder.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAnalyticsSummary.fulfilled, (state, action) => {
+      .addCase(fetchAnalyticsOrder.fulfilled, (state, action) => {
         state.loading = false;
         state.analytics = action.payload;
       })
-      .addCase(fetchAnalyticsSummary.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message !== undefined ? action.error.message : null;
-      })
-
-      .addCase(fetchAnalyticsVouchers.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchAnalyticsVouchers.fulfilled, (state) => {
-        state.loading = false;
-      })
-      .addCase(fetchAnalyticsVouchers.rejected, (state, action) => {
+      .addCase(fetchAnalyticsOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       });
+
+    // .addCase(fetchAnalyticsVouchers.pending, (state) => {
+    //   state.loading = true;
+    //   state.error = null;
+    // })
+    // .addCase(fetchAnalyticsVouchers.fulfilled, (state) => {
+    //   state.loading = false;
+    // })
+    // .addCase(fetchAnalyticsVouchers.rejected, (state, action) => {
+    //   state.loading = false;
+    //   state.error = action.error.message !== undefined ? action.error.message : null;
+    // });
   },
 });
 export const { setAnalytics } = analyticsSlice.actions;
