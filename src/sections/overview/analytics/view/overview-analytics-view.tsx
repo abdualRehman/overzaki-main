@@ -13,7 +13,12 @@ import CustomCrumbs from 'src/components/custom-crumbs/custom-crumbs';
 import { Paper } from '@mui/material';
 import AppAreaInstalled from '../../app/app-area-installed';
 import AppHolder from '../../app/app-holder';
-import { fetchAnalyticsGlobal, fetchAnalyticsOrder } from 'src/redux/store/thunks/analytics';
+import {
+  fetchAnalyticsGlobal,
+  fetchAnalyticsOrder,
+  fetchBestSellingCategories,
+  fetchBestSellingItems,
+} from 'src/redux/store/thunks/analytics';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
@@ -102,7 +107,7 @@ export default function OverviewAnalyticsView() {
           {
             title: 'TOTAL SALES',
             growth: '+6%',
-            count: analyticsGlobalData.totalSales,
+            count: analyticsGlobalData?.totalSales,
           },
           {
             title: 'AVERAGE ORDER VALUE',
@@ -113,12 +118,12 @@ export default function OverviewAnalyticsView() {
           {
             title: 'TOTAL ORDERS',
             growth: '+2.5%',
-            count: analyticsOrderData.totalOrders,
+            count: analyticsOrderData?.totalOrders,
           },
           {
             title: 'TOTAL CUSTOMERS',
             growth: '+4.1%',
-            count: analyticsGlobalData.totalCustomers,
+            count: analyticsGlobalData?.totalCustomers,
           },
         ].map((item, indx) => (
           <Paper key={indx} elevation={11}>
@@ -146,19 +151,19 @@ export default function OverviewAnalyticsView() {
                   variant="subtitle2"
                   sx={{ opacity: 0.7, fontSize: '.6rem' }}
                 >
-                  {item.title}
+                  {item?.title}
                 </Typography>
                 <Typography
                   component="p"
                   variant="subtitle2"
                   sx={{ fontSize: '.7.5rem', color: item.color ?? '#00DF9A' }}
                 >
-                  {item.growth}{' '}
+                  {item?.growth}{' '}
                 </Typography>
               </Grid>
               <Grid xs={12}>
                 <Typography component="p" variant="h6" sx={{ fontSize: '.8rem' }}>
-                  {item.count} <span style={{ fontSize: '12px' }}>KWD</span>
+                  {item?.count} <span style={{ fontSize: '12px' }}>KWD</span>
                 </Typography>
               </Grid>
             </Grid>

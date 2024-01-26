@@ -15,16 +15,40 @@ export interface IAnalyticsForm extends IRequest {
   balance: number;
   // examples
 }
-export const fetchAnalyticsGlobal = createAsyncThunk('analytics/fetchCustomer', async () => {
+export const fetchAnalyticsGlobal = createAsyncThunk('analytics/fetchGlobal', async () => {
   const response = await getRequest(endpoints.analytic.global, defaultConfig());
 
   return response;
 });
-export const fetchAnalyticsOrder = createAsyncThunk('analytics/fetchCustomer', async () => {
+export const fetchAnalyticsOrder = createAsyncThunk('analytics/fetchOrder', async () => {
   const response = await getRequest(endpoints.analytic.order, defaultConfig());
 
   return response;
 });
+export const fetchBestSellingItems = createAsyncThunk(
+  'analytics/fetchBestSellingItem',
+  async () => {
+    const response = await getRequest(endpoints.analytic.bestSellingItems, defaultConfig());
+
+    return response;
+  }
+);
+export const fetchBestSellingCategories = createAsyncThunk(
+  'analytics/fetchBestSellingCategories',
+  async () => {
+    const response = await getRequest(endpoints.analytic.bestSellingCategories, defaultConfig());
+
+    return response;
+  }
+);
+export const fetchBestSellingBranches = createAsyncThunk(
+  'analytics/fetchBestSellingBranches',
+  async () => {
+    const response = await getRequest(endpoints.analytic.bestSellingBranches, defaultConfig());
+
+    return response;
+  }
+);
 
 // export const fetchAnalyticsSummary = createAsyncThunk(
 //   'analytics/fetchSummary',
@@ -91,6 +115,42 @@ const analyticsSlice = createSlice({
         state.analytics = action.payload;
       })
       .addCase(fetchAnalyticsOrder.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+      .addCase(fetchBestSellingItems.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBestSellingItems.fulfilled, (state, action) => {
+        state.loading = false;
+        state.analytics = action.payload;
+      })
+      .addCase(fetchBestSellingItems.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+      .addCase(fetchBestSellingCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBestSellingCategories.fulfilled, (state, action) => {
+        state.loading = false;
+        state.analytics = action.payload;
+      })
+      .addCase(fetchBestSellingCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+      .addCase(fetchBestSellingBranches.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBestSellingBranches.fulfilled, (state, action) => {
+        state.loading = false;
+        state.analytics = action.payload;
+      })
+      .addCase(fetchBestSellingBranches.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       });

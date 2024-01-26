@@ -131,6 +131,9 @@ export const endpoints = {
   analytic: {
     global: '/analytics/global-analytics?filter=last-week',
     order: '/analytics/order-analytics?filter=last-week',
+    bestSellingItems: '/analytics/best-selling-items?filter=last-month',
+    bestSellingCategories: '/analytics/best-selling-categories?filter=last-week',
+    bestSellingBranches: '/analytics/best-selling-branches?filter=last-month',
   },
   deliveryPickup: {
     branches: '/delivery-pickup/branches',
