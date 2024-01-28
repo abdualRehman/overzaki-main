@@ -20,6 +20,11 @@ export const fetchAnalyticsGlobal = createAsyncThunk('analytics/fetchGlobal', as
 
   return response;
 });
+export const fetchChartData = createAsyncThunk('analytics/fetchChartData', async () => {
+  const response = await getRequest(endpoints.analytic.chart, defaultConfig());
+
+  return response;
+});
 export const fetchAnalyticsOrder = createAsyncThunk('analytics/fetchOrder', async () => {
   const response = await getRequest(endpoints.analytic.order, defaultConfig());
 
@@ -151,6 +156,18 @@ const analyticsSlice = createSlice({
         state.analytics = action.payload;
       })
       .addCase(fetchBestSellingBranches.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message !== undefined ? action.error.message : null;
+      })
+      .addCase(fetchChartData.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchChartData.fulfilled, (state, action) => {
+        state.loading = false;
+        state.analytics = action.payload;
+      })
+      .addCase(fetchChartData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message !== undefined ? action.error.message : null;
       });
