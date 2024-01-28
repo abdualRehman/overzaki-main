@@ -18,10 +18,12 @@ import {
   fetchAnalyticsOrder,
   fetchBestSellingCategories,
   fetchBestSellingItems,
+  fetchChartData,
 } from 'src/redux/store/thunks/analytics';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
+import { useSelector } from 'react-redux';
 // ----------------------------------------------------------------------
 
 export default function OverviewAnalyticsView() {
@@ -29,13 +31,17 @@ export default function OverviewAnalyticsView() {
   const dispatch = useDispatch<AppDispatch>();
   const [analyticsGlobalData, setAnalyticsGlobalData] = useState<any>();
   const [analyticsOrderData, setAnalyticsOrderData] = useState<any>();
+  const loadStatus = useSelector((state: any) => state?.analytics?.status);
   useEffect(() => {
-    dispatch(fetchAnalyticsGlobal()).then((response: any) =>
-      setAnalyticsGlobalData(response?.payload?.data)
-    );
-    dispatch(fetchAnalyticsOrder()).then((response: any) =>
-      setAnalyticsOrderData(response?.payload?.data)
-    );
+    if (loadStatus === 'idle') {
+      dispatch(fetchAnalyticsGlobal()).then((response: any) =>
+        setAnalyticsGlobalData(response?.payload?.data)
+      );
+      dispatch(fetchAnalyticsOrder()).then((response: any) =>
+        setAnalyticsOrderData(response?.payload?.data)
+      );
+      dispatch(fetchChartData()).then((response: any) => console.log(response));
+    }
   }, []);
 
   return (
