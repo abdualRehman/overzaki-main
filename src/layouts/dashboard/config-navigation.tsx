@@ -1,3 +1,4 @@
+'use client'
 import { useMemo } from 'react';
 // routes
 import { paths } from 'src/routes/paths';
