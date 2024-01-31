@@ -167,6 +167,13 @@ export default function OrdersListView() {
         },
         quantity: product.quantity,
         publish_app: product.publish_app,
+        brand: product?.brand || "",
+        discount: product?.discount || "",
+        discount_type: product?.discount_type || "percentage",
+        discount_start: product?.discount_start || "",
+        discount_end: product?.discount_end || "",
+        max_quantity: product?.max_quantity || "",
+
       };
       setProductData(newProduct);
       // Use setValue to update each field separately
