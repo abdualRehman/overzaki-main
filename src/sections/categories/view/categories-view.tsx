@@ -423,7 +423,7 @@ export default function CategoriesView() {
       dispatch(fetchCategorysList({ pageNumber, pageSize })).then((response: any) => {
         setCategoriesLength(response.payload.data.count);
         setListItems(response.payload.data.data);
-        // dispatch(fetchSubCategorysList(error));
+        dispatch(fetchSubCategorysList(error));
       });
     }
   }, [loadStatus, dispatch, pageNumber]);
