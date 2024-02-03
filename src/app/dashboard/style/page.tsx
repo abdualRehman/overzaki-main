@@ -164,6 +164,7 @@ const page = () => {
   const handleDrawerClose = () => {
     setStyleDrawer(false);
     setstyleData(null);
+    setEditCategoryId(null);
   };
   const handleCategoryData = (e: any) => {
     const { name, value } = e.target;
@@ -212,10 +213,7 @@ const page = () => {
   };
   const handleEditPost = () => {
     let style = new FormData();
-    style.append('title', styleCategoryData?.title);
-    style.append('type', styleCategoryData?.type);
-    style.append('json', styleCategoryData?.json);
-    style.append('image', styleCategoryData?.image);
+    style.append('name', styleCategoryData.name);
 
     if (editCategoryId) {
       dispatch(editStyleCategory({ id: editCategoryId, data: style })).then((response: any) => {
@@ -259,23 +257,22 @@ const page = () => {
     }
   };
   const handleStyleEdit = () => {
-    const dataToPush = {
-      category: styleData?.category,
-      image: styleData?.image,
-      title: styleData?.title,
-      json: styleData?.json,
-    };
-    if (editId) {
-      dispatch(editStyle({ id: editId, data: dataToPush })).then((response: any) => {
-        if (response.meta.requestStatus === 'fulfilled') {
-          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-          dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
-          handleDrawerClose();
-        } else {
-          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-        }
-      });
-    }
+    const formData = new FormData();
+    formData.append('category', styleData.category);
+    formData.append('title', styleData.title);
+    formData.append('json', styleData.json);
+
+    // Append the image file
+    formData.append('image', styleData.image);
+    dispatch(editStyle({ id: editId, data: formData })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+        handleDrawerClose();
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
   };
   useEffect(() => {
     dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));

@@ -30,6 +30,7 @@ import {
   createIconCategory,
   deleteIconCategory,
   editIcon,
+  editIconCategory,
   fetchIconCategoryList,
   fetchIconsList,
   getIconCategoryById,
@@ -194,19 +195,20 @@ const page = () => {
     );
   };
   const handleEditPost = () => {
-    if (editCategoryId) {
-      dispatch(editIcon({ id: editCategoryId, data: iconCategoryData })).then((response: any) => {
-        if (response.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchIconCategoryList()).then((response: any) =>
-            setIconCategories(response?.payload?.data)
-          );
-          setIconCategoryDrawer(false);
-          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-        } else {
-          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-        }
-      });
-    }
+    const formData = new FormData();
+    formData.append('name', iconCategoryData.name);
+
+    dispatch(editIconCategory({ id: editCategoryId, data: formData })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        dispatch(fetchIconCategoryList()).then((response: any) =>
+          setIconCategories(response?.payload?.data)
+        );
+        setIconCategoryDrawer(false);
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
   };
   const handleCreateIcon = () => {
     try {
@@ -233,22 +235,22 @@ const page = () => {
     }
   };
   const handleIconEdit = () => {
-    const dataToPush = {
-      category: iconData?.category,
-      image: iconData?.image,
-      title: iconData?.title,
-    };
-    if (editId) {
-      dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
-        if (response.meta.requestStatus === 'fulfilled') {
-          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-          dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
-          handleDrawerClose();
-        } else {
-          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-        }
-      });
+    const dataToPush = new FormData();
+    // Appending fields in formData
+    dataToPush.append('category', iconData.category);
+    dataToPush.append('title', iconData.title);
+    if (typeof iconData.image !== 'string') {
+      dataToPush.append('image', iconData.image);
     }
+    dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
+        handleDrawerClose();
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
   };
   return (
     <Container>
