@@ -76,7 +76,7 @@ export const editIcon = createAsyncThunk(
     return response.data;
   }
 );
-export const fetchIconById = createAsyncThunk('icon/fetchbyid', async (id: string) => {
+export const fetchIconById = createAsyncThunk('icon/fetchbyid', async (id: any) => {
   const response = await getRequest(`${endpoints.icon.app}/${id}`, defaultConfig());
   return response.data;
 });

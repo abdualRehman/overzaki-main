@@ -76,7 +76,7 @@ const page = () => {
     resolver: yupResolver(CategorySchema),
   });
   const [styleDrawer, setStyleDrawer] = useState(false);
-  const [editId, setEditId] = useState(null);
+  const [editId, setEditId] = useState('');
 
   const handleTheme = (e: any) => {
     const { name, value } = e.target;
@@ -168,7 +168,7 @@ const page = () => {
     setStyleDrawer(false);
     setstyleData(null);
     setEditCategoryId(null);
-    setEditId(null);
+    setEditId('');
   };
   const handleCategoryData = (e: any) => {
     const { name, value } = e.target;
@@ -193,7 +193,7 @@ const page = () => {
     });
   };
   useEffect(() => {
-    dispatch(fetchStyleCategoryList()).then((res) => setStylesCategories(res?.payload?.data));
+    dispatch(fetchStyleCategoryList()).then((res: any) => setStylesCategories(res?.payload?.data));
   }, []);
   const handleCategoryDelete = (id: any) => {
     dispatch(deleteStyleCategory(id)).then((response: any) => {
@@ -211,7 +211,7 @@ const page = () => {
     setOptionModal(false);
     setStyleCategoryDrawer(true);
     setEditCategoryId(id);
-    dispatch(getStyleCategoryById(id)).then((res) =>
+    dispatch(getStyleCategoryById(id)).then((res: any) =>
       setStyleCategoryData({ name: res?.payload.name })
     );
   };
@@ -249,7 +249,7 @@ const page = () => {
       dispatch(createStyle(formData)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
-          dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+          dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
           handleDrawerClose();
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -272,8 +272,8 @@ const page = () => {
         if (response.meta.requestStatus === 'fulfilled') {
           enqueueSnackbar('Successfully Updated!', { variant: 'success' });
           setstyleData({});
-          setEditId(null);
-          dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+          setEditId('');
+          dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
           handleDrawerClose();
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -282,17 +282,17 @@ const page = () => {
     }
   };
   useEffect(() => {
-    dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+    dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
   }, []);
   useEffect(() => {
     if (styleData === false) {
       setstyleData(null);
       setEditCategoryId(null);
-      setEditId(null);
+      setEditId('');
     }
   }, [styleDrawer]);
   useEffect(() => {
-    dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+    dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
   }, [allStylesData]);
   useEffect(() => {
     dispatch(fetchStyleById(editId)).then((resp) => setstyleData(resp?.payload));
@@ -547,7 +547,7 @@ const page = () => {
               onChange={(e) => {
                 const selectedCategoryId = e.target.value;
                 // Log the selected value
-                setstyleData((prev) => ({
+                setstyleData((prev: any) => ({
                   ...prev,
                   category: {
                     ...prev.category,

@@ -56,7 +56,7 @@ export const fetchStyleList = createAsyncThunk('styles/fetchStyleList', async ()
 });
 export const fetchStyleById = createAsyncThunk('styles/fetchById', async (id: string) => {
   const response = await getRequest(`${endpoints.style.app}/${id}`, defaultConfig());
-  return response.data
+  return response.data;
 });
 export const editStyleCategory = createAsyncThunk(
   'styles/edit',

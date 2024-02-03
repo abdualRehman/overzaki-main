@@ -48,7 +48,7 @@ import { AppDispatch } from 'src/redux/store/store';
 const page = () => {
   const [deleteIcon] = useDeleteIconMutation();
   const [optionModal, setOptionModal] = useState(false);
-  const [editCategoryId, setEditCategoryId] = useState();
+  const [editCategoryId, setEditCategoryId] = useState<any>();
   const dispatch = useDispatch<AppDispatch>();
   const [selectedType, setSelectedType] = useState<any>('');
   const [addIcon] = useAddNewIconMutation();
@@ -165,14 +165,14 @@ const page = () => {
   const handleCategoryDrawerClose = () => {
     setIconCategoryDrawer(false);
     setEditId(null);
-    setEditCategoryId(null);
+    setEditCategoryId('');
   };
   const handleCreateCategory = (data: any) => {
     dispatch(createIconCategory(data)).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         setIconCategoryData({ name: '' });
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
-        dispatch(fetchIconCategoryList()).then((res) => setIconCategories(res?.payload?.data));
+        dispatch(fetchIconCategoryList()).then((res: any) => setIconCategories(res?.payload?.data));
         handleCategoryDrawerClose();
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -547,7 +547,7 @@ const page = () => {
               onChange={(e) => {
                 const selectedCategoryId = e.target.value;
                 // Log the selected value
-                seticonData((prev) => ({
+                seticonData((prev: any) => ({
                   ...prev,
                   category: {
                     ...prev.category,
