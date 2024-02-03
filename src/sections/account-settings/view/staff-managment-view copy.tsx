@@ -296,7 +296,7 @@ export default function StaffManagment() {
   }, []);
   const [permissions, setPermissions] = useState<any>([]);
   useEffect(() => {
-    dispatch(fetchRolesList(Error)).then((response: any) => setPermissions(response.payload.data));
+    dispatch(fetchRolesList(Error)).then((response: any) => setPermissions(response?.payload?.data?.data));
   }, []);
 
   return (
