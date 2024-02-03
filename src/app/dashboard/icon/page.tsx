@@ -31,6 +31,7 @@ import {
   deleteIcon,
   deleteIconCategory,
   editIcon,
+  editIconCategory,
   fetchIconCategoryList,
   fetchIconsList,
   getIconById,
@@ -196,7 +197,10 @@ const page = () => {
     );
   };
   const handleEditPost = () => {
-    dispatch(editIcon({ id: editCategoryId, data: iconCategoryData })).then((response: any) => {
+    const formData = new FormData();
+    formData.append('name', iconCategoryData.name);
+
+    dispatch(editIconCategory({ id: editCategoryId, data: formData })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         dispatch(fetchIconCategoryList()).then((response: any) =>
           setIconCategories(response?.payload?.data)
@@ -233,11 +237,13 @@ const page = () => {
     }
   };
   const handleIconEdit = () => {
-    const dataToPush = {
-      category: iconData?.category,
-      image: iconData?.image,
-      title: iconData?.title,
-    };
+    const dataToPush = new FormData();
+    // Appending fields in formData
+    dataToPush.append('category', iconData.category);
+    dataToPush.append('title', iconData.title);
+    if (typeof iconData.image !== 'string') {
+      dataToPush.append('image', iconData.image);
+    }
     dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         enqueueSnackbar('Successfully Updated!', { variant: 'success' });
