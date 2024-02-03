@@ -198,17 +198,19 @@ const page = () => {
     const formData = new FormData();
     formData.append('name', iconCategoryData.name);
 
-    dispatch(editIconCategory({ id: editCategoryId, data: formData })).then((response: any) => {
-      if (response.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchIconCategoryList()).then((response: any) =>
-          setIconCategories(response?.payload?.data)
-        );
-        setIconCategoryDrawer(false);
-        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-      } else {
-        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-      }
-    });
+    if (editCategoryId) {
+      dispatch(editIconCategory({ id: editCategoryId, data: formData })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchIconCategoryList()).then((response: any) =>
+            setIconCategories(response?.payload?.data)
+          );
+          setIconCategoryDrawer(false);
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
   };
   const handleCreateIcon = () => {
     try {
@@ -242,15 +244,17 @@ const page = () => {
     if (typeof iconData.image !== 'string') {
       dataToPush.append('image', iconData.image);
     }
-    dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
-      if (response.meta.requestStatus === 'fulfilled') {
-        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-        dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
-        handleDrawerClose();
-      } else {
-        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-      }
-    });
+    if (editId) {
+      dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+          dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
+          handleDrawerClose();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
   };
   return (
     <Container>

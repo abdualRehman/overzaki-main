@@ -43,7 +43,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from 'src/redux/store/store';
 
 const page = () => {
-  const [editCategoryId, setEditCategoryId] = useState();
+  const [editCategoryId, setEditCategoryId] = useState<any>(null);
   const [optionModal, setOptionModal] = useState(false);
   const [allStylesData, setAllStylesData] = useState([]);
   const dispatch = useDispatch<AppDispatch>();
@@ -264,15 +264,17 @@ const page = () => {
 
     // Append the image file
     formData.append('image', styleData.image);
-    dispatch(editStyle({ id: editId, data: formData })).then((response: any) => {
-      if (response.meta.requestStatus === 'fulfilled') {
-        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-        dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
-        handleDrawerClose();
-      } else {
-        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-      }
-    });
+    if (editId) {
+      dispatch(editStyle({ id: editId, data: formData })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+          dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+          handleDrawerClose();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
   };
   useEffect(() => {
     dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
