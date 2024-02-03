@@ -32,7 +32,6 @@ export default function OverviewAnalyticsView() {
   const [analyticsGlobalData, setAnalyticsGlobalData] = useState<any>();
   const [analyticsOrderData, setAnalyticsOrderData] = useState<any>();
   const loadStatus = useSelector((state: any) => state?.analytics?.status);
-  const [chartData, setChartData] = useState<any>();
   useEffect(() => {
     if (loadStatus === 'idle') {
       dispatch(fetchAnalyticsGlobal()).then((response: any) =>
@@ -41,12 +40,10 @@ export default function OverviewAnalyticsView() {
       dispatch(fetchAnalyticsOrder()).then((response: any) =>
         setAnalyticsOrderData(response?.payload?.data)
       );
-      dispatch(fetchChartData()).then((response: any) =>
-        setChartData(response.payload.data.result)
-      );
+      dispatch(fetchChartData()).then((response: any) => console.log(response));
     }
   }, []);
-  console.log(chartData);
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <CustomCrumbs
@@ -59,18 +56,31 @@ export default function OverviewAnalyticsView() {
           title="Total"
           subheader="4.100,500 KWD"
           chart={{
-            categories: chartData?.map((item: any) => item?._id),
+            categories: [
+              'Jan',
+              'Feb',
+              'Mar',
+              'Apr',
+              'May',
+              'Jun',
+              'Jul',
+              'Aug',
+              'Sep',
+              'Oct',
+              'Nov',
+              'Dec',
+            ],
             series: [
               {
-                year: '2024',
+                year: '2019',
                 data: [
-                  // {
-                  //   name: 'Asia',
-                  //   data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49],
-                  // },
+                  {
+                    name: 'Asia',
+                    data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49],
+                  },
                   {
                     name: 'America',
-                    data: chartData?.map((item: any) => item?.totalAmount),
+                    data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77],
                   },
                 ],
               },
