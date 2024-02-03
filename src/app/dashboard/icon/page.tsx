@@ -232,7 +232,22 @@ const page = () => {
       reset();
     }
   };
-
+  const handleIconEdit = () => {
+    const dataToPush = {
+      category: iconData?.category,
+      image: iconData?.image,
+      title: iconData?.title,
+    };
+    dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
+      if (response.meta.requestStatus === 'fulfilled') {
+        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
+        handleDrawerClose();
+      } else {
+        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+      }
+    });
+  };
   return (
     <Container>
       <RoleBasedGuard permission="CREATE_PRODUCT">
@@ -359,7 +374,7 @@ const page = () => {
               color="success"
               size="large"
               loading={isSubmitting}
-              onClick={() => handleCreateIcon()}
+              onClick={editId ? () => handleIconEdit() : () => handleCreateIcon()}
               sx={{ borderRadius: '30px' }}
             >
               {editId ? 'Update' : 'Add'}

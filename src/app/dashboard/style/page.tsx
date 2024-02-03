@@ -257,7 +257,7 @@ const page = () => {
   const handleStyleEdit = () => {
     const dataToPush = {
       category: styleData?.category,
-      // image: styleData?.image,
+      image: styleData?.image,
       title: styleData?.title,
       json: styleData?.json,
     };
