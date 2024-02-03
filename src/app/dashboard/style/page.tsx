@@ -40,13 +40,14 @@ import {
 } from 'src/redux/store/thunks/style';
 import { enqueueSnackbar } from 'notistack';
 import { useDispatch } from 'react-redux';
+import { AppDispatch } from 'src/redux/store/store';
 
 const page = () => {
   const [editCategoryId, setEditCategoryId] = useState();
   const [optionModal, setOptionModal] = useState(false);
-  const [allStylesData, setAllStylesData] = useState();
-  const dispatch = useDispatch();
-  const [styleCategoryData, setStyleCategoryData] = useState({ name: '' });
+  const [allStylesData, setAllStylesData] = useState([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const [styleCategoryData, setStyleCategoryData] = useState<any>({});
   const [selectedType, setSelectedType] = useState<any>('');
   const [stylesCategories, setStylesCategories] = useState<any>([]);
   const [styleCategoryDrawer, setStyleCategoryDrawer] = useState(false);
@@ -106,7 +107,7 @@ const page = () => {
   } = methods;
   const [updateStyle, { isSuccess }] = useUpdateStyleMutation();
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: any) => {
     if (editId) {
       try {
         let style = new FormData();
@@ -211,21 +212,24 @@ const page = () => {
   };
   const handleEditPost = () => {
     let style = new FormData();
-    style.append('title', styleCategoryData.title);
-    style.append('type', styleCategoryData.type);
-    style.append('json', styleCategoryData.json);
-    style.append('image', styleCategoryData.image);
+    style.append('title', styleCategoryData?.title);
+    style.append('type', styleCategoryData?.type);
+    style.append('json', styleCategoryData?.json);
+    style.append('image', styleCategoryData?.image);
 
-    dispatch(editStyleCategory({ id: editCategoryId, data: style })).then((response: any) => {
-      if (response.meta.requestStatus === 'fulfilled') {
-        dispatch(fetchStyleCategoryList()).then((response: any) =>
-          setStylesCategories(response?.payload?.data)
-        );
-        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-      } else {
-        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-      }
-    });
+    if (editCategoryId) {
+      dispatch(editStyleCategory({ id: editCategoryId, data: style })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchStyleCategoryList()).then((response: any) =>
+            setStylesCategories(response?.payload?.data)
+          );
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+
+    }
   };
 
   // Creating Icon
@@ -261,15 +265,17 @@ const page = () => {
       title: styleData?.title,
       json: styleData?.json,
     };
-    dispatch(editStyle({ id: editId, data: dataToPush })).then((response: any) => {
-      if (response.meta.requestStatus === 'fulfilled') {
-        enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-        dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
-        handleDrawerClose();
-      } else {
-        enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
-      }
-    });
+    if (editId) {
+      dispatch(editStyle({ id: editId, data: dataToPush })).then((response: any) => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+          dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+          handleDrawerClose();
+        } else {
+          enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
+        }
+      });
+    }
   };
   useEffect(() => {
     dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
@@ -345,7 +351,7 @@ const page = () => {
           All
         </LoadingButton>
 
-        {stylesCategories.map((type: string, index: any) => (
+        {stylesCategories.map((type: any, index: any) => (
           <LoadingButton
             key={index}
             variant="soft"
@@ -356,7 +362,7 @@ const page = () => {
             <Stack sx={{ position: 'relative', zIndex: 999, backgroundColor: '' }}>
               <MoreVertOutlinedIcon onClick={() => setOptionModal(type?.id)} />
               {optionModal === type?.id && (
-                <ClickAwayListener onClickAway={() => setOptionModal(null)}>
+                <ClickAwayListener onClickAway={() => setOptionModal(false)}>
                   <Box
                     sx={{
                       position: 'absolute',
@@ -540,7 +546,7 @@ const page = () => {
               value={styleData?.category || types[0]}
               settingStateValue={handleTheme}
             >
-              {stylesCategories?.map((type: string, index: any) => (
+              {stylesCategories?.map((type: any, index: any) => (
                 <MenuItem key={index} value={type?.id}>
                   {type?.name}
                 </MenuItem>
@@ -615,7 +621,7 @@ const page = () => {
       </DetailsNavBar>
       <Grid container spacing={2} sx={{ padding: '16px' }}>
         {allStylesData
-          ?.filter((item) => item.category['_id'].includes(selectedType))
+          ?.filter((item: any) => item.category['_id'].includes(selectedType))
           ?.map((el: any) => (
             <StyleCard
               toggleDrawerCommon={toggleDrawerCommon}
