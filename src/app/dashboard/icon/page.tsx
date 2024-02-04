@@ -223,6 +223,7 @@ const page = () => {
       });
     }
   };
+
   async function convertImageUrlToFile(imageUrl: any) {
     const response = await fetch(imageUrl);
     const blob = await response.blob();
@@ -266,7 +267,7 @@ const page = () => {
 
       // Append the File object to FormData
     } else {
-      formData.append('image', iconData?.image);
+      dataToPush.append('image', iconData?.image);
     }
     if (editId) {
       dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
