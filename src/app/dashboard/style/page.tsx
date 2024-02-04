@@ -1,8 +1,10 @@
 'use client';
 import Button from '@mui/material/Button';
 import MoreVertOutlinedIcon from '@mui/icons-material/MoreVertOutlined';
-import { Box, ClickAwayListener, Grid, MenuItem, Typography } from '@mui/material';
+import { Box, ClickAwayListener, Grid, IconButton, MenuItem, Typography } from '@mui/material';
 import { Stack } from '@mui/system';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import React, { useEffect, useState } from 'react';
 import { RoleBasedGuard } from 'src/auth/guard';
 import { BottomActions } from 'src/components/bottom-actions';
@@ -34,6 +36,7 @@ import {
   deleteStyleCategory,
   editStyle,
   editStyleCategory,
+  fetchStyleById,
   fetchStyleCategoryList,
   fetchStyleList,
   getStyleCategoryById,
@@ -73,7 +76,7 @@ const page = () => {
     resolver: yupResolver(CategorySchema),
   });
   const [styleDrawer, setStyleDrawer] = useState(false);
-  const [editId, setEditId] = useState(null);
+  const [editId, setEditId] = useState('');
 
   const handleTheme = (e: any) => {
     const { name, value } = e.target;
@@ -165,6 +168,7 @@ const page = () => {
     setStyleDrawer(false);
     setstyleData(null);
     setEditCategoryId(null);
+    setEditId('');
   };
   const handleCategoryData = (e: any) => {
     const { name, value } = e.target;
@@ -175,6 +179,8 @@ const page = () => {
 
   const handleCategoryDrawerClose = () => {
     setStyleCategoryDrawer(false);
+    setEditCategoryId('');
+    setStyleCategoryData({});
   };
   const handleCreateCategory = (data: any) => {
     dispatch(createStyleCategory(data)).then((response: any) => {
@@ -189,7 +195,7 @@ const page = () => {
     });
   };
   useEffect(() => {
-    dispatch(fetchStyleCategoryList()).then((res) => setStylesCategories(res?.payload?.data));
+    dispatch(fetchStyleCategoryList()).then((res: any) => setStylesCategories(res?.payload?.data));
   }, []);
   const handleCategoryDelete = (id: any) => {
     dispatch(deleteStyleCategory(id)).then((response: any) => {
@@ -207,7 +213,7 @@ const page = () => {
     setOptionModal(false);
     setStyleCategoryDrawer(true);
     setEditCategoryId(id);
-    dispatch(getStyleCategoryById(id)).then((res) =>
+    dispatch(getStyleCategoryById(id)).then((res: any) =>
       setStyleCategoryData({ name: res?.payload.name })
     );
   };
@@ -226,9 +232,13 @@ const page = () => {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
         }
       });
-
     }
   };
+  async function convertImageUrlToFile(imageUrl: any) {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    return new File([blob], 'image.jpg', { type: blob.type });
+  }
 
   // Creating Icon
   const handleCreateStyle = () => {
@@ -236,7 +246,7 @@ const page = () => {
       const formData = new FormData();
 
       // Append each field to FormData
-      formData.append('category', styleData.category);
+      formData.append('category', styleData.category.id);
       formData.append('title', styleData.title);
       formData.append('json', styleData.json);
 
@@ -246,7 +256,7 @@ const page = () => {
       dispatch(createStyle(formData)).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           enqueueSnackbar('Successfully Created!', { variant: 'success' });
-          dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+          dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
           handleDrawerClose();
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -256,19 +266,30 @@ const page = () => {
       reset();
     }
   };
+
   const handleStyleEdit = () => {
     const formData = new FormData();
-    formData.append('category', styleData.category);
+    formData.append('category', styleData.category.id);
     formData.append('title', styleData.title);
     formData.append('json', styleData.json);
 
-    // Append the image file
-    formData.append('image', styleData.image);
+    if (typeof styleData.image === 'string') {
+      // Convert image URL to File object
+      const imageUrl = styleData?.image;
+      const file = convertImageUrlToFile(imageUrl).then((resp) => formData.append('image', resp));
+
+      // Append the File object to FormData
+    } else {
+      formData.append('image', styleData?.image);
+    }
+
     if (editId) {
       dispatch(editStyle({ id: editId, data: formData })).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           enqueueSnackbar('Successfully Updated!', { variant: 'success' });
-          dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+          setstyleData({});
+          setEditId('');
+          dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
           handleDrawerClose();
         } else {
           enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -277,8 +298,26 @@ const page = () => {
     }
   };
   useEffect(() => {
-    dispatch(fetchStyleList()).then((resp) => setAllStylesData(resp?.payload?.data));
+    dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
   }, []);
+  useEffect(() => {
+    if (styleData === false) {
+      setstyleData(null);
+      setEditCategoryId(null);
+      setEditId('');
+    }
+  }, [styleDrawer]);
+  useEffect(() => {
+    dispatch(fetchStyleList()).then((resp: any) => setAllStylesData(resp?.payload?.data));
+  }, [allStylesData]);
+  useEffect(() => {
+    dispatch(fetchStyleById(editId)).then((resp: any) => setstyleData(resp?.payload));
+  }, [editId]);
+  useEffect(() => {
+    dispatch(getStyleCategoryById(editCategoryId)).then((res: any) =>
+      setStyleCategoryData({ name: res?.payload?.name })
+    );
+  }, [editCategoryId]);
 
   return (
     <Container>
@@ -311,7 +350,11 @@ const page = () => {
                   component="button"
                   variant="contained"
                   color="primary"
-                  onClick={() => setStyleDrawer(true)}
+                  onClick={() => {
+                    setStyleDrawer(true);
+                    setstyleData(null);
+                    setEditId('');
+                  }}
                 >
                   Add New Style
                 </Button>
@@ -332,7 +375,10 @@ const page = () => {
                   component="button"
                   variant="contained"
                   color="primary"
-                  onClick={() => setStyleCategoryDrawer(true)}
+                  onClick={() => {
+                    setStyleCategoryDrawer(true);
+                    setEditId('');
+                  }}
                 >
                   Add New Category
                 </Button>
@@ -354,10 +400,9 @@ const page = () => {
           <LoadingButton
             key={index}
             variant="soft"
-            onClick={() => setSelectedType(type?.id)}
             color={type === selectedType ? 'success' : 'inherit'}
           >
-            {type?.name?.toUpperCase()}
+            <Box onClick={() => setSelectedType(type?.id)}>{type?.name?.toUpperCase()}</Box>
             <Stack sx={{ position: 'relative', zIndex: 999, backgroundColor: '' }}>
               <MoreVertOutlinedIcon onClick={() => setOptionModal(type?.id)} />
               {optionModal === type?.id && (
@@ -366,37 +411,23 @@ const page = () => {
                     sx={{
                       position: 'absolute',
                       top: 30,
-                      backgroundColor: 'red',
+                      backgroundColor: 'black',
                       borderRadius: '12px',
                       padding: '8px',
+                      zIndex: 999,
+                      display: 'flex',
                     }}
                   >
-                    <Typography
+                    <IconButton
                       onClick={() => handleCategoryDelete(type?.id)}
-                      component="p"
-                      noWrap
-                      variant="subtitle2"
-                      sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
-                      }}
+                      aria-label="delete"
+                      size="large"
                     >
-                      Delete
-                    </Typography>
-                    <Typography
-                      component="p"
-                      noWrap
-                      onClick={() => handleEdit(type?.id)}
-                      variant="subtitle2"
-                      sx={{
-                        opacity: 0.7,
-                        fontSize: '.9rem',
-                        maxWidth: { xs: '120px', md: '218px' },
-                      }}
-                    >
-                      Edit
-                    </Typography>
+                      <DeleteIcon />
+                    </IconButton>
+                    <IconButton aria-label="edit" size="large" onClick={() => handleEdit(type?.id)}>
+                      <EditIcon />
+                    </IconButton>
                   </Box>
                 </ClickAwayListener>
               )}
@@ -407,7 +438,7 @@ const page = () => {
       <DetailsNavBar
         open={styleDrawer}
         onClose={handleDrawerClose}
-        title={'Add New style'}
+        title={`${editId ? 'Update' : 'Add New'} Style`}
         actions={
           <Stack alignItems="center" justifyContent="center" spacing="10px">
             <LoadingButton
@@ -435,7 +466,6 @@ const page = () => {
             >
               image
             </Typography>
-
             <Box mt="10px" sx={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
               <Box>
                 {styleData?.image ? (
@@ -520,7 +550,6 @@ const page = () => {
             >
               title
             </Typography>
-
             <RHFTextField
               fullWidth
               variant="filled"
@@ -536,21 +565,44 @@ const page = () => {
             >
               Category
             </Typography>
-
             <RHFSelect
               fullWidth
               variant="filled"
               name="category"
               id="demo-simple-select2"
-              value={styleData?.category || types[0]}
+              value={styleData?.category?.id || ''}
+              onChange={(e) => {
+                const selectedCategoryId = e.target.value;
+                // Log the selected value
+                setstyleData((prev: any) => ({
+                  ...prev,
+                  category: {
+                    ...prev.category,
+                    id: selectedCategoryId,
+                  },
+                }));
+              }}
               settingStateValue={handleTheme}
             >
-              {stylesCategories?.map((type: any, index: any) => (
-                <MenuItem key={index} value={type?.id}>
-                  {type?.name}
+              {stylesCategories?.map((category: any, index: any) => (
+                <MenuItem key={index} value={category?.id || ''}>
+                  {category.name}
                 </MenuItem>
               ))}
             </RHFSelect>
+
+            {/* <RHFSelect
+              fullWidth
+              variant="filled"
+              name="category"
+              id="demo-simple-select2"
+              value={'1'}
+              settingStateValue={handleTheme}
+            >
+              <MenuItem value={'1'}>Category 1</MenuItem>
+              <MenuItem value={'2'}>Category 2</MenuItem>
+              <MenuItem value={'3'}>Category 3</MenuItem>
+            </RHFSelect> */}
             <Typography
               component="p"
               noWrap
@@ -559,7 +611,6 @@ const page = () => {
             >
               Json
             </Typography>
-
             <RHFTextField
               variant="filled"
               multiline
@@ -576,7 +627,7 @@ const page = () => {
       <DetailsNavBar
         open={styleCategoryDrawer}
         onClose={handleCategoryDrawerClose}
-        title={'Add Icon Category'}
+        title={'Add Style Category'}
         actions={
           <Stack alignItems="center" justifyContent="center" spacing="10px">
             <LoadingButton

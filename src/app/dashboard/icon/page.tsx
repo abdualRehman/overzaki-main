@@ -1,7 +1,9 @@
 'use client';
 import Button from '@mui/material/Button';
 import MoreVertOutlinedIcon from '@mui/icons-material/MoreVertOutlined';
-import { Box, ClickAwayListener, Grid, MenuItem, Typography } from '@mui/material';
+import { Box, ClickAwayListener, Grid, IconButton, MenuItem, Typography } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Stack } from '@mui/system';
 import React, { useEffect, useState } from 'react';
 import { RoleBasedGuard } from 'src/auth/guard';
@@ -14,8 +16,10 @@ import FormProvider from 'src/components/hook-form/form-provider';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+
 import {
   useAddNewIconMutation,
+  useDeleteIconMutation,
   useGetAllIconsQuery,
   useGetIconByIdQuery,
   useUpdateIconMutation,
@@ -31,17 +35,20 @@ import {
   deleteIconCategory,
   editIcon,
   editIconCategory,
+  fetchIconById,
   fetchIconCategoryList,
   fetchIconsList,
   getIconCategoryById,
 } from 'src/redux/store/thunks/icon';
 import { useDispatch } from 'react-redux';
 import { enqueueSnackbar } from 'notistack';
+
 import { AppDispatch } from 'src/redux/store/store';
 
 const page = () => {
+  const [deleteIcon] = useDeleteIconMutation();
   const [optionModal, setOptionModal] = useState(false);
-  const [editCategoryId, setEditCategoryId] = useState();
+  const [editCategoryId, setEditCategoryId] = useState<any>();
   const dispatch = useDispatch<AppDispatch>();
   const [selectedType, setSelectedType] = useState<any>('');
   const [addIcon] = useAddNewIconMutation();
@@ -153,16 +160,19 @@ const page = () => {
   const handleDrawerClose = () => {
     setIconDrawer(false);
     seticonData(null);
+    setEditId(null);
   };
   const handleCategoryDrawerClose = () => {
     setIconCategoryDrawer(false);
+    setEditId(null);
+    setEditCategoryId('');
   };
   const handleCreateCategory = (data: any) => {
     dispatch(createIconCategory(data)).then((response: any) => {
       if (response.meta.requestStatus === 'fulfilled') {
         setIconCategoryData({ name: '' });
         enqueueSnackbar('Successfully Created!', { variant: 'success' });
-        dispatch(fetchIconCategoryList()).then((res) => setIconCategories(res?.payload?.data));
+        dispatch(fetchIconCategoryList()).then((res: any) => setIconCategories(res?.payload?.data));
         handleCategoryDrawerClose();
       } else {
         enqueueSnackbar(`Error! ${response.error.message}`, { variant: 'error' });
@@ -194,6 +204,7 @@ const page = () => {
       setIconCategoryData({ name: res?.payload.name })
     );
   };
+
   const handleEditPost = () => {
     const formData = new FormData();
     formData.append('name', iconCategoryData.name);
@@ -212,11 +223,16 @@ const page = () => {
       });
     }
   };
+  async function convertImageUrlToFile(imageUrl: any) {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    return new File([blob], 'image.jpg', { type: blob.type });
+  }
   const handleCreateIcon = () => {
     try {
       const formData = new FormData();
       // Appending fields in formData
-      formData.append('category', iconData.category);
+      formData.append('category', iconData.category.id);
       formData.append('title', iconData.title);
       if (typeof iconData.image !== 'string') {
         formData.append('image', iconData.image);
@@ -239,15 +255,25 @@ const page = () => {
   const handleIconEdit = () => {
     const dataToPush = new FormData();
     // Appending fields in formData
-    dataToPush.append('category', iconData.category);
+    dataToPush.append('category', iconData.category.id);
     dataToPush.append('title', iconData.title);
-    if (typeof iconData.image !== 'string') {
-      dataToPush.append('image', iconData.image);
+    if (typeof iconData?.image === 'string') {
+      // Convert image URL to File object
+      const imageUrl = iconData?.image;
+      const file = convertImageUrlToFile(imageUrl).then((resp: any) =>
+        dataToPush.append('image', resp)
+      );
+
+      // Append the File object to FormData
+    } else {
+      formData.append('image', iconData?.image);
     }
     if (editId) {
       dispatch(editIcon({ id: editId, data: dataToPush })).then((response: any) => {
         if (response.meta.requestStatus === 'fulfilled') {
           enqueueSnackbar('Successfully Updated!', { variant: 'success' });
+          seticonData({});
+          setEditId(null);
           dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
           handleDrawerClose();
         } else {
@@ -256,6 +282,19 @@ const page = () => {
       });
     }
   };
+
+  // Delete Icon
+  const [toDeleteId, setToDeleteId] = useState('');
+  // console.log(iconsData);
+  // const delIcon = () => {
+  //   deleteIcon(toDeleteId).unwrap();
+  // };
+  useEffect(() => {
+    dispatch(fetchIconsList()).then((resp) => setIconsData(resp?.payload?.data));
+  }, [iconsData]);
+  useEffect(() => {
+    dispatch(fetchIconById(editId)).then((resp) => seticonData(resp?.payload));
+  }, [editId]);
   return (
     <Container>
       <RoleBasedGuard permission="CREATE_PRODUCT">
@@ -287,7 +326,10 @@ const page = () => {
                   component="button"
                   variant="contained"
                   color="primary"
-                  onClick={() => setIconDrawer(true)}
+                  onClick={() => {
+                    setIconDrawer(true);
+                    seticonData(null);
+                  }}
                 >
                   Add New Icon
                 </Button>
@@ -308,7 +350,10 @@ const page = () => {
                   component="button"
                   variant="contained"
                   color="primary"
-                  onClick={() => setIconCategoryDrawer(true)}
+                  onClick={() => {
+                    setIconCategoryDrawer(true);
+                    setIconCategoryData({ name: '' });
+                  }}
                 >
                   Add New Category
                 </Button>
@@ -329,10 +374,9 @@ const page = () => {
           <LoadingButton
             key={index}
             variant="soft"
-            onClick={() => setSelectedType(type?.id)}
             color={type === selectedType ? 'success' : 'inherit'}
           >
-            {type?.name?.toUpperCase()}
+            <Box onClick={() => setSelectedType(type?.id)}>{type?.name?.toUpperCase()}</Box>
             <MoreVertOutlinedIcon onClick={() => setOptionModal(type?.id)} />
             {optionModal === type?.id && (
               <ClickAwayListener onClickAway={() => setOptionModal(false)}>
@@ -340,30 +384,24 @@ const page = () => {
                   sx={{
                     position: 'absolute',
                     top: 30,
-                    backgroundColor: 'red',
+                    backgroundColor: 'black',
                     borderRadius: '12px',
                     padding: '8px',
                     zIndex: 999,
+                    display: 'flex',
                   }}
                 >
-                  <Typography
+                  <IconButton
                     onClick={() => handleCategoryDelete(type?.id)}
-                    component="p"
-                    noWrap
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
+                    aria-label="delete"
+                    size="large"
                   >
-                    Delete
-                  </Typography>
-                  <Typography
-                    component="p"
-                    noWrap
-                    onClick={() => handleEdit(type?.id)}
-                    variant="subtitle2"
-                    sx={{ opacity: 0.7, fontSize: '.9rem', maxWidth: { xs: '120px', md: '218px' } }}
-                  >
-                    Edit
-                  </Typography>
+                    <DeleteIcon />
+                  </IconButton>
+
+                  <IconButton aria-label="edit" size="large" onClick={() => handleEdit(type?.id)}>
+                    <EditIcon />
+                  </IconButton>
                 </Box>
               </ClickAwayListener>
             )}
@@ -373,7 +411,7 @@ const page = () => {
       <DetailsNavBar
         open={iconDrawer}
         onClose={handleDrawerClose}
-        title={'Add New theme'}
+        title={`${editId ? 'Update' : 'Add New'} Icon`}
         actions={
           <Stack alignItems="center" justifyContent="center" spacing="10px">
             <LoadingButton
@@ -507,7 +545,18 @@ const page = () => {
               variant="filled"
               name="category"
               id="demo-simple-select2"
-              value={iconData?.category || types[0]}
+              onChange={(e) => {
+                const selectedCategoryId = e.target.value;
+                // Log the selected value
+                seticonData((prev: any) => ({
+                  ...prev,
+                  category: {
+                    ...prev.category,
+                    id: selectedCategoryId,
+                  },
+                }));
+              }}
+              value={iconData?.category?.id || ''}
               settingStateValue={handleTheme}
             >
               {iconCategories?.map((type: any, index: any) => (
@@ -586,7 +635,9 @@ const page = () => {
           ?.filter((item: any) => item?.category?.['_id'].includes(selectedType))
           .map((el: any) => (
             <IconCard
+              // delIcon={delIcon}
               setIconData={seticonData}
+              setToDeleteId={setToDeleteId}
               // setEditId={setEditId}
               toggleDrawerCommon={toggleDrawerCommon}
               key={el._id}
