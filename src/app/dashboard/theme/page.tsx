@@ -46,7 +46,7 @@ const page = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [themeData, setThemeData] = useState<any>(null);
   const [themeDrawer, setThemeDrawer] = useState(false);
-  const [editId, setEditId] = useState(null);
+  const [editId, setEditId] = useState('');
   const ProductSchema = Yup.object().shape({
     title: Yup.string().required(),
     type: Yup.string().required(),
@@ -196,7 +196,7 @@ const page = () => {
         if (response.meta.requestStatus === 'fulfilled') {
           enqueueSnackbar('Successfully Updated!', { variant: 'success' });
           setThemeData({});
-          setEditId(null);
+          setEditId('');
           dispatch(fetchThemeList()).then((resp) => setAllThemesData(resp?.payload?.data));
           handleDrawerClose();
         } else {
