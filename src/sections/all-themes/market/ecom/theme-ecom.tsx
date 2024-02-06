@@ -55,6 +55,7 @@ import { socketClient } from '../../utils/helper-functions';
 import { useSnackbar } from 'notistack';
 import { useSettingsContext } from 'src/components/settings';
 import { useThrottledCallback } from 'use-debounce';
+import AddSectionComponent from './AddSectionComponent';
 
 const dataPages = [
   { title: "Home Page", link: 'https://ecom-zaki.vercel.app/' },
@@ -1026,102 +1027,7 @@ export default function EcomDesignMain() {
 
 
           <Grid xs={5} sx={{ display: controlls.addSection ? '' : 'none' }}>
-            <Card sx={{ borderRadius: '0px', p: '20px', height: '100%', boxShadow: '0px -6px 40px #00000014' }}>
-
-              <Stack direction='row' justifyContent='space-between'>
-                <Box>
-                  <Typography variant='h6'>Add New Section</Typography>
-                  <Typography variant='caption' color='#8688A3'>
-                    Select where you want to add this section.
-                  </Typography>
-                </Box>
-                <Iconify width={25} icon='iconamoon:close-bold' style={{ cursor: 'pointer' }} onClick={handleCloseDropDown('addSection')} />
-              </Stack>
-
-
-              <Box mt='20px'>
-                <Typography variant='caption' color='#8688A3'>
-                  Top Navigation (1)
-                </Typography>
-
-                <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-                  width: '100%',
-                  minHeight: '61px',
-                  border: '4px solid #8688A333',
-                  borderRadius: '8px',
-                }}>
-                  <Box component='img' src='/raws/navAS.png' sx={{ borderRadius: '8px', width: '100%' }} />
-                </Stack>
-              </Box>
-
-
-              <Divider sx={{
-                borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
-                '& .MuiDivider-wrapper': {
-                  padding: 0
-                }
-              }}>
-                <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
-                  width: "120px",
-                  height: "36px",
-                  background: "#F5F5F8",
-                  borderRadius: "20px",
-                  cursor: 'pointer'
-                }} >
-                  <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
-                  <Typography variant='button' color='#8688A3'>Add Here</Typography>
-                </Stack>
-              </Divider>
-
-              <Box mt='20px'>
-                <Typography variant='caption' color='#8688A3'>
-                  Categories section (2)
-                </Typography>
-
-                <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-                  width: '100%',
-                  height: '178px',
-                  border: '4px solid #8688A333',
-                  borderRadius: '8px',
-                }}>
-                  <Box component='img' src='/raws/catAS.png' sx={{ borderRadius: '8px', width: '100%', height: '100%' }} />
-                </Stack>
-              </Box>
-              <Divider sx={{
-                borderWidth: '2px', borderColor: '#F5F5F8', my: '20px',
-                '& .MuiDivider-wrapper': {
-                  padding: 0
-                }
-              }}>
-                <Stack direction='row' alignItems='center' spacing='8px' justifyContent='center' sx={{
-                  width: "120px",
-                  height: "36px",
-                  background: "#F5F5F8",
-                  borderRadius: "20px",
-                  cursor: 'pointer'
-                }} >
-                  <Iconify icon='mingcute:add-fill' style={{ color: '#8688A3' }} />
-                  <Typography variant='button' color='#8688A3'>Add Here</Typography>
-                </Stack>
-              </Divider>
-
-              <Box mt='20px'>
-                <Typography variant='caption' color='#8688A3'>
-                  Mobiles Section (3)
-                </Typography>
-
-                <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{
-                  width: '100%',
-                  height: '178px',
-                  border: '4px solid #8688A333',
-                  borderRadius: '8px',
-                }}>
-                  <Box component='img' src='/raws/catAS.png' sx={{ borderRadius: '8px', width: '100%', height: '100%' }} />
-                </Stack>
-              </Box>
-
-
-            </Card>
+            <AddSectionComponent onClose={handleCloseDropDown('addSection')} />
 
           </Grid>
 
@@ -1599,7 +1505,8 @@ export default function EcomDesignMain() {
 
 
                 <Actions condition={controlls.addSection}>
-                  <Card sx={{ borderRadius: '0px', p: '20px', height: '100%', boxShadow: '0px -6px 40px #00000014' }}>
+                  <AddSectionComponent onClose={handleCloseDropDown('addSection')} />
+                  {/* <Card sx={{ borderRadius: '0px', p: '20px', height: '100%', boxShadow: '0px -6px 40px #00000014' }}>
 
                     <Stack direction='row' justifyContent='space-between'>
                       <Box>
@@ -1694,7 +1601,7 @@ export default function EcomDesignMain() {
                     </Box>
 
 
-                  </Card>
+                  </Card> */}
                 </Actions>
 
 
