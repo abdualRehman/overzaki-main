@@ -10,6 +10,7 @@ import { Box } from '@mui/material';
 import { ConfirmDialogProps } from './types';
 import Iconify from '../iconify/iconify';
 
+//
 // ----------------------------------------------------------------------
 
 export default function ConfirmDialog({
