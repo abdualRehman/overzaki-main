@@ -61,7 +61,7 @@ const IconCard = ({
         }}
       >
         <CardContent>
-          <Typography gutterBottom variant="p" component="div">
+          <Typography gutterBottom component="div">
             {title}
           </Typography>
           <Typography variant="body2" color="text.secondary">
