@@ -10,6 +10,7 @@ import { Box } from '@mui/material';
 import { ConfirmDialogProps } from './types';
 import Iconify from '../iconify/iconify';
 
+//
 // ----------------------------------------------------------------------
 
 export default function ConfirmDialog({
@@ -23,26 +24,39 @@ export default function ConfirmDialog({
   ...other
 }: ConfirmDialogProps) {
   return (
-    <Dialog fullWidth maxWidth={maxWidth} open={open} onClose={onClose} {...other} sx={{
-      '& .MuiPaper-root': {
-        overflowY: 'visible !important'
-      }
-    }}>
-      <Box position='relative'>
-        <Box sx={{
-          boxShadow: "0px 4px 20px #0F134933",
-          height: '40px',
-          width: '40px',
-          borderRadius: '24px',
-          background: '#FFFFFF',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'absolute',
-          right: '0px',
-          top: '-20px',
-          cursor: 'pointer'
-        }} onClick={onClose} ><Iconify icon="ic:baseline-clear" /></Box>
+    <Dialog
+      fullWidth
+      maxWidth={maxWidth}
+      open={open}
+      onClose={onClose}
+      {...other}
+      sx={{
+        '& .MuiPaper-root': {
+          overflowY: 'visible !important',
+        },
+      }}
+    >
+      <Box position="relative">
+        <Box
+          sx={{
+            boxShadow: '0px 4px 20px #0F134933',
+            height: '40px',
+            width: '40px',
+            borderRadius: '24px',
+            background: '#FFFFFF',
+            color: 'black',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'absolute',
+            right: '0px',
+            top: '-20px',
+            cursor: 'pointer',
+          }}
+          onClick={onClose}
+        >
+          <Iconify icon="ic:baseline-clear" />
+        </Box>
       </Box>
       <DialogTitle sx={{ pb: 2 }}>{title}</DialogTitle>
 
@@ -51,9 +65,11 @@ export default function ConfirmDialog({
       <DialogActions>
         {action}
 
-        {noCancel && <Button variant="outlined" color="inherit" onClick={onClose}>
-          Cancel
-        </Button>}
+        {noCancel && (
+          <Button variant="outlined" color="inherit" onClick={onClose}>
+            Cancel
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
