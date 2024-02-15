@@ -70,6 +70,14 @@ const defaultSections = [
     page: "Home Page",
     sectinos: [
       {
+        name: "Top Bar",
+        img: "/raws/bars.svg",
+        show: true,
+        // Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+        //   <NavDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builder_Id={builder_Id} />
+        // )
+      },
+      {
         name: "App Bar",
         img: "/raws/bars.svg",
         show: true,
@@ -78,19 +86,19 @@ const defaultSections = [
         )
       },
       {
+        name: "Header",
+        img: "/raws/Header.svg",
+        show: false,
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+          <HeaderDealer builderId={builder_Id} handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        )
+      },
+      {
         name: "Banner",
         img: "/raws/Banners.svg",
         show: true,
         Componenet: (handleThemeConfig: any, themeConfig: any) => (
           <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        )
-      },
-      {
-        name: "Header",
-        img: "/raws/Header.svg",
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
-          <HeaderDealer builderId={builder_Id} handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         )
       },
       {
@@ -113,14 +121,14 @@ const defaultSections = [
         show: false
       },
       {
-        name: "Trending",
+        name: "Video",
         img: "/raws/Trending.svg",
-        show: false
+        show: true
       },
       {
         name: "Products",
         img: "/raws/Products.svg",
-        show: false,
+        show: true,
         Componenet: (handleThemeConfig: any, themeConfig: any) => (
           <ProductViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         )
@@ -130,6 +138,11 @@ const defaultSections = [
         //     handleButton('List View');
         //   }, 1000);
         // }
+      },
+      {
+        name: "Footer",
+        img: "/raws/Mobiles.svg",
+        show: true
       },
     ]
   },
@@ -417,7 +430,7 @@ export default function EcomDesignMain() {
         // setbuttonSection('App Bar');
         setbuttonSection('');
         setActiveSection(newValue);
-        setControlls((pv) => ({ ...pv, addSection: false }))
+        setControlls((pv) => ({ ...pv, addSection: true }))
       } else {
         setbuttonSection('Font');
         setActiveSection(newValue);
