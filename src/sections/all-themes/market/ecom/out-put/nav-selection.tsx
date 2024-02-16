@@ -59,6 +59,8 @@ export default function NavDealer({
   mobile = false,
   builder_Id,
 }: NavProps) {
+
+
   const [currentTab, setCurrentTab] = useState('Layout');
   const [appBar, setAppBar] = useState<any>({});
   const [mainAppBar, setMainAppBar] = useState<any>({});
@@ -75,41 +77,45 @@ export default function NavDealer({
     };
   };
 
-  const handleChangeEvent = (
-    key: string,
-    newValue: any,
-    parentClass: string,
-    subchild: string = ''
-  ) => {
-    let _socketKey = '';
-    let valueToShare = '';
+  const handleChangeEvent = debounce(
+    (
+      key: string,
+      newValue: any,
+      parentClass: string,
+      subchild: string = ''
+    ) => {
+      let _socketKey = '';
+      let valueToShare = '';
 
-    if (subchild === 'mobileView') {
-      const nestedAppbar = appBar?.[parentClass]?.[subchild] ?? {};
-      setAppBar({
-        ...appBar,
-        [parentClass]: { [subchild]: { ...nestedAppbar, [key]: newValue } },
-      });
-    } else {
-      const nestedAppbar = appBar?.[parentClass] ?? {};
-      setAppBar({ ...appBar, [parentClass]: { ...nestedAppbar, [key]: newValue } });
-    }
+      if (subchild === 'mobileView') {
+        const nestedAppbar = appBar?.[parentClass]?.[subchild] ?? {};
+        setAppBar({
+          ...appBar,
+          [parentClass]: { [subchild]: { ...nestedAppbar, [key]: newValue } },
+        });
+      } else {
+        const nestedAppbar = appBar?.[parentClass] ?? {};
+        setAppBar({ ...appBar, [parentClass]: { ...nestedAppbar, [key]: newValue } });
+      }
 
-    _socketKey = parentClass ? parentClass + '.' + (subchild ? subchild + '.' : '') + key : key;
-    // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
-    valueToShare = newValue;
+      _socketKey = parentClass ? parentClass + '.' + (subchild ? subchild + '.' : '') + key : key;
+      // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
+      valueToShare = newValue;
 
-    const targetHeader = 'appBar.';
-    const data = {
-      builderId: builder_Id,
-      key: targetHeader + _socketKey,
-      value: valueToShare,
-    };
+      const targetHeader = 'appBar.appBar.';
+      const data = {
+        builderId: builder_Id,
+        key: targetHeader + _socketKey,
+        value: valueToShare,
+      };
 
-    if (socket) {
-      socket.emit('website:cmd', data);
-    }
-  };
+      console.log("data", data);
+
+
+      if (socket) {
+        socket.emit('website:cmd', data);
+      }
+    }, 500);
 
   const isColorValid = (color: string) =>
     /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
@@ -181,6 +187,41 @@ export default function NavDealer({
       name: '',
     },
   ]);
+
+  useEffect(() => {
+    const menuesList = menus.filter((menuObj: any) => menuObj.link !== "" && menuObj.name !== "");
+    if (menuesList.length > 0) {
+      sendSocketMsg(menuesList)
+    }
+  }, [menus]);
+
+  const sendSocketMsg = debounce((menuesList: any) => {
+    // const _socketKey = "menuItems";
+    // const valueToShare = menuesList;
+    // const targetHeader = 'appBar.appBar.menu';
+    // const data = {
+    //   builderId: builder_Id,
+    //   key: targetHeader + _socketKey,
+    //   value: valueToShare,
+    // };
+    // // console.log("data", data);
+    // if (socket) {
+    //   socket.emit('website:cmd', data);
+    // }
+  }, 1500)
+
+
+
+  const handleChangeMenu = (event: any, target: any, index: any) => {
+    const updatedMenus = menus.map((menuItem, i) => {
+      if (i === index) {
+        return { ...menuItem, [target]: event.target.value };
+      }
+      return menuItem;
+    });
+    setMenus(updatedMenus);
+  };
+
 
   return (
     <div>
@@ -290,7 +331,7 @@ export default function NavDealer({
                       }
                     /> */}
                     <Sketch
-                      onChange={(event) =>
+                      onChange={(event: any) =>
                         isColorValid(event?.hex)
                           ? handleChangeEvent('backgroundColor', event?.hex, 'container')
                           : null
@@ -346,7 +387,7 @@ export default function NavDealer({
                       }
                     /> */}
                     <Sketch
-                      onChange={(event) =>
+                      onChange={(event: any) =>
                         isColorValid(event?.hex)
                           ? handleChangeEvent('borderBottomColor', event?.hex, 'container')
                           : null
@@ -521,9 +562,9 @@ export default function NavDealer({
                         <TextField
                           variant="filled"
                           type="number"
-                          value={appBar?.logoObj?.width}
+                          value={appBar?.menu?.size}
                           onChange={(event) =>
-                            handleChangeEvent('width', event.target.value, 'logoObj')
+                            handleChangeEvent('size', event.target.value, 'menu', 'style')
                           }
                         />
                       </Stack>
@@ -545,9 +586,9 @@ export default function NavDealer({
                       }
                     /> */}
                     <Sketch
-                      onChange={(event) =>
+                      onChange={(event: any) =>
                         isColorValid(event?.hex)
-                          ? handleChangeEvent('color', event?.hex, 'logoObj')
+                          ? handleChangeEvent('color', event?.hex, 'menu', 'style')
                           : null
                       }
                       presetColors={customPresets}
@@ -570,9 +611,9 @@ export default function NavDealer({
                       }
                     /> */}
                     <Sketch
-                      onChange={(event) =>
+                      onChange={(event: any) =>
                         isColorValid(event?.hex)
-                          ? handleChangeEvent('textBg', event?.hex, 'logoObj')
+                          ? handleChangeEvent('backgroundColor', event?.hex, 'menu', 'style')
                           : null
                       }
                       presetColors={customPresets}
@@ -595,9 +636,9 @@ export default function NavDealer({
                       }
                     /> */}
                     <Sketch
-                      onChange={(event) =>
+                      onChange={(event: any) =>
                         isColorValid(event?.hex)
-                          ? handleChangeEvent('textBg', event?.hex, 'logoObj')
+                          ? handleChangeEvent('hoverColor', event?.hex, 'menu', 'style')
                           : null
                       }
                       presetColors={customPresets}
@@ -617,7 +658,7 @@ export default function NavDealer({
                 </Box>
                 {/* Menu Start */}
 
-                {menus.map((item, i) => (
+                {menus.map((item: any, i) => (
                   <Box key={i} sx={{ width: '100%', display: 'flex', gap: 2 }}>
                     <Box>
                       <Typography variant="caption" color="#8688A3">
@@ -629,10 +670,11 @@ export default function NavDealer({
                             variant="filled"
                             type="text"
                             placeholder="https://"
-                            value={appBar?.logoObj?.width}
-                            onChange={(event) =>
-                              handleChangeEvent('width', event.target.value, 'logoObj')
-                            }
+                            value={item.link}
+                            onChange={(event) => handleChangeMenu(event, "link", i)}
+                          // onChange={(event) =>
+                          //   // setMenus([...menus])
+                          // }
                           />
                         </Stack>
                       </Stack>
@@ -647,9 +689,9 @@ export default function NavDealer({
                             variant="filled"
                             type="text"
                             placeholder="Name"
-                            value={appBar?.logoObj?.width}
+                            value={item?.name}
                             onChange={(event) =>
-                              handleChangeEvent('width', event.target.value, 'logoObj')
+                              handleChangeMenu(event, "name", i)
                             }
                           />
                         </Stack>
@@ -730,12 +772,12 @@ export default function NavDealer({
                   width={'100%'}
                 >
                   <Typography variant="caption" sx={{ fontWeight: 900 }}>
-                    Has Background
+                    Show Search
                   </Typography>
                   <Switch
-                    checked={appBar?.icon?.hasBackground}
+                    checked={appBar?.search?.status}
                     onChange={(event: any, value: any) =>
-                      handleChangeEvent('hasBackground', value, 'icon')
+                      handleChangeEvent('status', value, 'search')
                     }
                     inputProps={{ 'aria-label': 'controlled' }}
                   />
@@ -748,12 +790,12 @@ export default function NavDealer({
                   width={'100%'}
                 >
                   <Typography variant="caption" sx={{ fontWeight: 900 }}>
-                    Shadow
+                    Show Input
                   </Typography>
                   <Switch
-                    checked={appBar?.icon?.shadow}
+                    checked={appBar?.search?.input}
                     onChange={(event: any, value: any) =>
-                      handleChangeEvent('shadow', value, 'icon')
+                      handleChangeEvent('input', value, 'search')
                     }
                     inputProps={{ 'aria-label': 'controlled' }}
                   />
@@ -777,9 +819,10 @@ export default function NavDealer({
                       }
                     /> */}
                     <Sketch
-                      onChange={(event) =>
+                      onChange={(event: any) =>
                         isColorValid(event?.hex)
-                          ? handleChangeEvent('backgroundColor', event?.hex, 'icon')
+                          // ? handleChangeEvent('backgroundColor', event?.hex, 'icon')
+                          ? handleChangeEvent('textBg', event?.hex, 'search')
                           : null
                       }
                       presetColors={customPresets}
@@ -804,9 +847,9 @@ export default function NavDealer({
                       }
                     /> */}
                     <Sketch
-                      onChange={(event) =>
+                      onChange={(event: any) =>
                         isColorValid(event?.hex)
-                          ? handleChangeEvent('tintColor', event?.hex, 'icon')
+                          ? handleChangeEvent('textColor', event?.hex, 'search')
                           : null
                       }
                       presetColors={customPresets}
@@ -825,20 +868,20 @@ export default function NavDealer({
 
                 <Box sx={{ width: '100%' }}>
                   <Typography variant="caption" color="#8688A3">
-                    Border Radius (%)
+                    Border Width (%)
                   </Typography>
                   <Stack direction="row" alignItems="center" spacing="18px">
                     <Stack direction="row" alignItems="center" spacing={1} width={1}>
                       <Slider
-                        value={appBar?.icon?.borderRaduis || 0}
+                        value={appBar?.search?.borderWidth || 0}
                         onChange={(_event: Event, newValue: number | number[]) =>
-                          handleChangeEvent('borderRaduis', newValue, 'icon')
+                          handleChangeEvent('borderWidth', newValue, 'search')
                         }
                         valueLabelDisplay="auto"
                         marks
-                        step={5}
+                        // step={5}
                         min={0}
-                        max={100}
+                        max={20}
                       />
                     </Stack>
                   </Stack>
@@ -859,9 +902,9 @@ export default function NavDealer({
                       }
                     /> */}
                     <Sketch
-                      onChange={(event) =>
+                      onChange={(event: any) =>
                         isColorValid(event?.hex)
-                          ? handleChangeEvent('borderColor', event?.hex, 'icon')
+                          ? handleChangeEvent('borderColor', event?.hex, 'search')
                           : null
                       }
                       presetColors={customPresets}
@@ -869,7 +912,7 @@ export default function NavDealer({
                     />
                   </Stack>
                 </Box>
-                <Box sx={{ width: '100%', display: 'flex', gap: 2 }}>
+                {/* <Box sx={{ width: '100%', display: 'flex', gap: 2 }}>
                   <Box>
                     <Typography variant="caption" color="#8688A3">
                       Width
@@ -906,7 +949,7 @@ export default function NavDealer({
                       </Stack>
                     </Stack>
                   </Box>
-                </Box>
+                </Box> */}
               </Stack>
             </Box>
           </AccordionDetails>

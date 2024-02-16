@@ -17,6 +17,7 @@ import { AppDispatch } from 'src/redux/store/store';
 import { saveLogo } from 'src/redux/store/thunks/builder';
 import { MuiColorInput } from 'mui-color-input';
 import Sketch from '@uiw/react-color-sketch';
+import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
 
 // ----------------------------------------------------------------------
 
@@ -33,10 +34,48 @@ interface LogoProps {
 export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }: LogoProps) {
   const [logoObj, setLogoObj] = useState<any>(null);
   const dispatch = useDispatch<AppDispatch>();
+  const socket = socketClient();
 
-  const handleChangeEvent = (key: any, value: any, parent: any) => {
-    setLogoObj({ ...logoObj, [key]: value });
+
+
+  const debounce = (func: any, delay: any) => {
+    let timeoutId: any;
+    return (...args: any) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
   };
+
+
+
+  const handleChangeEvent = debounce((key: any, newValue: any, parentClass: any) => {
+    // setLogoObj({ ...logoObj, [key]: value });
+    let _socketKey = '';
+    let valueToShare = '';
+    const nestedAppbar = logoObj?.[parentClass] ?? {};
+    setLogoObj({ ...logoObj, [parentClass]: { ...nestedAppbar, [key]: newValue } });
+
+    _socketKey = parentClass ? parentClass + '.' + key : key;
+    // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
+    valueToShare = newValue;
+
+    const targetHeader = 'appBar.websiteLogo.';
+    const data = {
+      builderId: builderId,
+      key: targetHeader + _socketKey,
+      value: valueToShare,
+    };
+
+    console.log("data", data);
+
+    if (socket) {
+      socket.emit('website:cmd', data);
+    }
+
+
+  }, 1500);
 
   const handleImageChange64 = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -102,7 +141,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
         </Typography>
         <Switch
           checked={logoObj?.status}
-          onChange={(event: any) => handleChangeEvent('status', event?.target?.value, 'logoObj')}
+          onChange={(event: any) => handleChangeEvent('status', event?.target?.value)}
           inputProps={{ 'aria-label': 'controlled' }}
         />
       </Stack>
@@ -113,8 +152,8 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
         </Typography>
         <RadioGroup
           row
-          value={logoObj?.position || 'center'}
-          onChange={(event: any) => handleChangeEvent('position', event?.target?.value, 'logoObj')}
+          value={logoObj?.position}
+          onChange={(event: any) => handleChangeEvent('position', event?.target?.value)}
         >
           <FormControlLabel value="left" control={<Radio size="medium" />} label="Left" />
           <FormControlLabel value="center" control={<Radio size="medium" />} label="Center " />
@@ -166,7 +205,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
         <Stack direction="row" alignItems="center" spacing="18px">
           <Stack direction="row" alignItems="center" spacing={1} width={1}>
             <Slider
-              value={logoObj?.borderWidth || 0}
+              value={logoObj?.logoObj?.borderWidth || 0}
               onChange={(_event: Event, newValue: number | number[]) =>
                 handleChangeEvent('borderWidth', newValue, 'logoObj')
               }
@@ -179,7 +218,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
           </Stack>
         </Stack>
       </Box>
-      <Box sx={{ width: '100%', my: 2 }}>
+      {/* <Box sx={{ width: '100%', my: 2 }}>
         <Typography variant="caption" color="#8688A3">
           Border Radius (%)
         </Typography>
@@ -198,7 +237,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
             />
           </Stack>
         </Stack>
-      </Box>
+      </Box> */}
 
       <Box sx={{ width: '100%', display: 'flex', gap: 2, my: 2 }}>
         <Box>
@@ -210,7 +249,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
               <TextField
                 variant="filled"
                 type="number"
-                value={logoObj?.width}
+                value={logoObj?.logoObj?.width}
                 onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
               />
             </Stack>
@@ -225,7 +264,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
               <TextField
                 variant="filled"
                 type="number"
-                value={logoObj?.height}
+                value={logoObj?.logoObj?.height}
                 onChange={(event) => handleChangeEvent('height', event.target.value, 'logoObj')}
               />
             </Stack>
@@ -242,7 +281,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
             variant="filled"
             type="text"
             fullWidth
-            value={logoObj?.text}
+            value={logoObj?.logoObj?.text}
             onChange={(event: any) => handleChangeEvent('text', event.target.value, 'logoObj')}
           />
         </Stack>
@@ -259,8 +298,8 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
                         onChange={event => isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null}
                     /> */}
           <Sketch
-            onChange={(event) =>
-              isColorValid(event?.hex) ? handleChangeEvent('textBg', event?.hex, 'logoObj') : null
+            onChange={(event: any) =>
+              isColorValid(event?.hex) ? handleChangeEvent('backgroundColor', event?.hex, 'text') : null
             }
             presetColors={customPresets}
             style={{ width: '100%' }}
@@ -282,8 +321,8 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
             }
           /> */}
           <Sketch
-            onChange={(event) =>
-              isColorValid(event?.hex) ? handleChangeEvent('color', event?.hex, 'logoObj') : null
+            onChange={(event: any) =>
+              isColorValid(event?.hex) ? handleChangeEvent('color', event?.hex, 'text') : null
             }
             presetColors={customPresets}
             style={{ width: '100%' }}
