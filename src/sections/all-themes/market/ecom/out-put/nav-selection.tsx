@@ -202,9 +202,6 @@ export default function NavDealer({
         <Accordion
           sx={{
             width: '100%',
-            '& .css-55bqac-MuiPaper-root-MuiAccordion-root.Mui-expanded': {
-              backgroundColor: 'white !important',
-            },
           }}
         >
           <AccordionSummary
@@ -835,8 +832,6 @@ export default function NavDealer({
                           handleChangeEvent('borderRaduis', newValue, 'icon')
                         }
                         valueLabelDisplay="auto"
-                        marks
-                        step={5}
                         min={0}
                         max={100}
                       />

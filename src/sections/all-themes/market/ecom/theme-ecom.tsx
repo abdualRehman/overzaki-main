@@ -51,6 +51,7 @@ import { socketClient } from '../../utils/helper-functions';
 import { useSnackbar } from 'notistack';
 import AddSectionComponent from './AddSectionComponent';
 import StyleCategoriesDealer from './out-put/style-categories-selection';
+import TopBarDealer from './out-put/topbar-selection';
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -86,9 +87,13 @@ const defaultSections = [
         name: 'Top Bar',
         img: '/raws/bars.svg',
         show: true,
-        // Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
-        //   <NavDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builder_Id={builder_Id} />
-        // )
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+          <TopBarDealer
+            handleThemeConfig={handleThemeConfig}
+            themeConfig={themeConfig}
+            builder_Id={builder_Id}
+          />
+        ),
       },
       {
         name: 'App Bar',
