@@ -54,6 +54,7 @@ import StyleCategoriesDealer from './out-put/style-categories-selection';
 import TopBarDealer from './out-put/topbar-selection';
 import VideoDealer from './out-put/video-dealer';
 import BrandDealer from './out-put/brand-dealer';
+import StylesDealer from './out-put/styles-dealer';
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -186,6 +187,28 @@ const defaultSections = [
     page: 'Products Page',
     sectinos: [
       {
+        name: 'Search',
+        img: '/raws/si.png',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ProductPageSearchDealer
+            handleThemeConfig={handleThemeConfig}
+            themeConfig={themeConfig}
+          />
+        ),
+      },
+      {
+        name: 'Filter',
+        img: '/raws/filters.png',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => (
+          <ProductPageFiltersDealer
+            handleThemeConfig={handleThemeConfig}
+            themeConfig={themeConfig}
+          />
+        ),
+      },
+      {
         name: 'List View',
         img: '/raws/listing.svg',
         show: true,
@@ -217,28 +240,7 @@ const defaultSections = [
           <ProductPageViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         ),
       },
-      {
-        name: 'Search',
-        img: '/raws/si.png',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <ProductPageSearchDealer
-            handleThemeConfig={handleThemeConfig}
-            themeConfig={themeConfig}
-          />
-        ),
-      },
-      {
-        name: 'Filter',
-        img: '/raws/filters.png',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <ProductPageFiltersDealer
-            handleThemeConfig={handleThemeConfig}
-            themeConfig={themeConfig}
-          />
-        ),
-      },
+
       {
         name: 'Product Card',
         img: '/raws/cards.svg',
@@ -888,6 +890,21 @@ export default function EcomDesignMain() {
                         />
                       </Box>
                     )}
+                    {buttonSection === 'Styles' && (
+                      <Box>
+                        <HeaderSection
+                          name="General Style"
+                          description="Select the style of Icons"
+                          cancel={{ key: 'cart', value: '1' }}
+                          handleCancelBtn={handleCancelBtn}
+                          handleThemeConfig={handleThemeConfig}
+                        />
+                        <StylesDealer
+                          themeConfig={themeConfig}
+                          handleThemeConfig={handleThemeConfig}
+                        />
+                      </Box>
+                    )}
 
                     {/* {buttonSection === 'Categories' && <Box>
                   <HeaderSection
@@ -1077,6 +1094,32 @@ export default function EcomDesignMain() {
                           </Button>
                           <Typography variant="caption" color="#0F1349">
                             Cart
+                          </Typography>
+                        </Stack>
+                        <Stack spacing="3px" alignItems="center" justifyContent="center">
+                          <Button
+                            sx={{
+                              padding: '0px',
+                              width: '50px',
+                              height: '50px',
+                              minWidth: 'auto',
+                              borderRadius: '12px',
+                              background: buttonSection === 'Cart' ? '#1BFBB6' : '#F5F5F8',
+                              '&:hover': {
+                                background: buttonSection === 'Cart' ? '#22C55E' : '#DEE1E6',
+                              },
+                            }}
+                            variant="contained"
+                            onClick={handleButton('Styles')}
+                          >
+                            <Box
+                              component="img"
+                              src="/raw/shopping-cart.svg"
+                              sx={{ width: '30px', height: '30px' }}
+                            />
+                          </Button>
+                          <Typography variant="caption" color="#0F1349">
+                            General Styling
                           </Typography>
                         </Stack>
 
