@@ -807,6 +807,21 @@ export default function NavDealer({
                   />
                 </Stack>
 
+                <Box sx={{ width: '100%', my: 2 }}>
+                  <Typography variant="caption" color="#8688A3">
+                    Position
+                  </Typography>
+                  <RadioGroup
+                    row
+                    value={appBar?.search?.position}
+                    onChange={(event: any) => handleChangeEvent('position', event.target.value, 'search')}
+                  >
+                    <FormControlLabel value="left" control={<Radio size="medium" />} label="Left" />
+                    <FormControlLabel value="center" control={<Radio size="medium" />} label="Center " />
+                    <FormControlLabel value="right" control={<Radio size="medium" />} label="Right" />
+                  </RadioGroup>
+                </Box>
+
                 <Box sx={{ width: '100%' }}>
                   <Typography variant="caption" color="#8688A3">
                     Background Color

@@ -142,7 +142,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
         </Typography>
         <Switch
           checked={logoObj?.status}
-          onChange={(event: any) => handleChangeEvent('status', event?.target?.value)}
+          onChange={(event: any, value: any) => handleChangeEvent('status', value)}
           inputProps={{ 'aria-label': 'controlled' }}
         />
       </Stack>

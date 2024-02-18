@@ -17,6 +17,9 @@ import Sketch from '@uiw/react-color-sketch';
 import React, { useState } from 'react';
 import Iconify from 'src/components/iconify';
 import { VisuallyHiddenInput } from './logo-part';
+import { AppDispatch } from 'src/redux/store/store';
+import { useDispatch } from 'react-redux';
+import { socketClient } from 'src/sections/all-themes/utils/helper-functions';
 interface TopBarProps {
   themeConfig: {
     navLogoPosition: string;
@@ -55,7 +58,64 @@ const TopBarDealer = ({
   mobile = false,
   builder_Id,
 }: TopBarProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const socket = socketClient();
+
+
+  const [topBarObj, setTopBarObj] = useState<any>(null);
   const [appBarItems, setAppBarItems] = useState([]);
+
+
+  const debounce = (func: any, delay: any) => {
+    let timeoutId: any;
+    return (...args: any) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
+
+
+  const handleChangeEvent = debounce((key: any, newValue: any, parentClass: any) => {
+
+    let _socketKey = '';
+    let valueToShare = '';
+    const nestedAppbar = topBarObj?.[parentClass] ?? {};
+    setTopBarObj({ ...topBarObj, [parentClass]: { ...nestedAppbar, [key]: newValue } });
+
+    _socketKey = parentClass ? parentClass + '.' + key : key;
+    // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
+    valueToShare = newValue;
+
+    // const targetHeader = 'appBar.websiteLogo.';
+    const targetHeader = 'home.sections.appBar.adAppBar.';
+    const data = {
+      builderId: builder_Id,
+      key: targetHeader + _socketKey,
+      value: valueToShare,
+    };
+
+    console.log("data", data);
+
+    if (socket) {
+      socket.emit('website:cmd', data);
+    }
+
+
+  }, 1500);
+  const isColorValid = (color: string) =>
+    /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
+      color
+    );
+
+
+
+
+
+
+
+
   return (
     <Stack gap={2} direction={'column'}>
       <Box sx={{ border: '4px solid lightgray' }}>
@@ -81,7 +141,10 @@ const TopBarDealer = ({
             <Typography variant="caption" sx={{ fontWeight: 900 }}>
               Show Topbar
             </Typography>
-            <Switch inputProps={{ 'aria-label': 'controlled' }} />
+            <Switch inputProps={{ 'aria-label': 'controlled' }}
+              checked={topBarObj?.status}
+              onChange={(event: any, value: any) => handleChangeEvent('status', value)}
+            />
           </Stack>
           <Box sx={{ width: '100%', display: 'flex', gap: 2, my: 2 }}>
             <Box>
@@ -93,8 +156,8 @@ const TopBarDealer = ({
                   <TextField
                     variant="filled"
                     type="number"
-                    // value={logoObj?.width}
-                    // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                    value={topBarObj?.width}
+                    onChange={(event) => handleChangeEvent('width', event.target.value)}
                   />
                 </Stack>
               </Stack>
@@ -108,8 +171,8 @@ const TopBarDealer = ({
                   <TextField
                     variant="filled"
                     type="number"
-                    // value={logoObj?.height}
-                    // onChange={(event) => handleChangeEvent('height', event.target.value, 'logoObj')}
+                    value={topBarObj?.height}
+                    onChange={(event) => handleChangeEvent('height', event.target.value)}
                   />
                 </Stack>
               </Stack>
@@ -138,11 +201,11 @@ const TopBarDealer = ({
                       }
                     /> */}
               <Sketch
-                // onChange={(event) =>
-                //   isColorValid(event?.hex)
-                //     ? handleChangeEvent('backgroundColor', event?.hex, 'container')
-                //     : null
-                // }
+                onChange={(event: any) =>
+                  isColorValid(event?.hex)
+                    ? handleChangeEvent('bakgroundColor', event?.hex)
+                    : null
+                }
                 presetColors={customPresets}
                 style={{ width: '100%' }}
               />
@@ -165,7 +228,7 @@ const TopBarDealer = ({
             <Typography variant="subtitle1">Add Appbar Text</Typography>
             <IconButton
               onClick={() =>
-                setAppBarItems((pv) =>
+                setAppBarItems((pv: any) =>
                   pv?.length < 3 ? [...pv, { text: '', image: '', href: '' }] : pv
                 )
               }
@@ -180,7 +243,7 @@ const TopBarDealer = ({
                 <Typography variant="caption" sx={{ fontWeight: 900 }}>
                   Ad {i + 1}
                 </Typography>
-                <Stack direction="row" my={2} alignItems="center" spacing="20px">
+                <Stack direction="row" my={2} alignItems="center" spacing="20px" display={'none'} >
                   <Box
                     sx={{
                       width: '80px',
@@ -226,8 +289,8 @@ const TopBarDealer = ({
                       variant="filled"
                       type="text"
                       placeholder="Get 25% Off"
-                      // value={appBar?.logoObj?.width}
-                      // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                      value={topBarObj?.Slider?.[`text${i}`]}
+                      onChange={(event) => handleChangeEvent(`text${i}`, event.target.value, 'Slider')}
                     />
                   </Box>
                   <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -239,8 +302,8 @@ const TopBarDealer = ({
                       variant="filled"
                       type="text"
                       placeholder="www.overzaki.com"
-                      // value={appBar?.logoObj?.width}
-                      // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                    // value={appBar?.logoObj?.width}
+                    // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
                     />
                   </Box>
                 </Stack>
