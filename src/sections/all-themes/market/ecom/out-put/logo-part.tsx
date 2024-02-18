@@ -211,8 +211,6 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
                 handleChangeEvent('borderWidth', newValue, 'logoObj')
               }
               valueLabelDisplay="auto"
-              marks
-              step={1}
               min={0}
               max={5}
             />
@@ -231,8 +229,6 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
                 handleChangeEvent('borderRaduis', newValue, 'logoObj')
               }
               valueLabelDisplay="auto"
-              marks
-              step={5}
               min={0}
               max={100}
             />
