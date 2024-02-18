@@ -15,7 +15,14 @@ import Iconify from 'src/components/iconify';
 import BrandAccordion from './brandAccordion';
 import { VisuallyHiddenInput } from './logo-part';
 
-const BrandDealer = () => {
+
+
+interface Props {
+  themeConfig: any;
+  handleThemeConfig: (key: string, value: any, parentClass: any) => void;
+}
+
+const BrandDealer = ({ handleThemeConfig, themeConfig }: Props) => {
   const [brandItems, setBrandItems] = useState([{}, {}]);
 
   return (
@@ -38,7 +45,7 @@ const BrandDealer = () => {
         <VisuallyHiddenInput
           //   disabled={themeConfig.brandImages.length == 1}
           type="file"
-          //   onChange={handleNewBrand('bannerImages')}
+        //   onChange={handleNewBrand('bannerImages')}
         />
         <Iconify icon="ic:round-add" style={{ color: '#B2B3C5' }} />
         <Typography variant="caption" component="p" color="#8688A3">
