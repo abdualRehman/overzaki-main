@@ -61,7 +61,8 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
     // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
     valueToShare = newValue;
 
-    const targetHeader = 'appBar.websiteLogo.';
+    // const targetHeader = 'appBar.websiteLogo.';
+    const targetHeader = 'home.sections.general.websiteLogo.';
     const data = {
       builderId: builderId,
       key: targetHeader + _socketKey,
