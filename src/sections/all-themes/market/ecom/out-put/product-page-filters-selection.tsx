@@ -1,67 +1,162 @@
-
-import React from 'react';
-import { Typography, Box, Stack, Switch, Divider, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import React, { useState } from 'react';
+import {
+  Typography,
+  Box,
+  Stack,
+  Switch,
+  Divider,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+} from '@mui/material';
 
 // ----------------------------------------------------------------------
 
 interface PersonalProps {
-    themeConfig: {
-        productPageFilterShow: boolean;
-        productPageFilterStyle: string;
-        // Add other themeConfig properties as needed
-    };
-    handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
-    mobile?: boolean;
+  themeConfig: {
+    productPageFilterShow: boolean;
+    productPageFilterStyle: string;
+    // Add other themeConfig properties as needed
+  };
+  handleThemeConfig: (key: string, value: any) => void; // Adjust 'value' type as needed
+  mobile?: boolean;
 }
 
-export default function ProductPageFiltersDealer({ themeConfig, handleThemeConfig, mobile = false }: PersonalProps) {
+export default function ProductPageFiltersDealer({
+  themeConfig,
+  handleThemeConfig,
+  mobile = false,
+}: PersonalProps) {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+    handleThemeConfig('productPageFilterShow', event.target.checked);
+  const [filteringBasedOn, setFilteringBasedOn] = useState('price');
+  const [isSortingEnabled, setIsSortingEnabled] = useState(false);
+  return (
+    <Box>
+      <Divider sx={{ borderWidth: '1px', borderColor: '#F4F4F4', my: '20px' }} />
+      <Box>
+        <Stack mb="10px" direction="row" alignItems="center" justifyContent="space-between">
+          <Typography variant="caption" maxWidth="155px" fontWeight={900}>
+            Show filter categories on the page
+          </Typography>
+          <Switch
+            checked={themeConfig.productPageFilterShow}
+            onChange={handleChange}
+            inputProps={{ 'aria-label': 'controlled' }}
+          />
+        </Stack>
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => handleThemeConfig('productPageFilterShow', event.target.checked);
-
-    return (
+        <Typography variant="caption" color="#8688A3">
+          Allow customers to Filter for products
+        </Typography>
+      </Box>
+      <Divider sx={{ borderWidth: '1px', borderColor: '#F4F4F4', my: '20px' }} />
+      {themeConfig.productPageFilterShow && (
         <Box>
-            <Divider sx={{ borderWidth: '1px', borderColor: '#F4F4F4', my: '20px' }} />
-            <Box>
-                <Stack mb='10px' direction='row' alignItems='center' justifyContent='space-between'>
-                    <Typography variant='caption' maxWidth='155px' fontWeight={900}>Show filter categories on the page</Typography>
-                    <Switch
-                        checked={themeConfig.productPageFilterShow}
-                        onChange={handleChange}
-                        inputProps={{ 'aria-label': 'controlled' }}
+          <Box>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width={'100%'}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Enable Sorting
+              </Typography>
+              <Switch
+                checked={isSortingEnabled}
+                onChange={() => setIsSortingEnabled((pv) => !pv)}
+                inputProps={{ 'aria-label': 'controlled' }}
+              />
+            </Stack>
+            {isSortingEnabled && (
+              <Stack>
+                <Box sx={{ width: '100%', my: 2 }}>
+                  <Typography variant="caption" color="#8688A3">
+                    Based on
+                  </Typography>
+                  <RadioGroup
+                    row
+                    value={filteringBasedOn}
+                    onChange={(event: any) => setFilteringBasedOn(event.target.value)}
+                  >
+                    <FormControlLabel
+                      value="best-selling"
+                      control={<Radio size="medium" />}
+                      label="Best Selling"
                     />
-                </Stack>
-                <Typography variant='caption' color='#8688A3'>Allow customers to Filter for products</Typography>
-            </Box>
-            <Divider sx={{ borderWidth: '1px', borderColor: '#F4F4F4', my: '20px' }} />
-            <Box>
-                <RadioGroup
-                    aria-labelledby="controlled-list-view-grid-group"
-                    value={themeConfig?.productPageFilterStyle}
-                    name="list-view-grid-group"
-                    onChange={(event) => handleThemeConfig('productPageFilterStyle', event.target.value)}
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '20px',
-                    }}
-                >
-                    <FormControlLabel value='style-1' control={<Radio checked={themeConfig?.productPageFilterStyle === "style-1"} size='medium' />} label={
-                        <Stack direction='row' alignItems='center' spacing='12px' ml='15px' justifyContent='space-between' sx={{ flexGrow: 1 }}>
-                            <Typography variant='caption' component='p' color='#0F1349'>Tabs</Typography>
-                            <Box component='img' src='/raws/tabs.png' sx={{ maxWidth: '130px' }} />
-                        </Stack>
-                    } />
+                    <FormControlLabel
+                      value="price"
+                      control={<Radio size="medium" />}
+                      label="Price"
+                    />
+                    <FormControlLabel
+                      value="reviews"
+                      control={<Radio size="medium" />}
+                      label="Reviews"
+                    />
+                  </RadioGroup>
+                </Box>
 
-                    <FormControlLabel value='style-2' control={<Radio checked={themeConfig?.productPageFilterStyle === "style-2"} size='medium' />} label={
-                        <Stack direction='row' alignItems='center' spacing='12px' ml='15px' justifyContent='space-between' sx={{ flexGrow: 1 }}>
-                            <Typography variant='caption' component='p' color='#0F1349'>Tages</Typography>
-                            <Box component='img' src='/raws/tags.png' sx={{ maxWidth: '130px' }} />
-                        </Stack>
-                    } />
+                {filteringBasedOn === 'best-selling' && (
+                  <Stack>
+                    <Typography variant="subtitle1">Best Selling</Typography>
+                    <RadioGroup row>
+                      <FormControlLabel
+                        value="low-to-high"
+                        control={<Radio size="medium" />}
+                        label="Low To High"
+                      />
 
+                      <FormControlLabel
+                        value="high-to-low"
+                        control={<Radio size="medium" />}
+                        label="High To Low"
+                      />
+                    </RadioGroup>
+                  </Stack>
+                )}
+                {filteringBasedOn === 'price' && (
+                  <Stack>
+                    <Typography variant="subtitle1">Price</Typography>
+                    <RadioGroup row>
+                      <FormControlLabel
+                        value="low-to-high"
+                        control={<Radio size="medium" />}
+                        label="Low To High"
+                      />
 
-                </RadioGroup>
-            </Box>
+                      <FormControlLabel
+                        value="high-to-low"
+                        control={<Radio size="medium" />}
+                        label="High To Low"
+                      />
+                    </RadioGroup>
+                  </Stack>
+                )}
+                {filteringBasedOn === 'reviews' && (
+                  <Stack>
+                    <Typography variant="subtitle1">Reviews</Typography>
+                    <RadioGroup row>
+                      <FormControlLabel
+                        value="low-to-high"
+                        control={<Radio size="medium" />}
+                        label="Low To High"
+                      />
+
+                      <FormControlLabel
+                        value="high-to-low"
+                        control={<Radio size="medium" />}
+                        label="High To Low"
+                      />
+                    </RadioGroup>
+                  </Stack>
+                )}
+              </Stack>
+            )}
+          </Box>
         </Box>
-    )
-};
+      )}
+    </Box>
+  );
+}

@@ -61,10 +61,8 @@ const TopBarDealer = ({
   const dispatch = useDispatch<AppDispatch>();
   const socket = socketClient();
 
-
   const [topBarObj, setTopBarObj] = useState<any>(null);
   const [appBarItems, setAppBarItems] = useState([]);
-
 
   const debounce = (func: any, delay: any) => {
     let timeoutId: any;
@@ -76,9 +74,7 @@ const TopBarDealer = ({
     };
   };
 
-
   const handleChangeEvent = debounce((key: any, newValue: any, parentClass: any) => {
-
     let _socketKey = '';
     let valueToShare = '';
     const nestedAppbar = topBarObj?.[parentClass] ?? {};
@@ -96,30 +92,24 @@ const TopBarDealer = ({
       value: valueToShare,
     };
 
-    console.log("data", data);
+    console.log('data', data);
 
     if (socket) {
       socket.emit('website:cmd', data);
     }
-
-
   }, 1500);
   const isColorValid = (color: string) =>
     /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
       color
     );
-
-
-
-
-
-
-
-
+  const [isTopBarContainer, setIsTopBarContainer] = useState({
+    status: false,
+    backgroundColor: false,
+  });
   return (
     <Stack gap={2} direction={'column'}>
       <Box sx={{ border: '4px solid lightgray' }}>
-        <img src="https://s3.ezgif.com/tmp/ezgif-3-392363cace.gif" />
+        <img src="/topbar-gif.gif" />
       </Box>
       <Accordion>
         <AccordionSummary
@@ -141,55 +131,83 @@ const TopBarDealer = ({
             <Typography variant="caption" sx={{ fontWeight: 900 }}>
               Show Topbar
             </Typography>
-            <Switch inputProps={{ 'aria-label': 'controlled' }}
-              checked={topBarObj?.status}
-              onChange={(event: any, value: any) => handleChangeEvent('status', value)}
+            <Switch
+              inputProps={{ 'aria-label': 'controlled' }}
+              checked={isTopBarContainer.status}
+              onChange={(event: any, value: any) =>
+                setIsTopBarContainer((pv) => ({ ...pv, status: pv.status === true ? false : true }))
+              }
             />
           </Stack>
-          <Box sx={{ width: '100%', display: 'flex', gap: 2, my: 2 }}>
-            <Box>
-              <Typography variant="caption" color="#8688A3">
-                Width
-              </Typography>
-              <Stack direction="row" alignItems="center" spacing="18px">
-                <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                  <TextField
-                    variant="filled"
-                    type="number"
-                    value={topBarObj?.width}
-                    onChange={(event) => handleChangeEvent('width', event.target.value)}
+          {isTopBarContainer.status && (
+            <Stack>
+              <Box sx={{ width: '100%', display: 'flex', gap: 2, my: 2 }}>
+                <Box>
+                  <Typography variant="caption" color="#8688A3">
+                    Width
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                      <TextField
+                        variant="filled"
+                        type="number"
+                        value={topBarObj?.width}
+                        onChange={(event) => handleChangeEvent('width', event.target.value)}
+                      />
+                    </Stack>
+                  </Stack>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="#8688A3">
+                    Height
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                      <TextField
+                        variant="filled"
+                        type="number"
+                        value={topBarObj?.height}
+                        onChange={(event) => handleChangeEvent('height', event.target.value)}
+                      />
+                    </Stack>
+                  </Stack>
+                </Box>
+              </Box>
+              <Box sx={{ width: '100%' }}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  gap={2}
+                  width={'100%'}
+                >
+                  <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                    Background Color
+                  </Typography>
+                  <Switch
+                    inputProps={{ 'aria-label': 'controlled' }}
+                    checked={isTopBarContainer.backgroundColor}
+                    onChange={() =>
+                      setIsTopBarContainer((pv) => ({
+                        ...pv,
+                        backgroundColor: pv.backgroundColor === true ? false : true,
+                      }))
+                    }
                   />
                 </Stack>
-              </Stack>
-            </Box>
-            <Box>
-              <Typography variant="caption" color="#8688A3">
-                Height
-              </Typography>
-              <Stack direction="row" alignItems="center" spacing="18px">
-                <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                  <TextField
-                    variant="filled"
-                    type="number"
-                    value={topBarObj?.height}
-                    onChange={(event) => handleChangeEvent('height', event.target.value)}
-                  />
-                </Stack>
-              </Stack>
-            </Box>
-          </Box>
-          <Box sx={{ width: '100%' }}>
-            <Typography variant="caption" color="#8688A3">
-              Background Color
-            </Typography>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent={'center'}
-              spacing="18px"
-              marginTop="10px"
-            >
-              {/* <MuiColorInput
+                {isTopBarContainer?.backgroundColor && (
+                  <Stack>
+                    <Typography variant="caption" color="#8688A3">
+                      Background Color
+                    </Typography>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent={'center'}
+                      spacing="18px"
+                      marginTop="10px"
+                    >
+                      {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.container?.backgroundColor ?? '#000001'}
@@ -200,17 +218,22 @@ const TopBarDealer = ({
                           : null
                       }
                     /> */}
-              <Sketch
-                onChange={(event: any) =>
-                  isColorValid(event?.hex)
-                    ? handleChangeEvent('bakgroundColor', event?.hex)
-                    : null
-                }
-                presetColors={customPresets}
-                style={{ width: '100%' }}
-              />
+                      <Sketch
+                        onChange={(event: any) =>
+                          isColorValid(event?.hex)
+                            ? handleChangeEvent('bakgroundColor', event?.hex)
+                            : null
+                        }
+                        presetColors={customPresets}
+                        style={{ width: '100%' }}
+                      />
+                    </Stack>
+                  </Stack>
+                )}
+              </Box>
             </Stack>
-          </Box>
+          )}
+
           <Divider />
         </AccordionDetails>
       </Accordion>
@@ -243,7 +266,7 @@ const TopBarDealer = ({
                 <Typography variant="caption" sx={{ fontWeight: 900 }}>
                   Ad {i + 1}
                 </Typography>
-                <Stack direction="row" my={2} alignItems="center" spacing="20px" display={'none'} >
+                <Stack direction="row" my={2} alignItems="center" spacing="20px" display={'none'}>
                   <Box
                     sx={{
                       width: '80px',
@@ -290,7 +313,9 @@ const TopBarDealer = ({
                       type="text"
                       placeholder="Get 25% Off"
                       value={topBarObj?.Slider?.[`text${i}`]}
-                      onChange={(event) => handleChangeEvent(`text${i}`, event.target.value, 'Slider')}
+                      onChange={(event) =>
+                        handleChangeEvent(`text${i}`, event.target.value, 'Slider')
+                      }
                     />
                   </Box>
                   <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -302,8 +327,8 @@ const TopBarDealer = ({
                       variant="filled"
                       type="text"
                       placeholder="www.overzaki.com"
-                    // value={appBar?.logoObj?.width}
-                    // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                      // value={appBar?.logoObj?.width}
+                      // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
                     />
                   </Box>
                 </Stack>
