@@ -227,6 +227,7 @@ export default function NavDealer({
   const [containerBackgroundColor, setContainerBackgrounColor] = useState(false);
   const [searchBackgroundColor, setSearchBackgroundColor] = useState(false);
   const [isMenu, setIsMenu] = useState(false);
+  const [menuColors, setMenuColors] = useState({ textBackgroundColor: false, hoverColor: false });
 
   return (
     <div>
@@ -618,12 +619,14 @@ export default function NavDealer({
                       </Stack>
                     </Box>
                   </Box>
-                  <Box sx={{ width: '100%' }}>
-                    <Typography variant="caption" color="#8688A3">
-                      Text Color
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing="18px">
-                      {/* <MuiColorInput
+
+                  <Stack width={'100%'}>
+                    <Box sx={{ width: '100%' }}>
+                      <Typography variant="caption" color="#8688A3">
+                        Text Color
+                      </Typography>
+                      <Stack direction="row" alignItems="center" spacing="18px">
+                        {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.logoObj?.color ?? '#000001'}
@@ -632,23 +635,44 @@ export default function NavDealer({
                         isColorValid(event) ? handleChangeEvent('color', event, 'logoObj') : null
                       }
                     /> */}
-                      <Sketch
-                        onChange={(event: any) =>
-                          isColorValid(event?.hex)
-                            ? handleChangeEvent('color', event?.hex, 'menu', 'style')
-                            : null
+                        <Sketch
+                          onChange={(event: any) =>
+                            isColorValid(event?.hex)
+                              ? handleChangeEvent('color', event?.hex, 'menu', 'style')
+                              : null
+                          }
+                          presetColors={customPresets}
+                          style={{ width: '100%' }}
+                        />
+                      </Stack>
+                    </Box>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width={'100%'}
+                    >
+                      <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                        Text Background Color
+                      </Typography>
+                      <Switch
+                        checked={menuColors.textBackgroundColor}
+                        onChange={(event: any, value: any) =>
+                          setMenuColors((pv) => ({
+                            ...pv,
+                            textBackgroundColor: !pv.textBackgroundColor,
+                          }))
                         }
-                        presetColors={customPresets}
-                        style={{ width: '100%' }}
+                        inputProps={{ 'aria-label': 'controlled' }}
                       />
                     </Stack>
-                  </Box>
-                  <Box sx={{ width: '100%' }}>
-                    <Typography variant="caption" color="#8688A3">
-                      Text Background
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing="18px">
-                      {/* <MuiColorInput
+                    {menuColors.textBackgroundColor && (
+                      <Box sx={{ width: '100%' }}>
+                        <Typography variant="caption" color="#8688A3">
+                          Text Background
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.logoObj?.textBg ?? '#000001'}
@@ -657,23 +681,42 @@ export default function NavDealer({
                         isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null
                       }
                     /> */}
-                      <Sketch
-                        onChange={(event: any) =>
-                          isColorValid(event?.hex)
-                            ? handleChangeEvent('backgroundColor', event?.hex, 'menu', 'style')
-                            : null
+                          <Sketch
+                            onChange={(event: any) =>
+                              isColorValid(event?.hex)
+                                ? handleChangeEvent('backgroundColor', event?.hex, 'menu', 'style')
+                                : null
+                            }
+                            presetColors={customPresets}
+                            style={{ width: '100%' }}
+                          />
+                        </Stack>
+                      </Box>
+                    )}
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width={'100%'}
+                    >
+                      <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                        Hover Color
+                      </Typography>
+                      <Switch
+                        checked={menuColors.hoverColor}
+                        onChange={(event: any, value: any) =>
+                          setMenuColors((pv) => ({ ...pv, hoverColor: !pv.hoverColor }))
                         }
-                        presetColors={customPresets}
-                        style={{ width: '100%' }}
+                        inputProps={{ 'aria-label': 'controlled' }}
                       />
                     </Stack>
-                  </Box>
-                  <Box sx={{ width: '100%' }}>
-                    <Typography variant="caption" color="#8688A3">
-                      Hover Color
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing="18px">
-                      {/* <MuiColorInput
+                    {menuColors.hoverColor && (
+                      <Box sx={{ width: '100%' }}>
+                        <Typography variant="caption" color="#8688A3">
+                          Hover Color
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          {/* <MuiColorInput
                       sx={{ width: '100%', margin: 'auto' }}
                       variant="outlined"
                       value={appBar?.logoObj?.textBg ?? '#000001'}
@@ -682,17 +725,19 @@ export default function NavDealer({
                         isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null
                       }
                     /> */}
-                      <Sketch
-                        onChange={(event: any) =>
-                          isColorValid(event?.hex)
-                            ? handleChangeEvent('hoverColor', event?.hex, 'menu', 'style')
-                            : null
-                        }
-                        presetColors={customPresets}
-                        style={{ width: '100%' }}
-                      />
-                    </Stack>
-                  </Box>
+                          <Sketch
+                            onChange={(event: any) =>
+                              isColorValid(event?.hex)
+                                ? handleChangeEvent('hoverColor', event?.hex, 'menu', 'style')
+                                : null
+                            }
+                            presetColors={customPresets}
+                            style={{ width: '100%' }}
+                          />
+                        </Stack>
+                      </Box>
+                    )}
+                  </Stack>
                   <Divider />
                   <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
                     <Typography variant="subtitle1">Menu</Typography>

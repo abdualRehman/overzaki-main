@@ -727,24 +727,6 @@ export default function ProductPageProductCardDealer({
                             </Stack>
                           </Box>
                         </Box>
-                        <Box sx={{ width: '100%' }}>
-                          <Typography variant="caption" color="#8688A3">
-                            Icon Border Radius (%)
-                          </Typography>
-                          <Stack direction="row" alignItems="center" spacing="18px">
-                            <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                              <Slider
-                                // value={appBar?.icon?.borderRaduis || 0}
-                                // onChange={(_event: Event, newValue: number | number[]) =>
-                                //   handleChangeEvent('borderRaduis', newValue, 'icon')
-                                // }
-                                valueLabelDisplay="auto"
-                                min={0}
-                                max={100}
-                              />
-                            </Stack>
-                          </Stack>
-                        </Box>
                       </Box>
                     </Box>
                   </AccordionDetails>

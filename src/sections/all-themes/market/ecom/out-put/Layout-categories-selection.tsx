@@ -60,6 +60,7 @@ export default function LayoutCategoriesDealer({
   ];
   const [showImageStyling, setShowImageStyling] = useState(false);
   const [showTextBackground, setShowTextBackground] = useState(false);
+  const [isTextHoverColorItem, setIsTextHoverColorItem] = useState(false);
   return (
     <div>
       {mobile ? (
@@ -346,88 +347,106 @@ export default function LayoutCategoriesDealer({
                       <TextField
                         variant="filled"
                         type="text"
-                        placeholder="i.e. Shop Now"
+                        placeholder="10"
                         // value={appBar?.logoObj?.width}
                         // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
                       />
                     </Box>
-                  </Stack>
-                )}
-
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Image Border Radius (%)
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                      <Slider
-                        // value={appBar?.icon?.borderRaduis || 0}
-                        // onChange={(_event: Event, newValue: number | number[]) =>
-                        //   handleChangeEvent('borderRaduis', newValue, 'icon')
-                        // }
-                        valueLabelDisplay="auto"
-                        min={0}
-                        max={100}
-                      />
-                    </Stack>
-                  </Stack>
-                </Box>
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Border Color
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    <Sketch presetColors={customPresets} style={{ width: '100%' }} />
-                  </Stack>
-                </Box>
-                <Stack gap={3}>
-                  <Typography variant="h6" color="#fff">
-                    Category Item
-                  </Typography>
-                  <Box sx={{ width: '100%' }}>
-                    <Typography variant="caption" color="#8688A3">
-                      Text Color
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing="18px">
-                      <Sketch presetColors={customPresets} style={{ width: '100%' }} />
-                    </Stack>
-                  </Box>
-                  <Box sx={{ width: '100%' }}>
-                    <Typography variant="caption" color="#8688A3">
-                      Text Hover Color (optional)
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing="18px">
-                      <Sketch presetColors={customPresets} style={{ width: '100%' }} />
-                    </Stack>
-                  </Box>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    width={'100%'}
-                  >
-                    <Typography variant="caption" sx={{ fontWeight: 900 }}>
-                      Text Background
-                    </Typography>
-                    <Switch
-                      checked={showTextBackground}
-                      onChange={() => setShowTextBackground((pv) => !pv)}
-                      inputProps={{ 'aria-label': 'controlled' }}
-                    />
-                  </Stack>
-                  {showTextBackground && (
                     <Stack>
                       <Box sx={{ width: '100%' }}>
                         <Typography variant="caption" color="#8688A3">
-                          Text Background Color
+                          Image Border Radius (%)
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                            <Slider
+                              // value={appBar?.icon?.borderRaduis || 0}
+                              // onChange={(_event: Event, newValue: number | number[]) =>
+                              //   handleChangeEvent('borderRaduis', newValue, 'icon')
+                              // }
+                              valueLabelDisplay="auto"
+                              min={0}
+                              max={100}
+                            />
+                          </Stack>
+                        </Stack>
+                      </Box>
+                      <Box sx={{ width: '100%' }}>
+                        <Typography variant="caption" color="#8688A3">
+                          Border Color
                         </Typography>
                         <Stack direction="row" alignItems="center" spacing="18px">
                           <Sketch presetColors={customPresets} style={{ width: '100%' }} />
                         </Stack>
                       </Box>
+                      <Stack gap={3}>
+                        <Typography variant="h6" color="#fff">
+                          Category Item
+                        </Typography>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="caption" color="#8688A3">
+                            Text Color
+                          </Typography>
+                          <Stack direction="row" alignItems="center" spacing="18px">
+                            <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                          </Stack>
+                        </Box>
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          width={'100%'}
+                        >
+                          <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                            Add Hover Color on Text
+                          </Typography>
+                          <Switch
+                            checked={isTextHoverColorItem}
+                            onChange={() => setIsTextHoverColorItem((pv) => !pv)}
+                            inputProps={{ 'aria-label': 'controlled' }}
+                          />
+                        </Stack>
+                        {isTextHoverColorItem && (
+                          <Box sx={{ width: '100%' }}>
+                            <Typography variant="caption" color="#8688A3">
+                              Text Hover Color (optional)
+                            </Typography>
+                            <Stack direction="row" alignItems="center" spacing="18px">
+                              <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                            </Stack>
+                          </Box>
+                        )}
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          width={'100%'}
+                        >
+                          <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                            Text Background
+                          </Typography>
+                          <Switch
+                            checked={showTextBackground}
+                            onChange={() => setShowTextBackground((pv) => !pv)}
+                            inputProps={{ 'aria-label': 'controlled' }}
+                          />
+                        </Stack>
+                        {showTextBackground && (
+                          <Stack>
+                            <Box sx={{ width: '100%' }}>
+                              <Typography variant="caption" color="#8688A3">
+                                Text Background Color
+                              </Typography>
+                              <Stack direction="row" alignItems="center" spacing="18px">
+                                <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                              </Stack>
+                            </Box>
+                          </Stack>
+                        )}
+                      </Stack>
                     </Stack>
-                  )}
-                </Stack>
+                  </Stack>
+                )}
               </Stack>
             </AccordionDetails>
           </Accordion>

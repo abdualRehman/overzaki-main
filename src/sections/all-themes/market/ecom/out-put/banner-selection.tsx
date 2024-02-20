@@ -111,6 +111,7 @@ export default function BannerDealer({
     '#3366FF', // Vivid Blue
   ];
   const handleChangeEvent = (key: string, value: any, parent: any) => {};
+  const [bannerContainer, setBannerContainer] = useState({ shadow: true, borderBottomWidth: 0 });
   return (
     <Box pt="20px">
       <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -367,10 +368,10 @@ export default function BannerDealer({
                 <Stack direction="row" alignItems="center" spacing="18px">
                   <Stack direction="row" alignItems="center" spacing={1} width={1}>
                     <Slider
-                      // value={appBar?.container?.borderBottomWidth || 0}
-                      // onChange={(_event: Event, newValue: number | number[]) => {
-                      //   handleChangeEvent('borderBottomWidth', newValue, 'container');
-                      // }}
+                      value={bannerContainer.borderBottomWidth}
+                      onChange={(_event: Event, newValue: number | number[]) => {
+                        setBannerContainer((pv) => ({ ...pv, borderBottomWidth: newValue }));
+                      }}
                       valueLabelDisplay="auto"
                       min={0}
                       max={20}
@@ -378,14 +379,16 @@ export default function BannerDealer({
                   </Stack>
                 </Stack>
               </Box>
-              <Box sx={{ width: '100%' }}>
-                <Typography variant="caption" color="#8688A3">
-                  Border Color
-                </Typography>
-                <Stack direction="row" alignItems="center" spacing="18px">
-                  <Sketch presetColors={customPresets} style={{ width: '100%' }} />
-                </Stack>
-              </Box>
+              {bannerContainer.borderBottomWidth > 0 && (
+                <Box sx={{ width: '100%' }}>
+                  <Typography variant="caption" color="#8688A3">
+                    Border Color
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                  </Stack>
+                </Box>
+              )}
               <Stack
                 direction="row"
                 justifyContent="space-between"
@@ -396,19 +399,21 @@ export default function BannerDealer({
                   Shadow
                 </Typography>
                 <Switch
-                  // checked={appBar?.icon?.shadow}
-                  // onChange={(event: any, value: any) => handleChangeEvent('shadow', value, 'icon')}
+                  checked={bannerContainer.shadow}
+                  onChange={() => setBannerContainer((pv) => ({ ...pv, shadow: !pv.shadow }))}
                   inputProps={{ 'aria-label': 'controlled' }}
                 />
               </Stack>
-              <Box sx={{ width: '100%' }}>
-                <Typography variant="caption" color="#8688A3">
-                  Shadow Color
-                </Typography>
-                <Stack direction="row" alignItems="center" spacing="18px">
-                  <Sketch presetColors={customPresets} style={{ width: '100%' }} />
-                </Stack>
-              </Box>
+              {bannerContainer.shadow && (
+                <Box sx={{ width: '100%' }}>
+                  <Typography variant="caption" color="#8688A3">
+                    Shadow Color
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                  </Stack>
+                </Box>
+              )}
               <Box sx={{ width: '100%' }}>
                 <Typography variant="caption" color="#8688A3">
                   Margin Top
@@ -447,18 +452,6 @@ export default function BannerDealer({
               </Box>
             </Stack>
           </AccordionDetails>
-        </Accordion>
-      )}
-      {themeConfig.bannerShow && (
-        <Accordion>
-          <AccordionSummary
-            sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
-            expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
-          >
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="subtitle1">Banner</Typography>
-            </Box>
-          </AccordionSummary>
         </Accordion>
       )}
 

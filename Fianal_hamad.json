@@ -710,3 +710,62 @@ addToCart:{
     }
   }
 }
+
+
+productCard:{
+  wishlist:{
+    show:true,
+    icon:{
+      active:"",
+      inactive:"",
+      width:"30px",
+      height:"30px",
+      borderRadius:"50%",
+      backgroundColor:"red",
+      paddingY:"8px",
+      paddingX:"8px",
+      positioning:"topLeft,topRight,bottomLeft,bottomRight",
+    }
+  },
+  description:{
+    show:true,
+    color:"red",
+    backgrounColor:"transparent",
+    lineClamp:1,
+    hoverColor:"black",
+  },
+  addToCart:{
+    show:true,
+    icon:{
+      src:"",
+      "width":"10px",
+      height:"10px",
+      "borderRadius":"25%",
+      "backgroundColor":"red",
+      backgroundColorDark:"white",
+      padding:"5px",
+    }
+  },
+  pricing:{
+    itemPrice:{
+      show:true,
+      isBold:true,
+      textColor:"red",
+      textColorDark:"white",
+    },
+    discountItemPrice:{
+      show:true,
+      textDecoration:"line-through, none",
+      isBold:true,
+      textColor:"red",
+      textColorDark:"white",
+    },
+
+  },
+  currency:{
+    currencySymbol:"$",
+    currencyCode:"USD",
+    textColor:"red",
+      textColorDark:"white",
+  }
+}
