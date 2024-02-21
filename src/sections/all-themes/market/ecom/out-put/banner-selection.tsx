@@ -36,6 +36,8 @@ interface BannerProps {
   mobile?: boolean;
 }
 
+
+
 export default function BannerDealer({
   themeConfig,
   handleThemeConfig,
