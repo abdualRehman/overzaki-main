@@ -60,6 +60,7 @@ export default function LayoutCategoriesDealer({
   ];
   const [showImageStyling, setShowImageStyling] = useState(false);
   const [showTextBackground, setShowTextBackground] = useState(false);
+  const [isTextHoverColorItem, setIsTextHoverColorItem] = useState(false);
   return (
     <div>
       {mobile ? (
@@ -75,11 +76,6 @@ export default function LayoutCategoriesDealer({
             />
           </Stack>
           <Divider sx={{ borderWidth: '1px', borderColor: '#EBEBEB', my: '20px' }} />
-          <Typography variant="caption" component="p" color="#8688A3">
-            Sort
-          </Typography>
-          <TextField variant="filled" defaultValue={4} />
-
           <Box pt="20px">
             <RadioGroup
               aria-labelledby="layout-CategorieRow-group"
@@ -122,60 +118,6 @@ export default function LayoutCategoriesDealer({
         </Box>
       ) : (
         <Box pt="20px">
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="caption" sx={{ fontWeight: 900 }}>
-              Show Categories Section
-            </Typography>
-            <Switch
-              checked={themeConfig.layoutCategoriesShow}
-              onChange={handleChange}
-              inputProps={{ 'aria-label': 'controlled' }}
-            />
-          </Stack>
-          <Divider sx={{ borderWidth: '1px', borderColor: '#EBEBEB', my: '20px' }} />
-          <Typography variant="caption" component="p" color="#8688A3">
-            Sort
-          </Typography>
-          <TextField variant="filled" defaultValue={4} />
-
-          <Box pt="20px">
-            <RadioGroup
-              defaultValue={themeConfig?.layoutCategoriesRow}
-              name="layout-CategorieRow-group"
-              onChange={(event) => handleThemeConfig('layoutCategoriesRow', event.target.value)}
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '20px',
-              }}
-            >
-              <FormControlLabel
-                value="1"
-                control={<Radio checked={themeConfig?.layoutCategoriesRow === '1'} size="medium" />}
-                label={
-                  <Stack direction="row" alignItems="center" spacing="5px" ml="15px">
-                    <Box component="img" src="/raws/row.svg" />
-                    <Typography variant="caption" color="#0F1349">
-                      One Row
-                    </Typography>
-                  </Stack>
-                }
-              />
-
-              <FormControlLabel
-                value="2"
-                control={<Radio checked={themeConfig?.layoutCategoriesRow === '2'} size="medium" />}
-                label={
-                  <Stack direction="row" alignItems="center" spacing="5px" ml="15px">
-                    <Box component="img" src="/raws/row2.svg" />
-                    <Typography variant="caption" color="#0F1349">
-                      Two Rows
-                    </Typography>
-                  </Stack>
-                }
-              />
-            </RadioGroup>
-          </Box>
           <Accordion>
             <AccordionSummary
               sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
@@ -405,89 +347,161 @@ export default function LayoutCategoriesDealer({
                       <TextField
                         variant="filled"
                         type="text"
-                        placeholder="i.e. Shop Now"
+                        placeholder="10"
                         // value={appBar?.logoObj?.width}
                         // onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
                       />
                     </Box>
-                  </Stack>
-                )}
-
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Image Border Radius (%)
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                      <Slider
-                        // value={appBar?.icon?.borderRaduis || 0}
-                        // onChange={(_event: Event, newValue: number | number[]) =>
-                        //   handleChangeEvent('borderRaduis', newValue, 'icon')
-                        // }
-                        valueLabelDisplay="auto"
-                        min={0}
-                        max={100}
-                      />
-                    </Stack>
-                  </Stack>
-                </Box>
-                <Box sx={{ width: '100%' }}>
-                  <Typography variant="caption" color="#8688A3">
-                    Border Color
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing="18px">
-                    <Sketch presetColors={customPresets} style={{ width: '100%' }} />
-                  </Stack>
-                </Box>
-                <Stack gap={3}>
-                  <Typography variant="h6" color="#fff">
-                    Category Item
-                  </Typography>
-                  <Box sx={{ width: '100%' }}>
-                    <Typography variant="caption" color="#8688A3">
-                      Text Color
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing="18px">
-                      <Sketch presetColors={customPresets} style={{ width: '100%' }} />
-                    </Stack>
-                  </Box>
-                  <Box sx={{ width: '100%' }}>
-                    <Typography variant="caption" color="#8688A3">
-                      Text Hover Color (optional)
-                    </Typography>
-                    <Stack direction="row" alignItems="center" spacing="18px">
-                      <Sketch presetColors={customPresets} style={{ width: '100%' }} />
-                    </Stack>
-                  </Box>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    width={'100%'}
-                  >
-                    <Typography variant="caption" sx={{ fontWeight: 900 }}>
-                      Text Background
-                    </Typography>
-                    <Switch
-                      checked={showTextBackground}
-                      onChange={() => setShowTextBackground((pv) => !pv)}
-                      inputProps={{ 'aria-label': 'controlled' }}
-                    />
-                  </Stack>
-                  {showTextBackground && (
                     <Stack>
                       <Box sx={{ width: '100%' }}>
                         <Typography variant="caption" color="#8688A3">
-                          Text Background Color
+                          Image Border Radius (%)
+                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing="18px">
+                          <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                            <Slider
+                              // value={appBar?.icon?.borderRaduis || 0}
+                              // onChange={(_event: Event, newValue: number | number[]) =>
+                              //   handleChangeEvent('borderRaduis', newValue, 'icon')
+                              // }
+                              valueLabelDisplay="auto"
+                              min={0}
+                              max={100}
+                            />
+                          </Stack>
+                        </Stack>
+                      </Box>
+                      <Box sx={{ width: '100%' }}>
+                        <Typography variant="caption" color="#8688A3">
+                          Border Color
                         </Typography>
                         <Stack direction="row" alignItems="center" spacing="18px">
                           <Sketch presetColors={customPresets} style={{ width: '100%' }} />
                         </Stack>
                       </Box>
+                      <Stack gap={3}>
+                        <Typography variant="h6" color="#fff">
+                          Category Item
+                        </Typography>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="caption" color="#8688A3">
+                            Text Color
+                          </Typography>
+                          <Stack direction="row" alignItems="center" spacing="18px">
+                            <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                          </Stack>
+                        </Box>
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          width={'100%'}
+                        >
+                          <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                            Add Hover Color on Text
+                          </Typography>
+                          <Switch
+                            checked={isTextHoverColorItem}
+                            onChange={() => setIsTextHoverColorItem((pv) => !pv)}
+                            inputProps={{ 'aria-label': 'controlled' }}
+                          />
+                        </Stack>
+                        {isTextHoverColorItem && (
+                          <Box sx={{ width: '100%' }}>
+                            <Typography variant="caption" color="#8688A3">
+                              Text Hover Color (optional)
+                            </Typography>
+                            <Stack direction="row" alignItems="center" spacing="18px">
+                              <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                            </Stack>
+                          </Box>
+                        )}
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="center"
+                          width={'100%'}
+                        >
+                          <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                            Text Background
+                          </Typography>
+                          <Switch
+                            checked={showTextBackground}
+                            onChange={() => setShowTextBackground((pv) => !pv)}
+                            inputProps={{ 'aria-label': 'controlled' }}
+                          />
+                        </Stack>
+                        {showTextBackground && (
+                          <Stack>
+                            <Box sx={{ width: '100%' }}>
+                              <Typography variant="caption" color="#8688A3">
+                                Text Background Color
+                              </Typography>
+                              <Stack direction="row" alignItems="center" spacing="18px">
+                                <Sketch presetColors={customPresets} style={{ width: '100%' }} />
+                              </Stack>
+                            </Box>
+                          </Stack>
+                        )}
+                      </Stack>
                     </Stack>
-                  )}
-                </Stack>
+                  </Stack>
+                )}
               </Stack>
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary
+              sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
+              expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
+            >
+              <Box sx={{ width: '100%' }}>
+                <Typography variant="subtitle1">Sorting</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box pt="20px">
+                <RadioGroup
+                  defaultValue={themeConfig?.layoutCategoriesRow}
+                  name="layout-CategorieRow-group"
+                  onChange={(event) => handleThemeConfig('layoutCategoriesRow', event.target.value)}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '20px',
+                  }}
+                >
+                  <FormControlLabel
+                    value="1"
+                    control={
+                      <Radio checked={themeConfig?.layoutCategoriesRow === '1'} size="medium" />
+                    }
+                    label={
+                      <Stack direction="row" alignItems="center" spacing="5px" ml="15px">
+                        <Box component="img" src="/raws/row.svg" />
+                        <Typography variant="caption" color="#0F1349">
+                          One Row
+                        </Typography>
+                      </Stack>
+                    }
+                  />
+
+                  <FormControlLabel
+                    value="2"
+                    control={
+                      <Radio checked={themeConfig?.layoutCategoriesRow === '2'} size="medium" />
+                    }
+                    label={
+                      <Stack direction="row" alignItems="center" spacing="5px" ml="15px">
+                        <Box component="img" src="/raws/row2.svg" />
+                        <Typography variant="caption" color="#0F1349">
+                          Two Rows
+                        </Typography>
+                      </Stack>
+                    }
+                  />
+                </RadioGroup>
+              </Box>
             </AccordionDetails>
           </Accordion>
         </Box>

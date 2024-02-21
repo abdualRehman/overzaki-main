@@ -36,8 +36,6 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
   const dispatch = useDispatch<AppDispatch>();
   const socket = socketClient();
 
-
-
   const debounce = (func: any, delay: any) => {
     let timeoutId: any;
     return (...args: any) => {
@@ -47,8 +45,6 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
       }, delay);
     };
   };
-
-
 
   const handleChangeEvent = debounce((key: any, newValue: any, parentClass: any) => {
     // setLogoObj({ ...logoObj, [key]: value });
@@ -69,14 +65,13 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
       value: valueToShare,
     };
 
-    console.log("data", data);
+    console.log('data', data);
 
     if (socket) {
       socket.emit('website:cmd', data);
     }
+  }, 1500);
 
-
-  }, 2000);
 
   const handleImageChange64 = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -133,91 +128,96 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
     '#33FF57', // Greenish Yellow
     '#3366FF', // Vivid Blue
   ];
+  const [isLogo, setIsLogo] = useState({
+    status: false,
+    textBackground: false,
+  });
 
   return (
-    <Box mt="20px">
+    <Box width={'100%'} mt="20px">
       <Stack direction="row" justifyContent="space-between" alignItems="center" width={'100%'}>
         <Typography variant="caption" sx={{ fontWeight: 900 }}>
           Show Logo
         </Typography>
         <Switch
-          checked={logoObj?.status}
-          onChange={(event: any, value: any) => handleChangeEvent('status', value)}
+          checked={isLogo.status}
+          onChange={() => setIsLogo((pv) => ({ ...pv, status: !pv.status }))}
           inputProps={{ 'aria-label': 'controlled' }}
         />
       </Stack>
+      {isLogo?.status && (
+        <Stack sx={{ width: '100%' }}>
+          <Box sx={{ width: '100%', my: 2 }}>
+            <Typography variant="caption" color="#8688A3">
+              Position
+            </Typography>
+            <RadioGroup
+              row
+              value={logoObj?.position}
+              onChange={(event: any) => handleChangeEvent('position', event?.target?.value)}
+            >
+              <FormControlLabel value="left" control={<Radio size="medium" />} label="Left" />
+              <FormControlLabel value="center" control={<Radio size="medium" />} label="Center " />
+              <FormControlLabel value="right" control={<Radio size="medium" />} label="Right" />
+            </RadioGroup>
+          </Box>
 
-      <Box sx={{ width: '100%', my: 2 }}>
-        <Typography variant="caption" color="#8688A3">
-          Position
-        </Typography>
-        <RadioGroup
-          row
-          value={logoObj?.position}
-          onChange={(event: any) => handleChangeEvent('position', event?.target?.value)}
-        >
-          <FormControlLabel value="left" control={<Radio size="medium" />} label="Left" />
-          <FormControlLabel value="center" control={<Radio size="medium" />} label="Center " />
-          <FormControlLabel value="right" control={<Radio size="medium" />} label="Right" />
-        </RadioGroup>
-      </Box>
+          <Stack direction="row" my={2} alignItems="center" spacing="20px">
+            <Box
+              sx={{
+                width: '80px',
+                height: '80px',
+                outline: '#EBEBF0 dashed 4px',
+                borderRadius: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundImage: `url(${themeConfig?.logo})`,
+                backgroundSize: '100% 100%',
+              }}
+              component="label"
+            >
+              <VisuallyHiddenInput type="file" onChange={handleImageChange64('logo')} />
+              <Iconify
+                icon="bi:image"
+                style={{ color: '#C2C3D1', display: themeConfig?.logo ? 'none' : 'block' }}
+              />
+            </Box>
 
-      <Stack direction="row" my={2} alignItems="center" spacing="20px">
-        <Box
-          sx={{
-            width: '80px',
-            height: '80px',
-            outline: '#EBEBF0 dashed 4px',
-            borderRadius: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundImage: `url(${themeConfig?.logo})`,
-            backgroundSize: '100% 100%',
-          }}
-          component="label"
-        >
-          <VisuallyHiddenInput type="file" onChange={handleImageChange64('logo')} />
-          <Iconify
-            icon="bi:image"
-            style={{ color: '#C2C3D1', display: themeConfig?.logo ? 'none' : 'block' }}
-          />
-        </Box>
-
-        <Box>
-          <Typography
-            component="p"
-            sx={{ fontSize: '13px !important' }}
-            variant="caption"
-            color="#8688A3"
-          >
-            Maximum size is 5mb
-          </Typography>
-          <Typography variant="caption" sx={{ fontSize: '11px !important' }} color="#8688A3">
-            You can use these extensions <br /> SVG, PNG or JPG
-          </Typography>
-        </Box>
-      </Stack>
-
-      <Box sx={{ width: '100%', my: 2 }}>
-        <Typography variant="caption" color="#8688A3">
-          Border Width (%)
-        </Typography>
-        <Stack direction="row" alignItems="center" spacing="18px">
-          <Stack direction="row" alignItems="center" spacing={1} width={1}>
-            <Slider
-              value={logoObj?.logoObj?.borderWidth || 0}
-              onChange={(_event: Event, newValue: number | number[]) =>
-                handleChangeEvent('borderWidth', newValue, 'logoObj')
-              }
-              valueLabelDisplay="auto"
-              min={0}
-              max={5}
-            />
+            <Box>
+              <Typography
+                component="p"
+                sx={{ fontSize: '13px !important' }}
+                variant="caption"
+                color="#8688A3"
+              >
+                Maximum size is 5mb
+              </Typography>
+              <Typography variant="caption" sx={{ fontSize: '11px !important' }} color="#8688A3">
+                You can use these extensions <br /> SVG, PNG or JPG
+              </Typography>
+            </Box>
           </Stack>
-        </Stack>
-      </Box>
-      {/* <Box sx={{ width: '100%', my: 2 }}>
+
+          <Box sx={{ width: '100%', my: 2 }}>
+            <Typography variant="caption" color="#8688A3">
+              Border Width (%)
+            </Typography>
+            <Stack direction="row" alignItems="center" spacing="18px">
+              <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                <Slider
+                  value={logoObj?.logoObj?.borderWidth || 0}
+                  onChange={(_event: Event, newValue: number | number[]) =>
+                    handleChangeEvent('borderWidth', newValue, 'logoObj')
+                  }
+                  valueLabelDisplay="auto"
+                  min={0}
+                  max={5}
+                />
+              </Stack>
+            </Stack>
+          </Box>
+          {/* <Box sx={{ width: '100%', my: 2 }}>
         <Typography variant="caption" color="#8688A3">
           Border Radius (%)
         </Typography>
@@ -236,79 +236,102 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
         </Stack>
       </Box> */}
 
-      <Box sx={{ width: '100%', display: 'flex', gap: 2, my: 2 }}>
-        <Box>
-          <Typography variant="caption" color="#8688A3">
-            Width
-          </Typography>
-          <Stack direction="row" alignItems="center" spacing="18px">
-            <Stack direction="row" alignItems="center" spacing={1} width={1}>
-              <TextField
-                variant="filled"
-                type="text"
-                // value={logoObj?.logoObj?.width}
-                onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+
+          <Box sx={{ width: '100%', display: 'flex', gap: 2, my: 2 }}>
+            <Box>
+              <Typography variant="caption" color="#8688A3">
+                Width
+              </Typography>
+              <Stack direction="row" alignItems="center" spacing="18px">
+                <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                  <TextField
+                    variant="filled"
+                    type="number"
+                    value={logoObj?.logoObj?.width}
+                    onChange={(event) => handleChangeEvent('width', event.target.value, 'logoObj')}
+                  />
+                </Stack>
+              </Stack>
+            </Box>
+            <Box>
+              <Typography variant="caption" color="#8688A3">
+                Height
+              </Typography>
+              <Stack direction="row" alignItems="center" spacing="18px">
+                <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                  <TextField
+                    variant="filled"
+                    type="number"
+                    value={logoObj?.logoObj?.height}
+                    onChange={(event) => handleChangeEvent('height', event.target.value, 'logoObj')}
+                  />
+                </Stack>
+              </Stack>
+            </Box>
+          </Box>
+
+          <Box sx={{ width: '100%', my: 2 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width={'100%'}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Add Logo Text
+              </Typography>
+              <Switch
+                checked={isLogo.textBackground}
+                onChange={() => setIsLogo((pv) => ({ ...pv, textBackground: !pv.textBackground }))}
+                inputProps={{ 'aria-label': 'controlled' }}
               />
             </Stack>
-          </Stack>
-        </Box>
-        <Box>
-          <Typography variant="caption" color="#8688A3">
-            Height
-          </Typography>
-          <Stack direction="row" alignItems="center" spacing="18px">
-            <Stack direction="row" alignItems="center" spacing={1} width={1}>
-              <TextField
-                variant="filled"
-                type="text"
-                // value={logoObj?.logoObj?.height}
-                onChange={(event) => handleChangeEvent('height', event.target.value, 'logoObj')}
-              />
-            </Stack>
-          </Stack>
-        </Box>
-      </Box>
+          </Box>
+          {isLogo.textBackground && (
+            <Stack>
+              <Typography variant="caption" color="#8688A3">
+                Logo Text
+              </Typography>
+              <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                <TextField
+                  variant="filled"
+                  type="text"
+                  fullWidth
+                  value={logoObj?.logoObj?.text}
+                  onChange={(event: any) =>
+                    handleChangeEvent('text', event.target.value, 'logoObj')
+                  }
+                />
+              </Stack>
+              <Box sx={{ width: '100%', my: 2 }}>
+                <Typography variant="caption" color="#8688A3">
+                  Text Background
+                </Typography>
+                <Stack direction="row" alignItems="center" spacing="18px">
+                  {/* <MuiColorInput sx={{ width: "100%", margin: "auto", }} variant="outlined"
 
-      <Box sx={{ width: '100%', my: 2 }}>
-        <Typography variant="caption" color="#8688A3">
-          Logo Text
-        </Typography>
-        <Stack direction="row" alignItems="center" spacing={1} width={1}>
-          <TextField
-            variant="filled"
-            type="text"
-            fullWidth
-            // value={logoObj?.logoObj?.text}
-            onChange={(event: any) => handleChangeEvent('text', event.target.value, 'logoObj')}
-          />
-        </Stack>
-      </Box>
-
-      <Box sx={{ width: '100%', my: 2 }}>
-        <Typography variant="caption" color="#8688A3">
-          Text Background
-        </Typography>
-        <Stack direction="row" alignItems="center" spacing="18px">
-          {/* <MuiColorInput sx={{ width: "100%", margin: "auto", }} variant="outlined"
                         value={logoObj?.textBg ?? "#000001"}
                         format="hex"
                         onChange={event => isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null}
                     /> */}
-          <Sketch
-            onChange={(event: any) =>
-              isColorValid(event?.hex) ? handleChangeEvent('backgroundColor', event?.hex, 'text') : null
-            }
-            presetColors={customPresets}
-            style={{ width: '100%' }}
-          />
-        </Stack>
-      </Box>
-      <Box sx={{ width: '100%', my: 2 }}>
-        <Typography variant="caption" color="#8688A3">
-          Text Color
-        </Typography>
-        <Stack direction="row" alignItems="center" spacing="18px">
-          {/* <MuiColorInput
+                  <Sketch
+                    onChange={(event: any) =>
+                      isColorValid(event?.hex)
+                        ? handleChangeEvent('backgroundColor', event?.hex, 'text')
+                        : null
+                    }
+                    presetColors={customPresets}
+                    style={{ width: '100%' }}
+                  />
+                </Stack>
+              </Box>
+
+              <Box sx={{ width: '100%', my: 2 }}>
+                <Typography variant="caption" color="#8688A3">
+                  Text Color
+                </Typography>
+                <Stack direction="row" alignItems="center" spacing="18px">
+                  {/* <MuiColorInput
             sx={{ width: '100%', margin: 'auto' }}
             variant="outlined"
             value={logoObj?.color ?? '#000001'}
@@ -317,15 +340,21 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
               isColorValid(event) ? handleChangeEvent('color', event, 'logoObj') : null
             }
           /> */}
-          <Sketch
-            onChange={(event: any) =>
-              isColorValid(event?.hex) ? handleChangeEvent('color', event?.hex, 'text') : null
-            }
-            presetColors={customPresets}
-            style={{ width: '100%' }}
-          />
+                  <Sketch
+                    onChange={(event: any) =>
+                      isColorValid(event?.hex)
+                        ? handleChangeEvent('color', event?.hex, 'text')
+                        : null
+                    }
+                    presetColors={customPresets}
+                    style={{ width: '100%' }}
+                  />
+                </Stack>
+              </Box>
+            </Stack>
+          )}
         </Stack>
-      </Box>
+      )}
     </Box>
   );
 }

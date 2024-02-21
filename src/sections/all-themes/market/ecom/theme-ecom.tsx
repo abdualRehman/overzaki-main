@@ -232,14 +232,14 @@ const defaultSections = [
           <CardShapeDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         ),
       },
-      {
-        name: 'View',
-        img: '/raws/listing.svg',
-        show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <ProductPageViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
-        ),
-      },
+      // {
+      //   name: 'View',
+      //   img: '/raws/listing.svg',
+      //   show: true,
+      //   Componenet: (handleThemeConfig: any, themeConfig: any) => (
+      //     <ProductPageViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+      //   ),
+      // },
 
       {
         name: 'Product Card',
@@ -513,6 +513,7 @@ export default function EcomDesignMain() {
 
   const searchParams = useSearchParams();
   const builder_Id = searchParams.get('id')?.toString() || '';
+
   const url = searchParams.get('url')?.toString() || '';
   // const url = "http://localhost:3000";
 
@@ -684,18 +685,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Style'
                           ? {
-                            borderRadius: '12px',
-                            color: '#0F1349',
-                            backgroundColor: '#FFFFFF',
-                            boxShadow: '0px 6px 20px #00000033',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#0F1349',
+                              backgroundColor: '#FFFFFF',
+                              boxShadow: '0px 6px 20px #00000033',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                           : {
-                            borderRadius: '12px',
-                            color: '#8688A3',
-                            backgroundColor: 'background.neutral',
-                            '&:hover': { backgroundColor: 'background.neutral' },
-                          }
+                              borderRadius: '12px',
+                              color: '#8688A3',
+                              backgroundColor: 'background.neutral',
+                              '&:hover': { backgroundColor: 'background.neutral' },
+                            }
                       }
                     >
                       {' '}
@@ -709,18 +710,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Layout'
                           ? {
-                            borderRadius: '12px',
-                            color: '#0F1349',
-                            backgroundColor: '#FFFFFF',
-                            boxShadow: '0px 6px 20px #00000033',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#0F1349',
+                              backgroundColor: '#FFFFFF',
+                              boxShadow: '0px 6px 20px #00000033',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                           : {
-                            borderRadius: '12px',
-                            color: '#8688A3',
-                            backgroundColor: 'background.neutral',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#8688A3',
+                              backgroundColor: 'background.neutral',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                       }
                     >
                       {' '}

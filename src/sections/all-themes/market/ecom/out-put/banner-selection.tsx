@@ -449,6 +449,7 @@ export default function BannerDealer({
                   </Stack>
                 </Stack>
               </Box>
+
               <Box sx={{ width: '100%' }}>
                 <Typography variant="caption" color="#8688A3">
                   Border Color
@@ -461,6 +462,7 @@ export default function BannerDealer({
                   } style={{ width: '100%' }} />
                 </Stack>
               </Box>
+
               <Stack
                 direction="row"
                 justifyContent="space-between"
@@ -471,6 +473,7 @@ export default function BannerDealer({
                   Shadow
                 </Typography>
                 <Switch
+
                   // checked={appBar?.icon?.shadow}
                   onChange={(event: any, value: any) => handleChangeEvent('isShadow', value, 'container')}
                   inputProps={{ 'aria-label': 'controlled' }}
@@ -488,6 +491,7 @@ export default function BannerDealer({
                   } style={{ width: '100%' }} />
                 </Stack>
               </Box>
+
               <Box sx={{ width: '100%' }}>
                 <Typography variant="caption" color="#8688A3">
                   Margin Top
@@ -528,6 +532,7 @@ export default function BannerDealer({
           </AccordionDetails>
         </Accordion>
       )}
+
       {/* {themeConfig.bannerShow && (
         <Accordion>
           <AccordionSummary

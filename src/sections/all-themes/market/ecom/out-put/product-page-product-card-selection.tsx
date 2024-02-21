@@ -18,6 +18,7 @@ import {
 import Iconify from 'src/components/iconify';
 import Sketch from '@uiw/react-color-sketch';
 import { VisuallyHiddenInput } from './logo-part';
+import ProductPricingSection from './product-page/product-card/product-pricing-selection';
 
 // ----------------------------------------------------------------------
 
@@ -354,6 +355,124 @@ export default function ProductPageProductCardDealer({
                     </Box>
                   </AccordionDetails>
                 </Accordion>
+                <Accordion>
+                  <AccordionSummary
+                    sx={{ width: '100%', display: 'flex', alignItems: 'baseline' }}
+                    expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
+                  >
+                    <Box sx={{ width: '100%' }}>
+                      <Typography variant="subtitle1">Positioning</Typography>
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Box>
+                      <RadioGroup
+                        aria-labelledby="controlled-product-view-grid-group"
+                        value={themeConfig?.productPageFilterCardStyle}
+                        name="list-view-grid-group"
+                        onChange={(event) =>
+                          handleThemeConfig('productPageFilterCardStyle', event.target.value)
+                        }
+                        sx={{
+                          display: 'flex !important',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          rowGap: '20px',
+                        }}
+                      >
+                        <FormControlLabel
+                          labelPlacement="bottom"
+                          value="style-1"
+                          control={
+                            <Radio
+                              checked={themeConfig?.productPageFilterCardStyle === 'style-1'}
+                              size="medium"
+                            />
+                          }
+                          label={
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              spacing="12px"
+                              ml="15px"
+                              justifyContent="space-between"
+                              sx={{ flexGrow: 1 }}
+                            >
+                              {/* <Typography variant='caption' component='p' color='#0F1349'>Tabs</Typography> */}
+                              <Card sx={{ boxShadow: '0px 3px 20px #0000001F', p: '5px' }}>
+                                <Box
+                                  component="img"
+                                  src="/raws/pc1.png"
+                                  sx={{ width: '100%', maxWidth: '100px' }}
+                                />
+                              </Card>
+                            </Stack>
+                          }
+                        />
+
+                        <FormControlLabel
+                          labelPlacement="bottom"
+                          value="style-2"
+                          control={
+                            <Radio
+                              checked={themeConfig?.productPageFilterCardStyle === 'style-2'}
+                              size="medium"
+                            />
+                          }
+                          label={
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              spacing="12px"
+                              ml="15px"
+                              justifyContent="space-between"
+                              sx={{ flexGrow: 1 }}
+                            >
+                              {/* <Typography variant='caption' component='p' color='#0F1349'>Tabs</Typography> */}
+                              <Card sx={{ boxShadow: '0px 3px 20px #0000001F', p: '5px' }}>
+                                <Box
+                                  component="img"
+                                  src="/raws/pc2.png"
+                                  sx={{ width: '100%', maxWidth: '100px' }}
+                                />
+                              </Card>
+                            </Stack>
+                          }
+                        />
+
+                        <FormControlLabel
+                          labelPlacement="bottom"
+                          value="style-3"
+                          control={
+                            <Radio
+                              checked={themeConfig?.productPageFilterCardStyle === 'style-3'}
+                              size="medium"
+                            />
+                          }
+                          label={
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              spacing="12px"
+                              ml="15px"
+                              justifyContent="space-between"
+                              sx={{ flexGrow: 1 }}
+                            >
+                              {/* <Typography variant='caption' component='p' color='#0F1349'>Tabs</Typography> */}
+                              <Card sx={{ boxShadow: '0px 3px 20px #0000001F', p: '5px' }}>
+                                <Box
+                                  component="img"
+                                  src="/raws/pc2.png"
+                                  sx={{ width: '100%', maxWidth: '100px' }}
+                                />
+                              </Card>
+                            </Stack>
+                          }
+                        />
+                      </RadioGroup>
+                    </Box>
+                  </AccordionDetails>
+                </Accordion>
               </Box>
             )}
           </AccordionDetails>
@@ -608,24 +727,6 @@ export default function ProductPageProductCardDealer({
                             </Stack>
                           </Box>
                         </Box>
-                        <Box sx={{ width: '100%' }}>
-                          <Typography variant="caption" color="#8688A3">
-                            Icon Border Radius (%)
-                          </Typography>
-                          <Stack direction="row" alignItems="center" spacing="18px">
-                            <Stack direction="row" alignItems="center" spacing={1} width={1}>
-                              <Slider
-                                // value={appBar?.icon?.borderRaduis || 0}
-                                // onChange={(_event: Event, newValue: number | number[]) =>
-                                //   handleChangeEvent('borderRaduis', newValue, 'icon')
-                                // }
-                                valueLabelDisplay="auto"
-                                min={0}
-                                max={100}
-                              />
-                            </Stack>
-                          </Stack>
-                        </Box>
                       </Box>
                     </Box>
                   </AccordionDetails>
@@ -732,113 +833,9 @@ export default function ProductPageProductCardDealer({
             )}
           </AccordionDetails>
         </Accordion>
+        <ProductPricingSection />
       </Box>
       <Divider sx={{ borderWidth: '1px', borderColor: '#F4F4F4', my: '20px' }} />
-
-      <Box>
-        <RadioGroup
-          aria-labelledby="controlled-product-view-grid-group"
-          value={themeConfig?.productPageFilterCardStyle}
-          name="list-view-grid-group"
-          onChange={(event) => handleThemeConfig('productPageFilterCardStyle', event.target.value)}
-          sx={{
-            display: 'flex !important',
-            flexDirection: 'row',
-            alignItems: 'center',
-            rowGap: '20px',
-          }}
-        >
-          <FormControlLabel
-            labelPlacement="bottom"
-            value="style-1"
-            control={
-              <Radio
-                checked={themeConfig?.productPageFilterCardStyle === 'style-1'}
-                size="medium"
-              />
-            }
-            label={
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing="12px"
-                ml="15px"
-                justifyContent="space-between"
-                sx={{ flexGrow: 1 }}
-              >
-                {/* <Typography variant='caption' component='p' color='#0F1349'>Tabs</Typography> */}
-                <Card sx={{ boxShadow: '0px 3px 20px #0000001F', p: '5px' }}>
-                  <Box
-                    component="img"
-                    src="/raws/pc1.png"
-                    sx={{ width: '100%', maxWidth: '100px' }}
-                  />
-                </Card>
-              </Stack>
-            }
-          />
-
-          <FormControlLabel
-            labelPlacement="bottom"
-            value="style-2"
-            control={
-              <Radio
-                checked={themeConfig?.productPageFilterCardStyle === 'style-2'}
-                size="medium"
-              />
-            }
-            label={
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing="12px"
-                ml="15px"
-                justifyContent="space-between"
-                sx={{ flexGrow: 1 }}
-              >
-                {/* <Typography variant='caption' component='p' color='#0F1349'>Tabs</Typography> */}
-                <Card sx={{ boxShadow: '0px 3px 20px #0000001F', p: '5px' }}>
-                  <Box
-                    component="img"
-                    src="/raws/pc2.png"
-                    sx={{ width: '100%', maxWidth: '100px' }}
-                  />
-                </Card>
-              </Stack>
-            }
-          />
-
-          <FormControlLabel
-            labelPlacement="bottom"
-            value="style-3"
-            control={
-              <Radio
-                checked={themeConfig?.productPageFilterCardStyle === 'style-3'}
-                size="medium"
-              />
-            }
-            label={
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing="12px"
-                ml="15px"
-                justifyContent="space-between"
-                sx={{ flexGrow: 1 }}
-              >
-                {/* <Typography variant='caption' component='p' color='#0F1349'>Tabs</Typography> */}
-                <Card sx={{ boxShadow: '0px 3px 20px #0000001F', p: '5px' }}>
-                  <Box
-                    component="img"
-                    src="/raws/pc2.png"
-                    sx={{ width: '100%', maxWidth: '100px' }}
-                  />
-                </Card>
-              </Stack>
-            }
-          />
-        </RadioGroup>
-      </Box>
     </Box>
   );
 }

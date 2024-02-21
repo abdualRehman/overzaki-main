@@ -36,8 +36,8 @@ const BrandAccordion = () => {
     '#33FF57', // Greenish Yellow
     '#3366FF', // Vivid Blue
   ];
-  const [isHeading, setIsHeading] = useState(true);
-  const [isDescription, setIsDescription] = useState(true);
+  const [isHeading, setIsHeading] = useState(false);
+  const [isDescription, setIsDescription] = useState(false);
 
   return (
     <Box>
@@ -71,7 +71,11 @@ const BrandAccordion = () => {
                   <Typography variant="caption" sx={{ fontWeight: 900 }}>
                     Show
                   </Typography>
-                  <Switch inputProps={{ 'aria-label': 'controlled' }} />
+                  <Switch
+                    checked={isHeading}
+                    onChange={() => setIsHeading((pv) => !pv)}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                  />
                 </Stack>
                 {isHeading && (
                   <Box sx={{ width: '100%' }}>
@@ -156,7 +160,11 @@ const BrandAccordion = () => {
                   <Typography variant="caption" sx={{ fontWeight: 900 }}>
                     Show
                   </Typography>
-                  <Switch inputProps={{ 'aria-label': 'controlled' }} />
+                  <Switch
+                    onChange={() => setIsDescription((pv) => !pv)}
+                    checked={isDescription}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                  />
                 </Stack>
                 {isDescription && (
                   <Box sx={{ width: '100%' }}>
