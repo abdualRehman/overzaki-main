@@ -126,8 +126,8 @@ const defaultSections = [
         name: 'Banner',
         img: '/raws/Banners.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any) => (
-          <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+          <BannerDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} builderId={builder_Id} />
         ),
       },
       {
@@ -513,8 +513,9 @@ export default function EcomDesignMain() {
 
   const searchParams = useSearchParams();
   const builder_Id = searchParams.get('id')?.toString() || '';
-  // const url = searchParams.get('url')?.toString() || '';
-  const url = 'http://localhost:3000';
+
+  const url = searchParams.get('url')?.toString() || '';
+  // const url = "http://localhost:3000";
 
   const debounce = (func: any, delay: any) => {
     let timeoutId: any;

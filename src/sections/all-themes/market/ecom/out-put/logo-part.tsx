@@ -72,6 +72,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
     }
   }, 1500);
 
+
   const handleImageChange64 = (key: string) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -235,6 +236,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
         </Stack>
       </Box> */}
 
+
           <Box sx={{ width: '100%', display: 'flex', gap: 2, my: 2 }}>
             <Box>
               <Typography variant="caption" color="#8688A3">
@@ -307,6 +309,7 @@ export default function LogoDealer({ themeConfig, handleThemeConfig, builderId }
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing="18px">
                   {/* <MuiColorInput sx={{ width: "100%", margin: "auto", }} variant="outlined"
+
                         value={logoObj?.textBg ?? "#000001"}
                         format="hex"
                         onChange={event => isColorValid(event) ? handleChangeEvent('textBg', event, 'logoObj') : null}
