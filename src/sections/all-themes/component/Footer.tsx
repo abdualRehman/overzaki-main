@@ -12,7 +12,12 @@ const Footer = ({
   containerBackgroundColor: string;
   footerStyling: any;
 }) => {
-  const socialIcons = ['ic:baseline-facebook', 'lets-icons:insta', 'mdi:twitter', 'ri:google-fill'];
+  const socialIcons = [
+    footerStyling.socials.facebook && 'ic:baseline-facebook',
+    footerStyling.socials.instagram && 'lets-icons:insta',
+    footerStyling.socials.twitter && 'mdi:twitter',
+    footerStyling.socials.google && 'ri:google-fill',
+  ];
   return (
     <footer style={{ ...footerStyling.container, width: '100%', padding: '18px' }}>
       <div style={{ padding: '8px' }} className="footerContainer">

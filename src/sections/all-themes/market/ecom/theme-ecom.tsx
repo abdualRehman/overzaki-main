@@ -60,6 +60,7 @@ import ProductSelectionDealer from './out-put/product-selection-dealer';
 import CategoryViewDealer from './out-put/category-selection';
 import FooterDealer from './out-put/FooterDealer';
 import AddProductDealer from './out-put/add-product-dealer';
+import AddCategoryDealer from './out-put/add-category-dealer';
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -325,6 +326,12 @@ const defaultSections = [
         Componenet: (handleThemeConfig: any, themeConfig: any) => (
           <UserViewDealer handleThemeConfig={handleThemeConfig} themeConfig={themeConfig} />
         ),
+      },
+      {
+        name: 'Add Category',
+        img: '/raws/user-solid.svg',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <AddCategoryDealer />,
       },
       {
         name: 'Category',

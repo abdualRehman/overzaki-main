@@ -5,6 +5,7 @@ import {
   Box,
   IconButton,
   Stack,
+  Switch,
   TextField,
   Typography,
 } from '@mui/material';
@@ -47,6 +48,12 @@ const FooterDealer = () => {
     socialIcons: {
       color: 'black',
       backgroundColor: 'white',
+    },
+    socials: {
+      facebook: true,
+      instagram: true,
+      twitter: true,
+      google: true,
     },
   });
 
@@ -176,6 +183,88 @@ const FooterDealer = () => {
           </Box>
         </AccordionSummary>
         <AccordionDetails>
+          <Stack>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width={'100%'}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Facebook
+              </Typography>
+              <Switch
+                checked={footerStyling.socials.facebook}
+                onChange={() =>
+                  setFooterStyling((pv) => ({
+                    ...pv,
+                    socials: { ...pv.socials, facebook: !pv.socials.facebook },
+                  }))
+                }
+                inputProps={{ 'aria-label': 'controlled' }}
+              />
+            </Stack>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width={'100%'}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Facebook
+              </Typography>
+              <Switch
+                checked={footerStyling.socials.instagram}
+                onChange={() =>
+                  setFooterStyling((pv) => ({
+                    ...pv,
+                    socials: { ...pv.socials, instagram: !pv.socials.instagram },
+                  }))
+                }
+                inputProps={{ 'aria-label': 'controlled' }}
+              />
+            </Stack>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width={'100%'}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Twitter
+              </Typography>
+              <Switch
+                checked={footerStyling.socials.twitter}
+                onChange={() =>
+                  setFooterStyling((pv) => ({
+                    ...pv,
+                    socials: { ...pv.socials, twitter: !pv.socials.twitter },
+                  }))
+                }
+                inputProps={{ 'aria-label': 'controlled' }}
+              />
+            </Stack>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width={'100%'}
+            >
+              <Typography variant="caption" sx={{ fontWeight: 900 }}>
+                Google
+              </Typography>
+              <Switch
+                checked={footerStyling.socials.google}
+                onChange={() =>
+                  setFooterStyling((pv) => ({
+                    ...pv,
+                    socials: { ...pv.socials, google: !pv.socials.google },
+                  }))
+                }
+                inputProps={{ 'aria-label': 'controlled' }}
+              />
+            </Stack>
+          </Stack>
           <Box sx={{ width: '100%' }}>
             <Typography variant="caption" color="#8688A3">
               Social Icon Color
