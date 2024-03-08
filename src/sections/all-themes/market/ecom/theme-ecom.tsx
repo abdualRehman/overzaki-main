@@ -58,6 +58,8 @@ import BrandDealer from './out-put/brand-dealer';
 import StylesDealer from './out-put/styles-dealer';
 import ProductSelectionDealer from './out-put/product-selection-dealer';
 import CategoryViewDealer from './out-put/category-selection';
+import FooterDealer from './out-put/FooterDealer';
+import AddProductDealer from './out-put/add-product-dealer';
 
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
@@ -71,6 +73,7 @@ interface ControllsState {
   menu: (EventTarget & (Element | HTMLElement)) | null;
   addSection: Boolean;
 }
+// const [selectedSquareCard, setSelectedSquareCard] = useState('style-1');
 
 const defaultSections = [
   {
@@ -188,6 +191,7 @@ const defaultSections = [
         name: 'Footer',
         img: '/raws/Mobiles.svg',
         show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <FooterDealer />,
       },
     ],
   },
@@ -215,6 +219,12 @@ const defaultSections = [
             themeConfig={themeConfig}
           />
         ),
+      },
+      {
+        name: 'Add Product',
+        img: '/raws/filters.png',
+        show: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any) => <AddProductDealer />,
       },
       {
         name: 'Products Dealer',
@@ -706,18 +716,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Style'
                           ? {
-                            borderRadius: '12px',
-                            color: '#0F1349',
-                            backgroundColor: '#FFFFFF',
-                            boxShadow: '0px 6px 20px #00000033',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#0F1349',
+                              backgroundColor: '#FFFFFF',
+                              boxShadow: '0px 6px 20px #00000033',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                           : {
-                            borderRadius: '12px',
-                            color: '#8688A3',
-                            backgroundColor: 'background.neutral',
-                            '&:hover': { backgroundColor: 'background.neutral' },
-                          }
+                              borderRadius: '12px',
+                              color: '#8688A3',
+                              backgroundColor: 'background.neutral',
+                              '&:hover': { backgroundColor: 'background.neutral' },
+                            }
                       }
                     >
                       {' '}
@@ -731,18 +741,18 @@ export default function EcomDesignMain() {
                       sx={
                         activeSection === 'Layout'
                           ? {
-                            borderRadius: '12px',
-                            color: '#0F1349',
-                            backgroundColor: '#FFFFFF',
-                            boxShadow: '0px 6px 20px #00000033',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#0F1349',
+                              backgroundColor: '#FFFFFF',
+                              boxShadow: '0px 6px 20px #00000033',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                           : {
-                            borderRadius: '12px',
-                            color: '#8688A3',
-                            backgroundColor: 'background.neutral',
-                            '&:hover': { backgroundColor: '#FFFFFF' },
-                          }
+                              borderRadius: '12px',
+                              color: '#8688A3',
+                              backgroundColor: 'background.neutral',
+                              '&:hover': { backgroundColor: '#FFFFFF' },
+                            }
                       }
                     >
                       {' '}
@@ -879,7 +889,10 @@ export default function EcomDesignMain() {
                         <LogoDealer
                           themeConfig={themeConfig}
                           builderId={builder_Id}
-                          handleThemeConfig={handleThemeConfig} setAppBarLogo={undefined} appBarLogo={undefined} />
+                          handleThemeConfig={handleThemeConfig}
+                          setAppBarLogo={undefined}
+                          appBarLogo={undefined}
+                        />
                       </Box>
                     )}
                     {buttonSection === 'Color' && (
