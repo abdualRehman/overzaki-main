@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import './out-put/view/view.css';
 // @mui
@@ -653,6 +653,15 @@ export default function EcomDesignMain() {
   const handleButton = (btnSection: string) => (event: React.SyntheticEvent | React.MouseEvent) => {
     setbuttonSection(btnSection);
   };
+
+  useEffect(() => {
+    if (controlls.page === 'Products Page') {
+      setbuttonSection('Products Dealer');
+    } else if (controlls.page === 'Categories') {
+      setbuttonSection('Category');
+    }
+    setControlls((pv) => ({ ...pv, addSection: false }));
+  }, [controlls.page]);
 
   const handleOpenDropDown = React.useCallback(
     (openTo: string) => (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent) => {
