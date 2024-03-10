@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import './out-put/view/view.css';
 // @mui
@@ -93,11 +93,13 @@ const defaultSections = [
         name: 'Top Bar',
         img: '/raws/bars.svg',
         show: true,
-        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any) => (
+        hideHeader: true,
+        Componenet: (handleThemeConfig: any, themeConfig: any, builder_Id: any, url: any) => (
           <TopBarDealer
             handleThemeConfig={handleThemeConfig}
             themeConfig={themeConfig}
             builder_Id={builder_Id}
+            url={url}
           />
         ),
       },
@@ -674,6 +676,12 @@ export default function EcomDesignMain() {
     setbuttonSection('');
   };
 
+
+  const handleSaveSettings = () => {
+    console.log("event");
+
+  }
+
   return (
     <Box sx={{ height: '100%', transition: 'all .5' }}>
       {smUp && (
@@ -948,12 +956,15 @@ export default function EcomDesignMain() {
                                 <Box key={'mainPageWrap_' + index + '_' + ind}>
                                   {buttonSection === sectionObj.name && (
                                     <Box key={'main_' + ind}>
-                                      <HeaderSection
-                                        name={sectionObj?.name ?? ''}
-                                        cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
-                                        handleCancelBtn={handleCancelBtn}
-                                        handleThemeConfig={handleThemeConfig}
-                                      />
+                                      {!sectionObj?.hideHeader && (
+                                        <HeaderSection
+                                          name={sectionObj?.name ?? ''}
+                                          cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
+                                          handleCancelBtn={handleCancelBtn}
+                                          handleThemeConfig={handleThemeConfig}
+                                          closer={() => handleSaveSettings()}
+                                        />
+                                      )}
                                       {sectionObj?.Componenet &&
                                         sectionObj?.Componenet(
                                           handleThemeConfig,
@@ -966,6 +977,8 @@ export default function EcomDesignMain() {
                                 </Box>
                               );
                             }
+                            return null; // Make sure to return null for non-matching sections
+
                           })}
                         </Box>
                       ))}
