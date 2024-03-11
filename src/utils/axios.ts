@@ -120,6 +120,12 @@ export const endpoints = {
     get: '/builder?type=website',
     search: '/builder/search',
     setObject: '/home-design/lists',
+    home: {
+      adAppBar: {
+        createSlider: '/appbar-design/ad_app_bar',
+        updateSlider: '/appbar-design',
+      },
+    },
   },
   customer: {
     list: '/customers',

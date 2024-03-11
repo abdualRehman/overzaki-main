@@ -25,6 +25,8 @@ import OfferNavbar from 'src/sections/all-themes/component/OfferNavbar';
 import { sections } from 'src/sections/all-themes/component/response';
 import Slider from 'react-slick';
 import HeaderSection from './header-section';
+import { LoadingScreen } from 'src/components/loading-screen';
+import { createAdAppbarSlider, updateAdAppbarSlider } from 'src/redux/store/thunks/builder';
 interface TopBarProps {
   themeConfig: {
     navLogoPosition: string;
@@ -64,13 +66,17 @@ const TopBarDealer = ({
   handleThemeConfig,
   mobile = false,
   builder_Id,
+  url
 }: TopBarProps) => {
+
   const dispatch = useDispatch<AppDispatch>();
   const socket = socketClient();
 
   const targetHeader = 'home.sections.appBar.adAppBar.';
 
-  const [topBarObj, setTopBarObj] = useState<any>(null);
+  const [topBarObj, setTopBarObj] = useState<any>({});
+  const [loader, setLoader] = useState<any>(false);
+
   const [appBarItems, setAppBarItems] = useState([]);
   const [sliderArray, setSliderArray] = useState([]);
 
@@ -88,15 +94,40 @@ const TopBarDealer = ({
     };
   };
 
+
+
+
+  // useEffect(() => {
+  //   console.log("topBarObj", topBarObj);
+  // }, [topBarObj])
+
   // useEffect(() => {
   //   handleAppBarItemsChange()
   // }, [appBarItems])
 
-  const handleChangeEvent = debounce((key: any, newValue: any, parentClass: any) => {
+  const handleChangeEvent = debounce((key: any, newValue: any, parentClass: any = null) => {
+
+    // console.log(key, newValue, parentClass);
+
+
     let _socketKey = '';
     let valueToShare = '';
-    const nestedAppbar = topBarObj?.[parentClass] ?? {};
-    setTopBarObj({ ...topBarObj, [parentClass]: { ...nestedAppbar, [key]: newValue } });
+    const nestedAppbar = parentClass ? topBarObj?.[parentClass] : null;
+
+    // console.log("topBarObj", topBarObj);
+    // console.log("nestedAppbar", nestedAppbar);
+    // console.log("nestedAppbar", typeof nestedAppbar);
+
+    if (nestedAppbar !== null) {
+      setTopBarObj({ ...topBarObj, [parentClass]: { ...nestedAppbar, [key]: newValue } });
+    } else {
+      // const newObject = { ...topBarObj, [key]: newValue };
+      // console.log("newObject", newObject);
+
+      setTopBarObj({ ...topBarObj, [key]: newValue });
+    }
+
+
 
     _socketKey = parentClass ? parentClass + '.' + key : key;
     // valueToShare = typeof newValue === 'number' ? `${newValue}px` : newValue;
@@ -109,10 +140,13 @@ const TopBarDealer = ({
       value: valueToShare,
     };
 
+    console.log("data", data);
     if (socket) {
       socket.emit('website:cmd', data);
     }
   }, 1500);
+
+
   const isColorValid = (color: string) =>
     /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$|^rgba\(\d{1,3}, \d{1,3}, \d{1,3}, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$|^hsl\(\d{1,3}, \d{1,3}%, \d{1,3}%\)$|^hsla\(\d{1,3}, \d{1,3}%, \d{1,3}%, (0(\.\d{1,2})?|1(\.0{1,2})?)\)$/.test(
       color
@@ -127,7 +161,9 @@ const TopBarDealer = ({
       value: currentAppBarItems,
     };
     if (socket) {
-      socket.emit('website:cmd', data);
+      console.log("data.", data);
+
+      // socket.emit('website:cmd', data);
     }
   };
 
@@ -140,7 +176,7 @@ const TopBarDealer = ({
     debouncedHandleAppBarItemsChange();
   }, [appBarItems]);
 
-  const handleSliderItemChange = (index: number, value: string, target: string) => {
+  const handleSliderItemChange = (index: number, value: any, target: string) => {
     setAppBarItems((prev: any) => {
       return prev.map((item: any, i: number) => {
         if (i === index) {
@@ -165,6 +201,7 @@ const TopBarDealer = ({
         const base64 = reader.result?.toString().split(',')[1]; // Get the base64 data
         // console.log('Base64:', base64); // Log the base64 data
         handleSliderItemChange(key, reader.result?.toString() || '', 'image');
+        handleSliderItemChange(key, file, 'adAppbarFile');
       };
 
       reader.readAsDataURL(file); // Read the file as data URL
@@ -200,14 +237,45 @@ const TopBarDealer = ({
 
   const handleSaveItem = (item: any) => {
     console.log(item);
+    setLoader(true);
+    // dispatch(updateAdAppbarSlider({ builderId: builder_Id, url: url, data: JSON.stringify(item) })).then((response: any) => {
+    //   console.log("response", response);
+    // })
+    const payloadData = {
+      adAppbarFile: item?.adAppbarFile,
+      data: JSON.stringify({
+        text: item?.text || "",
+        href: item?.href || ""
+      })
+    };
+    setTimeout(() => {
 
+      dispatch(createAdAppbarSlider({ builderId: builder_Id, url: url, data: payloadData })).then((response: any) => {
+        console.log("response", response);
+        setLoader(false)
+      })
+    }, 1000);
   }
 
 
+  // add new row call API
+  const handleAddRow = () => {
+
+    setAppBarItems((pv: any) =>
+      pv?.length < 3 ? [...pv, { text: '', image: '', href: '' }] : pv
+    );
+    setAdAppbar((prevState: any) => ({
+      ...prevState,
+      Slider: [...prevState.Slider, { text: '', image: '', href: '' }],
+    }));
+  }
 
 
   return (
     <>
+      {loader && (
+        <LoadingScreen />
+      )}
       <HeaderSection
         name={"Top Bar"}
         cancel={{ key: 'cart', value: '/raw/cart1.svg' }}
@@ -325,17 +393,9 @@ const TopBarDealer = ({
           </AccordionSummary>
           <AccordionDetails>
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="subtitle1">Add Appbar Text</Typography>
+              <Typography variant="subtitle1" >Add Appbar Text</Typography>
               <IconButton
-                onClick={() => {
-                  setAppBarItems((pv: any) =>
-                    pv?.length < 3 ? [...pv, { text: '', image: '', href: '' }] : pv
-                  );
-                  setAdAppbar((prevState: any) => ({
-                    ...prevState,
-                    Slider: [...prevState.Slider, { text: '', image: '', href: '' }],
-                  }));
-                }}
+                onClick={() => handleAddRow()}
                 color="primary"
               >
                 <Iconify icon="ic:baseline-plus" />
@@ -402,7 +462,7 @@ const TopBarDealer = ({
                         value={topBarObj?.Slider?.[`text${i}`]}
                         onChange={(event) => {
                           handleSliderItemChange(i, event.target.value, 'text')
-                          handleChangeEvent(`text${i}`, event.target.value, 'Slider');
+                          // handleChangeEvent(`text${i}`, event.target.value, 'Slider');
                           handleTextChange(i, event, 'text');
                         }}
                       />
@@ -474,3 +534,7 @@ const TopBarDealer = ({
 };
 
 export default TopBarDealer;
+function setLoader(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+
