@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Image, Input, Span } from './subcomponents';
 import { useMediaQuery } from '@mui/material';
 import { sections } from './response';
+import Iconify from 'src/components/iconify';
 const NavbarTheme = ({
   navbarState,
   generalIcons,
@@ -16,6 +17,9 @@ const NavbarTheme = ({
   appBarLogo,
   appBarContainer,
   centerMenu,
+  cartLogo,
+  headerLogo,
+  language,
 }: any) => {
   const [isHovered, setIsHovered] = useState(false);
   const matches = useMediaQuery('(max-width:600px)');
@@ -142,6 +146,7 @@ const NavbarTheme = ({
   //         ...sections?.general?.generalIcons,
   //       });
   //     }
+  // /Hassaan
 
   //     // Logo
   //     if (
@@ -222,15 +227,11 @@ const NavbarTheme = ({
           {appBarLeftDetails?.find((item) => item?.key == 'mobile_home_app_bar_show_icon_drawer')
             ?.show && (
             <div>
-              <Image
+              <Iconify
                 style={{
                   ...generalIcons,
                 }}
-                src={
-                  appBarLeftDetails?.find(
-                    (item) => item?.key == 'mobile_home_app_bar_show_icon_drawer'
-                  )?.icon || ''
-                }
+                icon={headerLogo}
               />
             </div>
           )}
@@ -394,19 +395,20 @@ const NavbarTheme = ({
               location="right"
             />
           )}
-          {appBarRightDetails?.find((item) => item?.key == 'mobile_home_app_bar_show_icon_lang')
-            ?.show && (
-            <Image
-              style={{
-                ...generalIcons,
-              }}
-              src={
-                appBarRightDetails?.find(
-                  (item) => item?.key == 'mobile_home_app_bar_show_icon_lang'
-                )?.icon || ''
-              }
-            />
-          )}
+          {language &&
+            appBarRightDetails?.find((item) => item?.key == 'mobile_home_app_bar_show_icon_lang')
+              ?.show && (
+              <Image
+                style={{
+                  ...generalIcons,
+                }}
+                src={
+                  appBarRightDetails?.find(
+                    (item) => item?.key == 'mobile_home_app_bar_show_icon_lang'
+                  )?.icon || ''
+                }
+              />
+            )}
           {/* <ShoppingCartOutlinedIcon /> */}
           {appBarRightDetails?.find((item) => item?.key == 'mobile_home_app_bar_show_icon_cart')
             ?.show && (
@@ -414,11 +416,7 @@ const NavbarTheme = ({
               style={{
                 ...generalIcons,
               }}
-              src={
-                appBarRightDetails?.find(
-                  (item) => item?.key == 'mobile_home_app_bar_show_icon_cart'
-                )?.icon || ''
-              }
+              src={cartLogo}
             />
           )}
         </div>
