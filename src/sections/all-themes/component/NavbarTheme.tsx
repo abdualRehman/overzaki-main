@@ -19,6 +19,7 @@ const NavbarTheme = ({
   centerMenu,
   cartLogo,
   headerLogo,
+  language,
 }: any) => {
   const [isHovered, setIsHovered] = useState(false);
   const matches = useMediaQuery('(max-width:600px)');
@@ -394,8 +395,9 @@ const NavbarTheme = ({
               location="right"
             />
           )}
-          {appBarRightDetails?.find((item) => item?.key == 'mobile_home_app_bar_show_icon_lang')
-            ?.show && (
+          {language &&
+            appBarRightDetails?.find((item) => item?.key == 'mobile_home_app_bar_show_icon_lang')
+              ?.show && (
               <Image
                 style={{
                   ...generalIcons,
