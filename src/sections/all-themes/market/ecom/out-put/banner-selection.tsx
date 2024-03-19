@@ -268,6 +268,11 @@ export default function BannerDealer({
   const [paymentBox, setPaymentBox] = useState({
     show: false,
   });
+  const [bannerSearch, setBannerSearch] = useState({
+    topText: 'WE ARE HERE TO MAKE',
+    bottomText: 'COOKING FUN AGAIN',
+    placeHolder: 'What to cook today?',
+  });
   return (
     <Box pt="20px">
       {!themeConfig.bannerImages[0] && !themeConfig.sliderImage && (
@@ -303,28 +308,38 @@ export default function BannerDealer({
                 <h1
                   style={{ textAlign: 'center', lineHeight: 1, fontSize: '20px', fontWeight: 900 }}
                 >
-                  WE ARE HERE TO MAKE
-                  <br /> <span style={{ fontSize: '25px' }}>COOKING FUN AGAIN</span>
+                  {bannerSearch.topText}
+                  <br /> <span style={{ fontSize: '25px' }}>{bannerSearch.bottomText}</span>
                 </h1>
               )}
               <div
                 style={{
                   display: bannerContainerSearch.search ? 'flex' : 'none',
                   alignItems: 'center',
+                  width: '50%',
                   backgroundColor: 'white',
                   padding: '5px',
-                  borderRadius: '10px',
+                  borderRadius: '20px',
                 }}
               >
                 <input
                   style={{ outline: 'none', border: 'none' }}
                   type="text"
-                  placeholder="Aaj kya pakana hai?"
+                  placeholder={bannerSearch.placeHolder}
                 />
-                <Iconify
-                  style={{ backgroundColor: 'orange', padding: '2px', borderRadius: '5px' }}
-                  icon="material-symbols:search"
-                />
+                <div
+                  style={{
+                    backgroundColor: 'orange',
+                    padding: '2px',
+                    borderRadius: '5px',
+                    width: '40%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Iconify icon="material-symbols:search" />
+                </div>
               </div>
             </div>
           )}
@@ -820,6 +835,57 @@ export default function BannerDealer({
                     />
                   </Stack>
                 </Stack>
+                <Box>
+                  <Typography variant="caption" color="#8688A3">
+                    Bottom text
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                      <TextField
+                        variant="filled"
+                        type="text"
+                        value={bannerSearch.bottomText}
+                        onChange={(event) =>
+                          setBannerSearch((pv) => ({ ...pv, bottomText: event.target.value }))
+                        }
+                      />
+                    </Stack>
+                  </Stack>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="#8688A3">
+                    Top text
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                      <TextField
+                        variant="filled"
+                        type="text"
+                        value={bannerSearch.topText}
+                        onChange={(event) =>
+                          setBannerSearch((pv) => ({ ...pv, topText: event.target.value }))
+                        }
+                      />
+                    </Stack>
+                  </Stack>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="#8688A3">
+                    Input placeholder
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing="18px">
+                    <Stack direction="row" alignItems="center" spacing={1} width={1}>
+                      <TextField
+                        variant="filled"
+                        type="text"
+                        value={bannerSearch.placeHolder}
+                        onChange={(event) =>
+                          setBannerSearch((pv) => ({ ...pv, placeHolder: event.target.value }))
+                        }
+                      />
+                    </Stack>
+                  </Stack>
+                </Box>
               </AccordionDetails>
             </Accordion>
             <Accordion>
@@ -842,7 +908,7 @@ export default function BannerDealer({
                     Show
                   </Typography>
                   <Switch
-                    checked={bannerContainerSearch.search}
+                    checked={paymentBox.show}
                     onChange={(event: any, value: any) => {
                       setPaymentBox((pv: any) => ({ ...pv, show: !pv.show }));
                     }}
