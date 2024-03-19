@@ -1260,22 +1260,25 @@ export default function EcomDesignMain() {
                               spacing="20px"
                             >
                               <Stack alignItems={'center'}>
-                                <Button
-                                  sx={{
+                                <button
+                                  style={{
                                     backgroundColor: '#1BFBB6',
                                     width: '50px',
                                     height: '50px',
                                     borderRadius: '50%',
+                                    border: '0px solid transparent',
+                                    outline: 'none',
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     minWidth: 'auto',
                                     padding: '0px',
                                   }}
-                                  startIcon={<Iconify color={'#0F1349'} icon="mi:add" />}
                                   disabled={!(activeSection === 'Layout')}
                                   onClick={() => openDropDown()}
-                                ></Button>
+                                >
+                                  <Iconify color={'#0F1349'} icon="mi:add" />
+                                </button>
                                 <Typography variant="caption" color="#0F1349">
                                   Add Section
                                 </Typography>
