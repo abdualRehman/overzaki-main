@@ -74,6 +74,11 @@ import SignupDealer from './out-put/signup-dealer';
 import SignInDealer from './out-put/sign-in-dealer';
 import ForgotPassDealer from './out-put/forgot-pass-dealer';
 import OtpDealer from './out-put/otp-dealer';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from 'src/redux/store/store';
+import { getBuilderDetails } from 'src/redux/store/thunks/builder';
+import { useSelector } from 'react-redux';
+
 const dataPages = [
   { title: 'Home Page', link: 'https://ecom-zaki.vercel.app/' },
   { title: 'Products Page', link: 'https://ecom-zaki.vercel.app/products' },
@@ -453,6 +458,8 @@ const defaultSections = [
 ];
 
 export default function EcomDesignMain() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { builderDetails } = useSelector((state: any) => state.builder);
   const socket = socketClient();
 
   const [activeSection, setActiveSection] = useState('Style');
@@ -735,6 +742,25 @@ export default function EcomDesignMain() {
     setOpen(false);
     setbuttonSection(section);
   };
+
+
+  useEffect(() => {
+    if (!builderDetails) {
+      dispatch(getBuilderDetails({ builderId: builder_Id, url }));
+    }
+  }, [builderDetails])
+
+
+
+
+
+
+
+
+
+
+
+
   return (
     <Box sx={{ height: '100%', transition: 'all .5' }}>
       {smUp && (
