@@ -34,11 +34,11 @@ const OtpDealer = () => {
     '#33FF57', // Greenish Yellow
     '#3366FF', // Vivid Blue
   ];
-  const [orderCardNumber, setOrderCardNumber] = useState({ color: 'black', fontSize: '12px' });
-  const [orderCardDate, setOrderCardDate] = useState({ color: 'gray', fontSize: '10px' });
-  const [orderCardProducts, setOrderCardProducts] = useState({ color: 'gray', fontSize: '10px' });
-  const [orderCardTotal, setOrderCardTotal] = useState({ color: 'black', fontSize: '8px' });
-  const [orderCardContainer, setOrderCardContainer] = useState({
+  const [orderCardNumber, setOrderCardNumber] = useState<any>({ color: 'black', fontSize: '12px' });
+  const [orderCardDate, setOrderCardDate] = useState<any>({ color: 'gray', fontSize: '10px' });
+  const [orderCardProducts, setOrderCardProducts] = useState<any>({ color: 'gray', fontSize: '10px' });
+  const [orderCardTotal, setOrderCardTotal] = useState<any>({ color: 'black', fontSize: '8px' });
+  const [orderCardContainer, setOrderCardContainer] = useState<any>({
     backgroundColor: 'transparent',
     padding: '25px',
     borderTopLeftRadius: '20px',
@@ -74,7 +74,7 @@ const OtpDealer = () => {
             </Typography>
             <Stack direction="row" alignItems="center" spacing="18px">
               <Sketch
-                onChange={(e) => setOrderCardNumber((pv) => ({ ...pv, color: e?.hex }))}
+                onChange={(e) => setOrderCardNumber((pv: any) => ({ ...pv, color: e?.hex }))}
                 presetColors={customPresets}
                 style={{ width: '100%' }}
               />
@@ -87,9 +87,9 @@ const OtpDealer = () => {
             <Stack direction="row" alignItems="center" spacing="18px">
               <Stack direction="row" alignItems="center" spacing={1} width={1}>
                 <Slider
-                  value={orderCardNumber.fontSize.split('px')[0]}
+                  value={orderCardNumber ? orderCardNumber?.fontSize?.split('px')[0] : 0}
                   onChange={(event: any, newValue: number | number[]) => {
-                    setOrderCardNumber((pv) => ({ ...pv, fontSize: newValue + 'px' }));
+                    setOrderCardNumber((pv: any) => ({ ...pv, fontSize: newValue + 'px' }));
                   }}
                   valueLabelDisplay="auto"
                   min={0}
@@ -117,7 +117,7 @@ const OtpDealer = () => {
             </Typography>
             <Stack direction="row" alignItems="center" spacing="18px">
               <Sketch
-                onChange={(e) => setOrderCardDate((pv) => ({ ...pv, color: e?.hex }))}
+                onChange={(e) => setOrderCardDate((pv: any) => ({ ...pv, color: e?.hex }))}
                 presetColors={customPresets}
                 style={{ width: '100%' }}
               />
@@ -130,9 +130,9 @@ const OtpDealer = () => {
             <Stack direction="row" alignItems="center" spacing="18px">
               <Stack direction="row" alignItems="center" spacing={1} width={1}>
                 <Slider
-                  value={orderCardDate.fontSize.split('px')[0]}
+                  value={orderCardDate?.fontSize?.split('px')[0] || "0"}
                   onChange={(event: any, newValue: number | number[]) => {
-                    setOrderCardDate((pv) => ({ ...pv, fontSize: newValue + 'px' }));
+                    setOrderCardDate((pv: any) => ({ ...pv, fontSize: newValue + 'px' }));
                   }}
                   valueLabelDisplay="auto"
                   min={0}
@@ -160,7 +160,7 @@ const OtpDealer = () => {
             </Typography>
             <Stack direction="row" alignItems="center" spacing="18px">
               <Sketch
-                onChange={(e) => setOrderCardProducts((pv) => ({ ...pv, color: e?.hex }))}
+                onChange={(e) => setOrderCardProducts((pv: any) => ({ ...pv, color: e?.hex }))}
                 presetColors={customPresets}
                 style={{ width: '100%' }}
               />
@@ -175,7 +175,7 @@ const OtpDealer = () => {
                 <Slider
                   value={orderCardProducts.fontSize.split('px')[0]}
                   onChange={(event: any, newValue: number | number[]) => {
-                    setOrderCardProducts((pv) => ({ ...pv, fontSize: newValue + 'px' }));
+                    setOrderCardProducts((pv: any) => ({ ...pv, fontSize: newValue + 'px' }));
                   }}
                   valueLabelDisplay="auto"
                   min={0}
@@ -203,7 +203,7 @@ const OtpDealer = () => {
             </Typography>
             <Stack direction="row" alignItems="center" spacing="18px">
               <Sketch
-                onChange={(e) => setOrderCardTotal((pv) => ({ ...pv, color: e?.hex }))}
+                onChange={(e) => setOrderCardTotal((pv: any) => ({ ...pv, color: e?.hex }))}
                 presetColors={customPresets}
                 style={{ width: '100%' }}
               />
@@ -218,7 +218,7 @@ const OtpDealer = () => {
                 <Slider
                   value={orderCardTotal.fontSize.split('px')[0]}
                   onChange={(event: any, newValue: number | number[]) => {
-                    setOrderCardTotal((pv) => ({ ...pv, fontSize: newValue + 'px' }));
+                    setOrderCardTotal((pv: any) => ({ ...pv, fontSize: newValue + 'px' }));
                   }}
                   valueLabelDisplay="auto"
                   min={0}
@@ -247,7 +247,7 @@ const OtpDealer = () => {
             <Stack direction="row" alignItems="center" spacing="18px">
               <Sketch
                 onChange={(e) =>
-                  setOrderCardContainer((pv) => ({ ...pv, backgroundColor: e?.hex }))
+                  setOrderCardContainer((pv: any) => ({ ...pv, backgroundColor: e?.hex }))
                 }
                 presetColors={customPresets}
                 style={{ width: '100%' }}
@@ -263,7 +263,7 @@ const OtpDealer = () => {
                 <Slider
                   value={orderCardContainer.padding.split('px')[0]}
                   onChange={(event: any, newValue: number | number[]) => {
-                    setOrderCardContainer((pv) => ({ ...pv, padding: newValue + 'px' }));
+                    setOrderCardContainer((pv: any) => ({ ...pv, padding: newValue + 'px' }));
                   }}
                   valueLabelDisplay="auto"
                   min={0}
@@ -291,7 +291,7 @@ const OtpDealer = () => {
                     <Slider
                       value={orderCardContainer.borderTopLeftRadius.split('px')[0]}
                       onChange={(event: any, newValue: number | number[]) => {
-                        setOrderCardContainer((pv) => ({
+                        setOrderCardContainer((pv: any) => ({
                           ...pv,
                           borderTopLeftRadius: newValue + 'px',
                         }));
@@ -312,7 +312,7 @@ const OtpDealer = () => {
                     <Slider
                       value={orderCardContainer.borderBottomLeftRadius.split('px')[0]}
                       onChange={(event: any, newValue: number | number[]) => {
-                        setOrderCardContainer((pv) => ({
+                        setOrderCardContainer((pv: any) => ({
                           ...pv,
                           borderBottomLeftRadius: newValue + 'px',
                         }));
@@ -333,7 +333,7 @@ const OtpDealer = () => {
                     <Slider
                       value={orderCardContainer.borderTopRightRadius.split('px')[0]}
                       onChange={(event: any, newValue: number | number[]) => {
-                        setOrderCardContainer((pv) => ({
+                        setOrderCardContainer((pv: any) => ({
                           ...pv,
                           borderTopRightRadius: newValue + 'px',
                         }));
@@ -354,7 +354,7 @@ const OtpDealer = () => {
                     <Slider
                       value={orderCardContainer.borderBottomRightRadius.split('px')[0]}
                       onChange={(event: any, newValue: number | number[]) => {
-                        setOrderCardContainer((pv) => ({
+                        setOrderCardContainer((pv: any) => ({
                           ...pv,
                           borderborderBottomRightRadius: newValue + 'px',
                         }));
@@ -377,7 +377,7 @@ const OtpDealer = () => {
                 <Slider
                   value={orderCardContainer.shadow}
                   onChange={(event: any, newValue: number | number[]) => {
-                    setOrderCardContainer((pv) => ({
+                    setOrderCardContainer((pv: any) => ({
                       ...pv,
                       shadow: newValue,
                     }));
