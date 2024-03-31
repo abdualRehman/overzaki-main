@@ -306,7 +306,7 @@ export default function BannerDealer({
             data={themeConfig.sliderImage}
             bannerType={sliderType}
           />
-          {bannerContainerSearch.show && (
+          {bannerContainerSearch?.show && (
             <div
               style={{
                 position: 'absolute',
@@ -323,17 +323,17 @@ export default function BannerDealer({
                 justifyContent: 'center',
               }}
             >
-              {bannerContainerSearch.text && (
+              {bannerContainerSearch?.text && (
                 <h1
                   style={{ textAlign: 'center', lineHeight: 1, fontSize: '20px', fontWeight: 900, color: 'white' }}
                 >
-                  {bannerSearch.topText}
-                  <br /> <span style={{ fontSize: '25px', color: "white" }}>{bannerSearch.bottomText}</span>
+                  {bannerSearch?.topText}
+                  <br /> <span style={{ fontSize: '25px', color: "white" }}>{bannerSearch?.bottomText}</span>
                 </h1>
               )}
               <div
                 style={{
-                  display: bannerContainerSearch.search ? 'flex' : 'none',
+                  display: bannerContainerSearch?.search ? 'flex' : 'none',
                   alignItems: 'center',
                   width: '50%',
                   backgroundColor: 'white',
@@ -344,7 +344,7 @@ export default function BannerDealer({
                 <input
                   style={{ outline: 'none', border: 'none' }}
                   type="text"
-                  placeholder={bannerSearch.placeHolder}
+                  placeholder={bannerSearch?.placeHolder}
                 />
                 <div
                   style={{
@@ -362,7 +362,7 @@ export default function BannerDealer({
               </div>
             </div>
           )}
-          {paymentBox.show && (
+          {paymentBox?.show && (
             <div
               style={{
                 position: 'absolute',
@@ -710,7 +710,7 @@ export default function BannerDealer({
                   checked={bannerContainer.shadow}
                   onChange={(event: any, value: any) => {
                     handleChangeEvent('isShadow', value, 'container');
-                    setBannerContainer((pv: any) => ({ ...pv, shadow: !pv.shadow }));
+                    setBannerContainer((pv: any) => ({ ...pv, shadow: !pv?.shadow }));
                   }}
                   inputProps={{ 'aria-label': 'controlled' }}
                 />
@@ -812,9 +812,9 @@ export default function BannerDealer({
                       Show
                     </Typography>
                     <Switch
-                      checked={bannerContainerSearch.show}
+                      checked={bannerContainerSearch?.show}
                       onChange={(event: any, value: any) => {
-                        setBannerContainerSearch((pv: any) => ({ ...pv, show: !pv.show }));
+                        setBannerContainerSearch((pv: any) => ({ ...pv, show: !pv?.show }));
                       }}
                       inputProps={{ 'aria-label': 'controlled' }}
                     />
@@ -829,9 +829,9 @@ export default function BannerDealer({
                       Text
                     </Typography>
                     <Switch
-                      checked={bannerContainerSearch.text}
+                      checked={bannerContainerSearch?.text}
                       onChange={(event: any, value: any) => {
-                        setBannerContainerSearch((pv: any) => ({ ...pv, text: !pv.text }));
+                        setBannerContainerSearch((pv: any) => ({ ...pv, text: !pv?.text }));
                       }}
                       inputProps={{ 'aria-label': 'controlled' }}
                     />
@@ -846,9 +846,9 @@ export default function BannerDealer({
                       Search
                     </Typography>
                     <Switch
-                      checked={bannerContainerSearch.search}
+                      checked={bannerContainerSearch?.search}
                       onChange={(event: any, value: any) => {
-                        setBannerContainerSearch((pv: any) => ({ ...pv, search: !pv.search }));
+                        setBannerContainerSearch((pv: any) => ({ ...pv, search: !pv?.search }));
                       }}
                       inputProps={{ 'aria-label': 'controlled' }}
                     />
@@ -863,7 +863,7 @@ export default function BannerDealer({
                       <TextField
                         variant="filled"
                         type="text"
-                        value={bannerSearch.bottomText}
+                        value={bannerSearch?.bottomText}
                         onChange={(event) =>
                           setBannerSearch((pv: any) => ({ ...pv, bottomText: event.target.value }))
                         }
@@ -880,7 +880,7 @@ export default function BannerDealer({
                       <TextField
                         variant="filled"
                         type="text"
-                        value={bannerSearch.topText}
+                        value={bannerSearch?.topText}
                         onChange={(event) =>
                           setBannerSearch((pv: any) => ({ ...pv, topText: event.target.value }))
                         }
@@ -897,7 +897,7 @@ export default function BannerDealer({
                       <TextField
                         variant="filled"
                         type="text"
-                        value={bannerSearch.placeHolder}
+                        value={bannerSearch?.placeHolder}
                         onChange={(event) =>
                           setBannerSearch((pv: any) => ({ ...pv, placeHolder: event.target.value }))
                         }
@@ -927,9 +927,9 @@ export default function BannerDealer({
                     Show
                   </Typography>
                   <Switch
-                    checked={paymentBox.show}
+                    checked={paymentBox?.show}
                     onChange={(event: any, value: any) => {
-                      setPaymentBox((pv: any) => ({ ...pv, show: !pv.show }));
+                      setPaymentBox((pv: any) => ({ ...pv, show: !pv?.show }));
                     }}
                     inputProps={{ 'aria-label': 'controlled' }}
                   />
